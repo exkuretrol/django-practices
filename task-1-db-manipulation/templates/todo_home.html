@@ -1,0 +1,64 @@
+{% extends "_base.html" %}
+{% block content %}
+    <h2>
+        {% if user.is_authenticated %}
+            <p class="bg-slate-50 px-4 py-2 text-4xl font-serif mb-4">{{ user.username }}'s Todo List</p>
+        {% endif %}
+    </h2>
+    <div class="bg-slate-50 p-4 gap-4 flex flex-col mb-4">
+        {% if user.is_authenticated %}
+            {% for todo in todos %}
+                <div class="flex flex-row gap-2 justify-center items-center">
+                    <input type="checkbox"
+                           name="todo-{{ todo.pk }}"
+                           id="todo-{{ todo.pk }}"
+                           class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded min-h-10 min-w-10"
+                           {% if todo.completed %}checked{% endif %}>
+                    <a href="{% url "todoupdate" todo.pk %}"
+                       id="task-{{ todo.pk }}"
+                       class="text-xl">{{ todo.task }}</a>
+                    <a href="{% url "tododelete" todo.pk %}"
+                       class="ml-auto bg-slate-300 hover:bg-slate-500 text-white font-bold py-2 px-4">Delete</a>
+                    {% comment %} delete without confirm {% endcomment %}
+                    {% comment %} <form action="{% url "tododelete" todo.pk %}" method="post">
+                {% csrf_token %}
+                <input type="submit" value="Delete">
+                    </form> {% endcomment %}
+                </div>
+            {% endfor %}
+    <a href="{% url "todocreate" %}"
+       class="bg-slate-500 hover:bg-slate-700 text-white font-bold py-2 px-4 h-10 w-fit block">Create</a>
+        {% else %}
+            <p class="text-xl">You should <a href="{% url "login" %}" class="text-slate-400 hover:text-slate-700 font-semibold">Log in</a> First! Or <a href="{% url "signup" %}" class="text-slate-400 hover:text-slate-700 font-semibold">create </a> a new account instread.</p>
+        {% endif %}
+    </div>
+{% endblock content %}
+{% block script %}
+    <script>
+    document.addEventListener("DOMContentLoaded", () => {
+        let inputs = document.querySelectorAll("input[type='checkbox']")
+        for (let input of inputs)
+        {
+            input.addEventListener("change", (el) => {
+                mark_as_completed(el.target)
+            })
+        }
+
+        function mark_as_completed(checkbox) {
+            let inputId = checkbox.id.split("-")[1];
+            let cookie = document.cookie
+            let csrfToken = cookie.substring(cookie.indexOf('=') + 1)
+            let task = document.getElementById(`task-${inputId}`).innerText
+            const formData = new FormData();
+            formData.append('csrfmiddlewaretoken', csrfToken)
+            formData.append('task', task);
+            checkbox.checked ? formData.append('completed', "on") : null;
+
+            fetch(`/edit/${inputId}/`, {
+                method: "POST",
+                body: formData
+            })
+        }
+    });
+    </script>
+{% endblock script %}
