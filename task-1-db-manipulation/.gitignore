@@ -17,3 +17,5 @@ node_modules
 
 # compiled static fiels
 staticfiles
+
+.DS_Store
