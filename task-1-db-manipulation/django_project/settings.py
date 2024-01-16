@@ -30,6 +30,7 @@ SECRET_KEY = env.str("SECRET_KEY")
 DEBUG = env.bool("DEBUG")
 
 import os
+
 APP_NAME = os.environ.get("FLY_APP_NAME", "*")
 ALLOWED_HOSTS = [f"{APP_NAME}.fly.dev", "localhost", "127.0.0.1"]
 CSRF_TRUSTED_ORIGINS = [f"https://{APP_NAME}.fly.dev"]
@@ -88,8 +89,7 @@ WSGI_APPLICATION = "django_project.wsgi.application"
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+        "default": env.dj_db_url("DATABASE_URL", default="sqlite:///db.sqlite3")
     }
 }
 
