@@ -1,9 +1,20 @@
 {% extends "_base.html" %}
+{% load widget_tweaks %}
 {% block content %}
-{% csrf_token %}
-<form action="" method="post">
     {% csrf_token %}
-    {{ form.as_div }}
-    <input type="submit" value="Save">
-</form>
+    <form action=""
+          method="post"
+          class="bg-slate-50 p-4 gap-4 flex flex-col mb-4">
+        {% csrf_token %}
+        <div class="flex flex-col">
+            <label for="id_task" class="block mb-2 text-sm font-medium text-slate-900 ">Task</label>
+            {{ form.task|add_class:"focus:outline-none p-2.5 focus:ring-slate-500 text-sm text-slate-700 border-slate-300 border focus:border-slate-500 bg-slate-200 focus:ring w-80 mb-4" }}
+            <label for="id_completed"
+                   class="block mb-2 text-sm font-medium text-slate-900 ">Completed?</label>
+            {{ form.completed|add_class:"w-10 h-10 mb-4" }}
+        </div>
+        <input type="submit"
+               value="Save"
+               class="bg-slate-500 hover:bg-slate-700 text-white font-bold py-2 px-4 h-10 w-fit block">
+    </form>
 {% endblock content %}

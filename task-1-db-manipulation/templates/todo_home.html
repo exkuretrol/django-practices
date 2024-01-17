@@ -1,10 +1,8 @@
 {% extends "_base.html" %}
 {% block content %}
-    <h2>
-        {% if user.is_authenticated %}
-            <p class="bg-slate-50 px-4 py-2 text-4xl font-serif mb-4">{{ user.username }}'s Todo List</p>
-        {% endif %}
-    </h2>
+    {% if user.is_authenticated %}
+        <p class="bg-slate-50 px-4 py-2 text-4xl font-serif mb-4">{{ user.username }}'s Todo List</p>
+    {% endif %}
     <div class="bg-slate-50 p-4 gap-4 flex flex-col mb-4">
         {% if user.is_authenticated %}
             {% for todo in todos %}
@@ -26,10 +24,14 @@
                     </form> {% endcomment %}
                 </div>
             {% endfor %}
-    <a href="{% url "todocreate" %}"
-       class="bg-slate-500 hover:bg-slate-700 text-white font-bold py-2 px-4 h-10 w-fit block">Create</a>
+            <a href="{% url "todocreate" %}"
+               class="bg-slate-500 hover:bg-slate-700 text-white font-bold py-2 px-4 h-10 w-fit block">Create</a>
         {% else %}
-            <p class="text-xl">You should <a href="{% url "login" %}" class="text-slate-400 hover:text-slate-700 font-semibold">Log in</a> First! Or <a href="{% url "signup" %}" class="text-slate-400 hover:text-slate-700 font-semibold">create </a> a new account instread.</p>
+            <p class="text-xl">
+                You should <a href="{% url "login" %}"
+    class="text-slate-400 hover:text-slate-700 font-semibold">Log in</a> First! Or <a href="{% url "signup" %}"
+    class="text-slate-400 hover:text-slate-700 font-semibold">create</a> a new account instread.
+            </p>
         {% endif %}
     </div>
 {% endblock content %}

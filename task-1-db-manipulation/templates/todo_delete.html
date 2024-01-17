@@ -1,8 +1,15 @@
 {% extends "_base.html" %}
 {% block content %}
-    <form action="" method="post">
+    <form action=""
+          method="post"
+          class="bg-slate-50 p-4 gap-4 flex flex-col mb-4 items-center">
         {% csrf_token %}
-        <p>Do you really want to delete "{{ todo_to_delete }}?"</p>
-        <input type="submit" value="Confirm">
+        <p class="text-xl">Do you really want to delete task"{{ todo_to_delete }}?"</p>
+        <div class="flex flex-row gap-4">
+            <a href="{% url 'todolist' %}" class="bg-slate-500 hover:bg-slate-700 text-white font-bold py-2 px-4 h-10 w-fit block">Cancel</a>
+            <input type="submit"
+                   value="Confirm"
+                   class="bg-rose-500 hover:bg-rose-700 text-white font-bold py-2 px-4 h-10 w-fit block">
+        </div>
     </form>
 {% endblock content %}

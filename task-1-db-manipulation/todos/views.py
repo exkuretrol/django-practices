@@ -1,3 +1,5 @@
+from django.forms.models import BaseModelForm
+from django.http import HttpResponse
 from django.views.generic import ListView, CreateView
 from django.views.generic.edit import DeleteView, UpdateView
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -20,8 +22,11 @@ class TodoListView(ListView):
 class TodoCreateView(LoginRequiredMixin, CreateView):
     model = Todo
     template_name = "todo_create.html"
-    fields = ["task", "author"]
+    fields = ["task"]
     success_url = reverse_lazy("todolist")
+    def form_valid(self, form: BaseModelForm) -> HttpResponse:
+        form.instance.author = self.request.user
+        return super().form_valid(form)
 
 
 class TodoDeleteView(LoginRequiredMixin, DeleteView):
