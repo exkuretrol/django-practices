@@ -8,6 +8,9 @@
 		"[html][django-html][handlebars][hbs][mustache][jinja][jinja-html][nj][njk][nunjucks][twig]": {
 			"editor.defaultFormatter": "monosans.djlint",
 			"workbench.editor.languageDetection": false,
+		},
+		"[css]": {
+			"workbench.editor.languageDetection": false,
 		}
 	}
 }
