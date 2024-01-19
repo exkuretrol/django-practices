@@ -17,3 +17,6 @@ node_modules
 
 # compiled static fiels
 staticfiles
+
+# media files
+media
