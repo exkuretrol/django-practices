@@ -1,7 +1,13 @@
 from django.views.generic import ListView
 from django.views.generic.edit import CreateView
+from django.views.generic import ListView, DetailView
 from .models import Prod
 
+
+class ProdDetailView(DetailView):
+    model = Prod
+    context_object_name = "prod"
+    template_name = "prod_detail.html"
 
 class ProdListView(ListView):
     model = Prod
