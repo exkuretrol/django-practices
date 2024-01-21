@@ -1,5 +1,31 @@
 {% extends "_base.html" %}
 {% block content %}
+    <div class="container mb-4">
+        <div class="flex w-full items-center space-x-2">
+            <svg xmlns="http://www.w3.org/2000/svg"
+                 width="24"
+                 height="24"
+                 viewBox="0 0 24 24"
+                 fill="none"
+                 stroke="currentColor"
+                 stroke-width="2"
+                 stroke-linecap="round"
+                 stroke-linejoin="round"
+                 class="h-5 w-5">
+                <path d="M6 18h8"></path>
+                <path d="M3 22h18"></path>
+                <path d="M14 22a7 7 0 1 0 0-14h-1"></path>
+                <path d="M9 14h2"></path>
+                <path d="M9 12a2 2 0 0 1-2-2V6h6v4a2 2 0 0 1-2 2Z"></path>
+                <path d="M12 6V3a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v3"></path>
+            </svg>
+            <input class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                   placeholder="Search..."
+                   type="text">
+            <button class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
+                    type="submit">Search</button>
+        </div>
+    </div>
     <div class="container">
         <table class="min-w-full divide-y divide-gray-200">
             <thead>
@@ -27,7 +53,10 @@
             <tbody class="bg-white divide-y divide-gray-200">
                 {% for prod in prods %}
                     <tr>
-                        <td class="px-6 py-4 whitespace-no-wrap">{{ prod.prod_name }}</td>
+                        <td class="px-6 py-4 whitespace-no-wrap">
+                            <a href="{% url 'prod_detail' prod.pk %}"
+                               class="text-slate-400 underline">{{ prod.prod_name }}</a>
+                        </td>
                         <td class="px-6 py-4 whitespace-no-wrap">{{ prod.prod_desc|truncatechars:8 }}</td>
                         <td class="px-6 py-4 whitespace-no-wrap">
                             <img src="{{ prod.prod_img.url }}"
@@ -44,3 +73,6 @@
         </table>
     </div>
 {% endblock content %}
+{% block nav %}
+    <a href="{% url 'prod_create' %}" class="ml-auto nav-item">Create</a>
+{% endblock nav %}

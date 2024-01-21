@@ -38,6 +38,11 @@
   @apply focus:file:outline-none focus:file:ring-slate-500 file:mr-4 file:py-2 file:px-4 file:border-0 file:text-sm file:font-semibold file:bg-slate-200 file:text-slate-700 hover:file:bg-slate-100 mb-4;
 }
 
+.nav-item {
+  @apply px-4 py-2 bg-slate-50;
+}
+
+
 .label-normal {
   @apply block mb-2 text-sm font-medium text-slate-900;
 }
