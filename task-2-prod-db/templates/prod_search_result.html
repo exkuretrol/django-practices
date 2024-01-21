@@ -19,10 +19,7 @@
                 <path d="M9 12a2 2 0 0 1-2-2V6h6v4a2 2 0 0 1-2 2Z"></path>
                 <path d="M12 6V3a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v3"></path>
             </svg>
-            <form action="{% url 'prod_search_result' %}"
-                  method="get"
-                  class="flex flex-row space-x-2 w-full">
-                {% csrf_token %}
+            <form action="" method="get" class="flex flex-row space-x-2 w-full">
                 <input class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                        placeholder="Search..."
                        type="text"
@@ -30,23 +27,6 @@
                 <button class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 bg-slate-900 text-slate-50"
                         type="submit">Search</button>
             </form>
-        </div>
-        <div class="container">
-
-                <div class="text-sm text-slate-600">
-                    <p>
-                        <span class="font-semibold mr-2">name:cloths </span>products name contains "cloths"
-                    </p>
-                    <p>
-                        <span class="font-semibold mr-2">desc:ayaya </span>products desc contains "ayaya"
-                    </p>
-                    <p>
-                        <span class="font-semibold mr-2">type:t1 </span>product type is "T1"
-                    </p>
-                    <p>
-                        <span class="font-semibold mr-2">status:AC </span>product is Active
-                    </p>
-                </div>
         </div>
     </div>
     <div class="container">
