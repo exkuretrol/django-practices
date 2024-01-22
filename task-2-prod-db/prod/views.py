@@ -1,11 +1,17 @@
 from typing import Any
 from django.db.models.query import QuerySet
 from django.db.models import Q
-from django.views.generic import ListView, DetailView
+from django.views.generic import ListView, DetailView, FormView
+from django.contrib.auth.forms import AuthenticationForm
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from .models import Prod
 from django.urls import reverse_lazy
+from .forms import QueryForm
 
+class QueryFormView(FormView):
+    form_class = QueryForm
+    template_name = "query_form.html"
+    success_url = reverse_lazy("query")
 
 class ProdDetailView(DetailView):
     model = Prod
@@ -26,11 +32,9 @@ class ProdSearchView(ListView):
 
     def get_queryset(self) -> QuerySet[Any]:
         query = self.request.GET.get("q")
-        print(query)
 
         def query_by_what(query: str):
             conds = query.split(" ")
-            filters = None
             filters = Q()
             for cond in conds:
                 col, value = cond.split(":")

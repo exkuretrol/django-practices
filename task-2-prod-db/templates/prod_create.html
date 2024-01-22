@@ -2,21 +2,18 @@
 {% load widget_tweaks %}
 {% block content %}
     <h2 class="page-title">Create Product</h2>
-    <form action="" method="post" class="container flex flex-col mb-4" enctype="multipart/form-data">
+    <form action=""
+          method="post"
+          class="container flex flex-col mb-4"
+          enctype="multipart/form-data">
         {% csrf_token %}
-        {% comment %} {{ form.as_div }} {% endcomment %}
-        <label for="id_prod_name" class="label-normal">Name</label>
-        {{ form.prod_name|add_class:"input-normal" }}
-        <label for="id_prod_desc" class="label-normal">Describution</label>
-        {{ form.prod_desc|add_class:"input-form" }}
-        <label for="id_prod_type" class="label-normal">Type</label>
-        {{ form.prod_type|add_class:"input-normal" }}
-        <label for="id_prod_quantity" class="label-normal">Quantity</label>
-        {{ form.prod_quantity|add_class:"input-normal" }}
-        <label for="id_prod_status" class="label-normal">Status</label>
-        {{ form.prod_status|add_class:"input-normal" }}
-        <label for="id_prod_img" class="label-normal">Image</label>
-        {{ form.prod_img|add_class:"input-file" }}
-        <input type="submit" value="Create" class="btn-primary" />
+        {% for field in form %}
+            <div class="fieldWrapper">
+                {{ field.errors }}
+                {{ field.label_tag }}
+                {{ field }}
+            </div>
+        {% endfor %}
+        <input type="submit" value="Submit">
     </form>
 {% endblock content %}

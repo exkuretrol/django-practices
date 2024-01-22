@@ -1,0 +1,12 @@
+{% extends "_base.html" %}
+{% load widget_tweaks %}
+{% block content %}
+    <form action="" method="post" class="container flex flex-col">
+        {% csrf_token %}
+        {% with WIDGET_ERROR_CLASS='my_error' WIDGET_REQUIRED_CLASS='my_required' %}
+            {% render_field form.query|add_class:"input-normal" %}
+            {{ form.query.errors }}
+        {% endwith %}
+        <input type="submit" value="Submit" class="btn-primary">
+    </form>
+{% endblock content %}

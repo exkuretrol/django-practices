@@ -1,6 +1,7 @@
 from django.urls import path
 from django.views.generic.base import TemplateView
 from .views import (
+    QueryFormView,
     ProdListView,
     ProdCreateView,
     ProdDetailView,
@@ -17,4 +18,5 @@ urlpatterns = [
     path("prods/<int:pk>/", ProdDetailView.as_view(), name="prod_detail"),
     path("prods/<int:pk>/update/", ProdUpdateView.as_view(), name="prod_update"),
     path("prods/<int:pk>/delete/", ProdDeleteView.as_view(), name="prod_delete"),
+    path("test/", QueryFormView.as_view(), name="query"),
 ]
