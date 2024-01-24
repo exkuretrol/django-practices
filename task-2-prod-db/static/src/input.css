@@ -42,7 +42,10 @@
   @apply px-4 py-2 bg-slate-50;
 }
 
-
 .label-normal {
   @apply block mb-2 text-sm font-medium text-slate-900;
+}
+
+.errorlist {
+  @apply text-sm text-rose-600;
 }

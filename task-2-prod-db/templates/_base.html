@@ -21,7 +21,7 @@
         <nav class="nav-bar">
             <a href="{% url 'home' %}"
                class="nav-title">Task 2 - Production db</a>
-            {% comment %} {% if user.is_authenticated %}
+            {% if user.is_authenticated %}
                 <p class="ml-auto px-4 py-2 bg-slate-700 text-slate-200">* hi {{ user.username }} ! *</p>
                 <form action="{% url 'logout' %}" method="post">
                     {% csrf_token %}
@@ -31,7 +31,7 @@
                 </form>
             {% else %}
                 <a href="{% url 'login' %}" class="ml-auto nav-item">+ Login +</a>
-            {% endif %} {% endcomment %}
+            {% endif %}
             {% block nav %}
             {% endblock nav %}
         </nav>

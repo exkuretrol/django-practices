@@ -1,84 +1,69 @@
-from typing import Any
-from django.db.models.query import QuerySet
 from django.db.models import Q
-from django.views.generic import ListView, DetailView, FormView
-from django.contrib.auth.forms import AuthenticationForm
-from django.views.generic.edit import CreateView, DeleteView, UpdateView
+from django.views.generic import ListView, DetailView
+from django.views.generic.edit import CreateView, DeleteView, UpdateView, FormMixin
+from django.contrib.auth.mixins import LoginRequiredMixin
 from .models import Prod
 from django.urls import reverse_lazy
-from .forms import QueryForm
+from .forms import QueryForm, ProdCreateForm, ProdUpdateForm
 
-class QueryFormView(FormView):
-    form_class = QueryForm
-    template_name = "query_form.html"
-    success_url = reverse_lazy("query")
-
-class ProdDetailView(DetailView):
+class ProdDetailView(LoginRequiredMixin, DetailView):
     model = Prod
     context_object_name = "prod"
     template_name = "prod_detail.html"
 
 
-class ProdListView(ListView):
+class ProdListView(LoginRequiredMixin, FormMixin, ListView):
     model = Prod
     context_object_name = "prods"
     template_name = "prod_list.html"
+    form_class = QueryForm
+
+    def get_queryset(self):
+        query_str = self.request.POST.get("query")
+        if query_str is not None and len(query_str) is not 0:
+
+            def query_by_what(query: str):
+                conds = query.split(" ")
+                filters = Q()
+                for cond in conds:
+                    col, value = cond.split(":")
+                    if col == "name":
+                        filters &= Q(prod_name__contains=value)
+                    elif col == "desc":
+                        filters &= Q(prod_desc__contains=value)
+                    elif col == "type":
+                        filters &= Q(prod_type__contains=value)
+                    elif col == "status":
+                        filters &= Q(prod_status__contains=value)
+                return filters
+
+            prods_list = Prod.objects.filter(query_by_what(query_str))
+            return prods_list
+
+        return super().get_queryset()
+
+    def post(self, request, *args, **kwargs):
+        form = self.get_form()
+        if form.is_valid():
+            return self.get(request, *args, **kwargs)
+        else:
+            self.object_list = super().get_queryset()
+            return self.form_invalid(form)
 
 
-class ProdSearchView(ListView):
-    model = Prod
-    context_object_name = "prods"
-    template_name = "prod_search_result.html"
-
-    def get_queryset(self) -> QuerySet[Any]:
-        query = self.request.GET.get("q")
-
-        def query_by_what(query: str):
-            conds = query.split(" ")
-            filters = Q()
-            for cond in conds:
-                col, value = cond.split(":")
-                if col == "name":
-                    filters &= Q(prod_name__contains=value)
-                elif col == "desc":
-                    filters &= Q(prod_desc__contains=value)
-                elif col == "type":
-                    filters &= Q(prod_type__contains=value)
-                elif col == "status":
-                    filters &= Q(prod_status__contains=value)
-            return filters
-
-        prods_list = Prod.objects.filter(query_by_what(query))
-        return prods_list
-
-
-class ProdCreateView(CreateView):
+class ProdCreateView(LoginRequiredMixin, CreateView):
     model = Prod
     template_name = "prod_create.html"
-    fields = [
-        "prod_name",
-        "prod_desc",
-        "prod_img",
-        "prod_type",
-        "prod_quantity",
-        "prod_status",
-    ]
+    form_class = ProdCreateForm
 
 
-class ProdUpdateView(UpdateView):
+class ProdUpdateView(LoginRequiredMixin, UpdateView):
     model = Prod
-    fields = [
-        "prod_name",
-        "prod_desc",
-        "prod_img",
-        "prod_type",
-        "prod_quantity",
-        "prod_status",
-    ]
+    form_class = ProdUpdateForm
     template_name = "prod_update.html"
 
 
-class ProdDeleteView(DeleteView):
+class ProdDeleteView(LoginRequiredMixin, DeleteView):
     model = Prod
     template_name = "prod_delete.html"
     context_object_name = "prod"

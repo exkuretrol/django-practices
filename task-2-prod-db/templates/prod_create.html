@@ -8,12 +8,10 @@
           enctype="multipart/form-data">
         {% csrf_token %}
         {% for field in form %}
-            <div class="fieldWrapper">
-                {{ field.errors }}
-                {{ field.label_tag }}
-                {{ field }}
-            </div>
+            {{ field.errors }}
+            <label for="{{ field.auto_id }}" class="label-normal">{{ field.label }}</label>
+            {{ field }}
         {% endfor %}
-        <input type="submit" value="Submit">
+        <input type="submit" value="Create" class="btn-primary">
     </form>
 {% endblock content %}

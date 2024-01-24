@@ -11,7 +11,8 @@
                class="block mb-2 text-sm font-medium text-slate-900 ">Password</label>
         {{ form.password |add_class:"focus:outline-none p-2.5 focus:ring-slate-500 text-sm text-slate-700 border-slate-300 border focus:border-slate-500 bg-slate-200 focus:ring w-80 mb-4" }}
         <p class="text-sm text-slate-700 mb-2">
-        Forget password? Check <a href="{% url 'password_reset' %}" class="text-slate-400 hover:text-slate-300">here</a> to reset
+            Forget password? Check <a href="{% url 'password_reset' %}"
+    class="text-slate-400 hover:text-slate-300">here</a> to reset
         </p>
         <input type="submit"
                value="Login"

@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     "widget_tweaks",
     "prod",
     "accounts",
+    "django.forms",
 ]
 
 MIDDLEWARE = [
@@ -74,6 +75,8 @@ TEMPLATES = [
         },
     },
 ]
+
+FORM_RENDERER = 'django.forms.renderers.TemplatesSetting'
 
 WSGI_APPLICATION = "django_project.wsgi.application"
 
