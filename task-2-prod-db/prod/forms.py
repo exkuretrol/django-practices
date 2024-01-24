@@ -1,9 +1,18 @@
 from django import forms
 from django.core.validators import RegexValidator
-from django.contrib.admin.widgets import AdminFileWidget
+from django.core.exceptions import ValidationError
 from django.forms.widgets import ClearableFileInput
-from django.db import models
 from .models import Prod
+from re import findall
+
+
+def validate_query_str(query: str) -> None:
+    colon_num = len(findall(":", query))
+    res = findall(pattern=r"(name:|desc:|type:|status:)[a-zA-Z0-9]+", string=query)
+    if len(res) is not colon_num:
+        raise ValidationError(
+            "Invalid format. The query string after the colon should only contain alphanumeric characters or numbers."
+        )
 
 
 class QueryForm(forms.Form):
@@ -17,13 +26,11 @@ class QueryForm(forms.Form):
                 regex=r"(name:|desc:|type:|status:)",
                 message="Invalid format. It should start with 'name:', 'desc:', 'type:', or 'status:'. Do not place a space after the colon.",
             ),
-            RegexValidator(
-                regex=r"(name:|desc:|type:|status:)[a-zA-Z0-9]+",
-                message="Invalid format. The query string after the colon should only contain alphanumeric characters or numbers.",
-            ),
+            validate_query_str,
         ],
         required=False,
     )
+
 
 class ProdCommonInfo(forms.ModelForm):
     class Meta:
@@ -58,6 +65,7 @@ class ProdCreateForm(forms.ModelForm):
 
 class CustomFileInput(ClearableFileInput):
     template_name = "custom_file_input.html"
+
 
 class ProdUpdateForm(ProdCreateForm):
     class Meta(ProdCommonInfo.Meta):
