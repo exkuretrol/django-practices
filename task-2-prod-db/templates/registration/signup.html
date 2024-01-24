@@ -4,19 +4,11 @@
     <h2 class="bg-slate-50 px-4 py-2 text-4xl font-serif mb-4">Sign Up</h2>
     <form action="" method="post" class="bg-slate-50 p-4 flex flex-col mb-4">
         {% csrf_token %}
-        <label for="id_username"
-               class="block mb-2 text-sm font-medium text-slate-900 ">Username</label>
-        {{ form.username |add_class:"focus:outline-none p-2.5 focus:ring-slate-500 text-sm text-slate-700 border-slate-300 border focus:border-slate-500 bg-slate-200 focus:ring w-80 mb-4" }}
-        <label for="id_email" class="block mb-2 text-sm font-medium text-slate-900 ">Email</label>
-        {{ form.email |add_class:"focus:outline-none p-2.5 focus:ring-slate-500 text-sm text-slate-700 border-slate-300 border focus:border-slate-500 bg-slate-200 focus:ring w-80 mb-4" }}
-        <label for="id_password1"
-               class="block mb-2 text-sm font-medium text-slate-900 ">password</label>
-        {{ form.password1 |add_class:"focus:outline-none p-2.5 focus:ring-slate-500 text-sm text-slate-700 border-slate-300 border focus:border-slate-500 bg-slate-200 focus:ring w-80 mb-4" }}
-        <label for="id_password2"
-               class="block mb-2 text-sm font-medium text-slate-900 ">Password Confirmation</label>
-        {{ form.password2 |add_class:"focus:outline-none p-2.5 focus:ring-slate-500 text-sm text-slate-700 border-slate-300 border focus:border-slate-500 bg-slate-200 focus:ring w-80 mb-4" }}
-        <label for="id_age" class="block mb-2 text-sm font-medium text-slate-900 ">Age</label>
-        {{ form.age |add_class:"focus:outline-none p-2.5 focus:ring-slate-500 text-sm text-slate-700 border-slate-300 border focus:border-slate-500 bg-slate-200 focus:ring w-80 mb-4" }}
+        {% for field in form %}
+            {{ field.errors }}
+            <label for="{{ field.auto_id }}" class="label-normal">{{ field.label }}</label>
+            {{ field }}
+        {% endfor %}
         <input type="submit"
                value="Signup"
                class="bg-slate-500 hover:bg-slate-700 text-slate-50 font-bold py-2 px-4 h-10 w-fit block" />
