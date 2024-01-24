@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     # 3rd party packages
     "django_browser_reload",
     "widget_tweaks",
+    "django_seed",
     # local apps
     "prod",
     "accounts",
