@@ -1,0 +1,17 @@
+{% extends "_base.html" %}
+{% load widget_tweaks %}
+{% block content %}
+    <h2 class="page-title">Create Product</h2>
+    <form action=""
+          method="post"
+          class="container flex flex-col mb-4"
+          enctype="multipart/form-data">
+        {% csrf_token %}
+        {% for field in form %}
+            {{ field.errors }}
+            <label for="{{ field.auto_id }}" class="label-normal">{{ field.label }}</label>
+            {{ field }}
+        {% endfor %}
+        <input type="submit" value="Create" class="btn-primary">
+    </form>
+{% endblock content %}
