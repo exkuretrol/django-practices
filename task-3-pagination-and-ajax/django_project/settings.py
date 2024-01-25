@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     # local apps
     "prod",
     "accounts",
+    "api",
     # django override templaets
     "django.forms",
 ]

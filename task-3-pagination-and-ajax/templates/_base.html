@@ -12,11 +12,12 @@
             Task 2 - Production db
             {% endblock title %}
         </title>
-        <link rel="stylesheet" href="{% static 'css/output.css' %}">
-        
-        {% block script %}
-        {% endblock script %}
+        <link rel="stylesheet" href="{% static 'css/output.css' %}" >
+        <script src="{% static 'js/jquery-3.7.1.min.js' %}" ></script>
+        {% block head %}
+        {% endblock head %}
     </head>
+        
     <body class="wrapper">
         <nav class="nav-bar">
             <a href="{% url 'home' %}"
