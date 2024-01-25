@@ -39,10 +39,10 @@ class ProdCommonInfo(forms.ModelForm):
         widgets = {
             "prod_name": forms.TextInput(attrs={"class": "input-normal"}),
             "prod_desc": forms.Textarea(attrs={"class": "input-form"}),
-            "prod_type": forms.TextInput(attrs={"class": "input-normal"}),
+            "prod_type": forms.Select(attrs={"class": "input-normal"}),
             "prod_img": forms.FileInput(attrs={"class": "input-file"}),
             "prod_quantity": forms.TextInput(attrs={"class": "input-normal"}),
-            "prod_status": forms.TextInput(attrs={"class": "input-normal"}),
+            "prod_status": forms.Select(attrs={"class": "input-normal"}),
         }
         labels = {
             "prod_name": "Name",
@@ -52,10 +52,6 @@ class ProdCommonInfo(forms.ModelForm):
             "prod_quantity": "Quantity",
             "prod_status": "Status",
         }
-
-        def __init__(self, *args, **kwargs):
-            super().__init__(*args, **kwargs)
-            self.label_suffix = ""
 
 
 class ProdCreateForm(forms.ModelForm):

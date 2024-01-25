@@ -1,5 +1,5 @@
 from typing import Any
-from django.core.management.base import BaseCommand, CommandError, CommandParser
+from django.core.management.base import BaseCommand, CommandParser
 from prod.models import Prod
 from django_seed import Seed
 import random
@@ -10,7 +10,7 @@ seeder = Seed.seeder()
 
 
 class Command(BaseCommand):
-    help = "seed database for development and testing"
+    help = "seed database prod for development and testing"
 
     def add_arguments(self, parser: CommandParser) -> None:
         parser.add_argument("--mode", type=str, help="Mode")
@@ -26,7 +26,7 @@ def clear_data() -> None:
     Prod.objects.all().delete()
 
 
-def run_seed(self, mode: str, nums: int = 10):
+def run_seed(self, mode: str, nums: int = 10) -> None:
     clear_data()
     if mode == MODE_CLEAR:
         return
