@@ -2,7 +2,7 @@
 {% load widget_tweaks %}
 {% load prod_extra %}
 {% block head %}
-{% include "prod_ajax_js.html" %}
+    {% include "prod_ajax_js.html" %}
 {% endblock head %}
 {% block content %}
     <div class="container mb-4">
@@ -48,7 +48,7 @@
             </ul>
         </div>
     </div>
-    <div class="container">
+    <div class="container mb-4">
         <table class="min-w-full divide-y divide-gray-200">
             <thead>
                 <tr>
@@ -93,7 +93,7 @@
                 {% endfor %}
             </tbody>
         </table>
-        {% comment %} {% get_proper_elided_page_range paginator page_obj.number as page_range %}
+        {% get_proper_elided_page_range paginator page_obj.number as page_range %}
         <nav class="mx-auto flex w-full justify-center mt-4">
             <ul class="flex flex-row items-center gap-1">
                 {% if page_obj.has_previous %}
@@ -124,7 +124,8 @@
                 {% endfor %}
                 {% if page_obj.has_next %}
                     <li>
-                        <a class="page-bottom" href="?{% query_transform page=page_obj.next_page_number %}">next</a>
+                        <a class="page-bottom"
+                           href="?{% query_transform page=page_obj.next_page_number %}">next</a>
                     </li>
                 {% else %}
                     <li class="page-bottom disabled">
@@ -132,10 +133,12 @@
                     </li>
                 {% endif %}
             </ul>
-        </nav> {% endcomment %}
+        </nav>
     </div>
-    <button id="ajax-button" class="btn-primary">Ajax</button>
-    <div id="ajax-response"></div>
+    <div class="container">
+        <button id="ajax-button" class="btn-primary">Ajax</button>
+        <div id="ajax-response"></div>
+    </div>
 {% endblock content %}
 {% block nav %}
     <a href="{% url 'prod_create' %}" class="nav-item">Create</a>

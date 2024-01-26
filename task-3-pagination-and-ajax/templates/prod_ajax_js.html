@@ -8,14 +8,28 @@
                 },
             });
         });
-        let query = $("#query");
+
+        let query = $("#id_query");
+        let timeout;
     
-        query.on("keyup", (_) => {console.log(_)});
+        query.on("keyup", (_) => {
+            input_query = _.target
+            clearTimeout(timeout)
+            timeout = setTimeout(function() {
+                // search_by_conditions(_.target.value)
+                query.parent().submit()
+            }, 800);
+        });
+        
     
         function search_by_conditions(conditions) {
             $.ajax({
                 url: '{% url "ajax_get_prods" %}',
-                success: () => {},
+                method: "get",
+                data: query.serialize(),
+                success: (data) => {
+                    console.log(data)
+                },
             });
         }
     });
