@@ -2,18 +2,7 @@
 {% load widget_tweaks %}
 {% load prod_extra %}
 {% block head %}
-    <script>
-    $(document).ready(function() {
-        $('#ajax-button').click(function() {
-            $.ajax({
-                url: '{% url "ajax_get_category" %}',
-                success: function(data) {
-                    $('#ajax-response').text(data.message);
-                }
-            });
-        });
-    });
-    </script>
+{% include "prod_ajax_js.html" %}
 {% endblock head %}
 {% block content %}
     <div class="container mb-4">
@@ -39,8 +28,6 @@
                   method="get"
                   class="flex flex-row w-full col-span-2 items-center">
                 {{ form.query|add_class:"flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 mr-2"|attr:"placeholder:Search..."|add_error_class:"error-border" }}
-                <button class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 bg-slate-900 text-slate-50"
-                        type="submit">Search</button>
             </form>
             <ul class="text-sm text-slate-600 col-start-2 mt-2">
                 <li>
