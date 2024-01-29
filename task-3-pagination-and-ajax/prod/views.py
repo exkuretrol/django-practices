@@ -1,10 +1,13 @@
-from django.views.generic import ListView, DetailView
+from django.views.generic import DetailView
 from django.views.generic.edit import CreateView, DeleteView, UpdateView, FormMixin
 from django.contrib.auth.mixins import LoginRequiredMixin
 from .models import Prod
 from django.urls import reverse_lazy
-from .forms import QueryForm, ProdCreateForm, ProdUpdateForm
-from .utils import prod_query
+from .forms import ProdCreateForm, ProdUpdateForm
+from .tables import ProdTable
+from .filters import ProdFilter
+from django_tables2 import SingleTableMixin
+from django_filters.views import FilterView
 
 
 class ProdDetailView(LoginRequiredMixin, DetailView):
@@ -13,37 +16,12 @@ class ProdDetailView(LoginRequiredMixin, DetailView):
     template_name = "prod_detail.html"
 
 
-class ProdListView(LoginRequiredMixin, FormMixin, ListView):
+class ProdListView(LoginRequiredMixin, SingleTableMixin, FilterView):
     paginate_by = 10
-    model = Prod
+    filterset_class = ProdFilter
+    table_class = ProdTable
     context_object_name = "prods"
     template_name = "prod_list.html"
-    form_class = QueryForm
-
-    def get(self, request, *args, **kwargs):
-        query = request.GET.get("query", "")
-
-        form = QueryForm({"query": query})
-        new_form = QueryForm()
-        new_form.fields["query"].widget.attrs.update({"value": query})
-
-        if form.is_valid():
-            self.object_list = self.get_queryset()
-            context = self.get_context_data()
-
-            context["form"] = new_form
-            return self.render_to_response(context)
-        else:
-            self.object_list = super().get_queryset()
-            return self.form_invalid(form)
-
-    def get_queryset(self):
-        query_str = self.request.GET.get("query")
-        if query_str is not None and len(query_str) != 0:
-            prods_list = Prod.objects.filter(prod_query(query_str))
-            return prods_list
-
-        return super().get_queryset()
 
 
 class ProdCreateView(LoginRequiredMixin, CreateView):

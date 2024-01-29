@@ -46,6 +46,8 @@ INSTALLED_APPS = [
     "django_browser_reload",
     "widget_tweaks",
     "django_seed",
+    "django_filters",
+    "django_tables2",
     # local apps
     "prod",
     "accounts",
@@ -146,3 +148,8 @@ MEDIA_ROOT = BASE_DIR / "media"
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# django-tables2
+DJANGO_TABLES2_TABLE_ATTRS = {
+    'class': 'table',
+}

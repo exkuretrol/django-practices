@@ -50,22 +50,34 @@
   @apply text-sm text-rose-600;
 }
 
-.page-item {
+.pagination {
+  @apply flex flex-row items-center justify-center space-x-1;
+}
+
+.pagination li.active {
+  @apply text-slate-50 bg-slate-500 border-slate-400 inline-flex items-center whitespace-nowrap shrink-0 justify-center text-sm focus-visible:outline-none focus-visible:ring-1 disabled:pointer-events-none disabled:opacity-50 border shadow-sm h-9 w-9;
+}
+
+.pagination li:not(.previous, .next, .active) a:not([href="#"]) {
   @apply text-slate-500 bg-slate-50 border-slate-400 inline-flex items-center whitespace-nowrap shrink-0 justify-center text-sm focus-visible:outline-none focus-visible:ring-1 disabled:pointer-events-none disabled:opacity-50 border shadow-sm h-9 w-9 hover:bg-slate-100 hover:text-slate-600;
 }
 
-.page-bottom {
-  @apply px-2 text-slate-500 bg-slate-50 h-9 w-auto inline-flex items-center whitespace-nowrap shrink-0 justify-center text-sm hover:bg-slate-100 hover:text-slate-600;
+.pagination a {
+  @apply w-full h-full grid place-items-center;
 }
 
-.current {
-  @apply text-slate-50 bg-slate-500 border-slate-600 hover:text-slate-50 hover:bg-slate-500;
+.previous, .next {
+  @apply px-2 text-slate-500 bg-slate-50 h-9 inline-flex items-center whitespace-nowrap shrink-0 justify-center text-sm hover:bg-slate-100 hover:text-slate-600 w-auto;
 }
 
-.page-ellipsis {
-  @apply border-none shadow-none hover:bg-slate-50 hover:text-slate-500;
+.pagination li a[href="#"]{
+  @apply border-none shadow-none hover:bg-slate-50 hover:text-slate-500 pointer-events-none h-8 w-8;
 }
 
 .disabled {
   @apply opacity-50 hover:text-slate-500 hover:bg-slate-50 pointer-events-none;
+}
+
+.table {
+  @apply w-full divide-y divide-gray-200 mb-4;
 }
