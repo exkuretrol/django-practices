@@ -27,3 +27,9 @@ collectstatic:
 
 shell:
 	@python manage.py shell
+
+prod_refresh:
+	@python manage.py prod_seed --mode refresh --nums 1000
+
+prod_empty:
+	@python manage.py prod_seed --mode empty

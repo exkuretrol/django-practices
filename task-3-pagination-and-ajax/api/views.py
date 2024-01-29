@@ -1,11 +1,13 @@
-from typing import Any
-from django.http import HttpResponse, JsonResponse, HttpRequest
-from django.views.generic import TemplateView, ListView
+from django.http import JsonResponse, HttpRequest
+from django.views.generic import ListView, TemplateView
 from django.views.generic.edit import FormMixin
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db.utils import IntegrityError
 from prod.forms import QueryForm
 from prod.models import Prod
 from prod.utils import prod_query
+from .forms import ExcelTableForm
+import json
 
 
 class ProdListView(LoginRequiredMixin, FormMixin, ListView):
@@ -41,16 +43,17 @@ class ProdListView(LoginRequiredMixin, FormMixin, ListView):
         return super().get_queryset()
 
 
-def get_data(request):
-    return JsonResponse({"message": "hello"})
-
-
-def get_prods(request: HttpRequest):
-    query_str = request.GET.get("query", "")
-    object_list = Prod.objects.all()
-    if query_str is not "":
-        data = list(object_list.filter(prod_query(query_str)).values())
-    else:
-        data = list(object_list.values())
-
-    return JsonResponse({"data": data})
+class ProdCreateMultipleView(FormMixin, TemplateView):
+    form_class = ExcelTableForm
+    template_name = "prod_create_multiple.html"
+    
+def create_prods(request: HttpRequest):
+    prods_str = request.POST.get("prods", "")
+    prods_json = json.loads(prods_str)
+    for prod_obj in prods_json:
+        try:
+            prod = Prod.objects.create(**prod_obj)
+            prod.save()
+        except IntegrityError as e:
+            return JsonResponse({"message": "error while adding new product."})
+    return JsonResponse({"message": "success"})

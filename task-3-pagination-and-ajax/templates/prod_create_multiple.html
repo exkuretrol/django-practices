@@ -1,0 +1,24 @@
+{% extends "_base.html" %}
+{% block head %}
+    <script>{% include "prod_create_multiple.js" %}</script>
+{% endblock head %}
+{% block content %}
+    <h2 class="page-title">Create Multiple</h2>
+    <div class="container">
+        <form action="" method="post" class="mb-4">
+            {% for field in form %}
+                {{ field.errors }}
+                <label for="{{ field.auto_id }}" class="label-normal">{{ field.label }}</label>
+                {{ field }}
+            {% endfor %}
+            <input id="btn_create" type="submit" value="Create" disabled class="btn-primary disabled cursor-pointer">
+        </form>
+        <p id="output">
+
+        </p>
+    </div>
+{% endblock content %}
+
+{% block nav %}
+    <a href="{% url 'prod_create' %}" class="nav-item">Create Single</a>
+{% endblock nav %}

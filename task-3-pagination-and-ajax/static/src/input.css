@@ -31,7 +31,7 @@
 }
 
 .input-form {
-  @apply focus:outline-none p-2.5 focus:ring-slate-500 text-sm text-slate-700 border-slate-300 border focus:border-slate-500 bg-slate-200 focus:ring mb-4;
+  @apply focus:outline-none p-2.5 focus:ring-slate-500 text-sm text-slate-700 border-slate-300 border focus:border-slate-500 bg-slate-200 focus:ring mb-4 w-full;
 }
 
 .input-file {

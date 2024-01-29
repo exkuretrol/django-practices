@@ -1,10 +1,14 @@
 from django.urls import path
-from .views import get_data, get_prods, ProdListView
+from .views import (
+    ProdCreateMultipleView,
+    create_prods,
+)
 
 urlpatterns = [
-    path("goods/ajax_get_category/9x9shop", get_data, name="ajax_get_category"),
-    path("goods/ajax_get_prods/9x9shop", get_prods, name="ajax_get_prods"),
     path(
-        "ajax/", ProdListView.as_view(), name="ajax_test"
+        "prods/create_multiple/",
+        ProdCreateMultipleView.as_view(),
+        name="prod_create_multiple",
     ),
+    path("goods/ajax_post_prods/9x9shop", create_prods, name="ajax_post_prods"),
 ]

@@ -5,7 +5,7 @@ from django_seed import Seed
 import random
 
 MODE_REFRESH = "refresh"
-MODE_CLEAR = "clear"
+MODE_EMPTY = "empty"
 seeder = Seed.seeder()
 
 
@@ -28,7 +28,7 @@ def clear_data() -> None:
 
 def run_seed(self, mode: str, nums: int = 10) -> None:
     clear_data()
-    if mode == MODE_CLEAR:
+    if mode == MODE_EMPTY:
         return
 
     seeder.add_entity(
