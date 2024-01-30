@@ -1,8 +1,13 @@
 import django_filters as filters
 from .models import Prod, TypesInProd, StatusInProd
 from django.forms import widgets
-from django.db import models
 
+
+class ProdNoFilter(filters.FilterSet):
+    prod_no = filters.BaseInFilter(label="Product No", lookup_expr="in", required=False)
+    class Meta:
+        model = Prod
+        fields = ["prod_no"]
 
 class ProdFilter(filters.FilterSet):
     prod_name = filters.CharFilter(label="Name", lookup_expr="icontains")

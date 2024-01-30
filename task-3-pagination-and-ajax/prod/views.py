@@ -5,8 +5,8 @@ from .models import Prod
 from django.urls import reverse_lazy
 from .forms import ProdCreateForm, ProdUpdateForm, ExcelTableCreateForm, ExcelTableUpdateForm
 from .tables import ProdTable
-from .filters import ProdFilter
-from django_tables2 import SingleTableMixin
+from .filters import ProdFilter, ProdNoFilter
+from django_tables2 import SingleTableMixin, SingleTableView
 from django_filters.views import FilterView
 
 
@@ -20,7 +20,6 @@ class ProdListView(LoginRequiredMixin, SingleTableMixin, FilterView):
     paginate_by = 10
     filterset_class = ProdFilter
     table_class = ProdTable
-    context_object_name = "prods"
     template_name = "prod_list.html"
 
 
@@ -47,6 +46,9 @@ class ProdCreateMultipleView(FormMixin, TemplateView):
     form_class = ExcelTableCreateForm
     template_name = "prod_create_multiple.html"
 
-class ProdUpdateMultipleView(FormMixin, TemplateView):
-    form_class = ExcelTableUpdateForm
+class ProdUpdateMultipleView(SingleTableMixin, FormMixin, FilterView):
+    paginate_by = 10
     template_name = "prod_update_multiple.html"
+    filterset_class = ProdNoFilter
+    table_class = ProdTable
+    form_class = ExcelTableUpdateForm

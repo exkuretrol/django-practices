@@ -2,7 +2,7 @@ $(function () {
     let timeout;
     let excel_table = $("#id_excel_table");
     let output = $("#output");
-    let btn_create = $("#btn_create");
+    let btn_update = $("#btn_update");
     let tbl_json = [];
     excel_table.on("keyup", (_) => {
         clearTimeout(timeout);
@@ -12,58 +12,12 @@ $(function () {
                 output.empty().append("table is not valid");
             } else {
                 tbl_json = generate_table(table_str);
-                btn_create.removeAttr("disabled").removeClass("disabled");
+
+                $("#id_prod_no").val(extract_product_no_to_list(tbl_json).join(","))
+                btn_update.removeAttr("disabled").removeClass("disabled");
             }
         }, 800);
     });
-
-    btn_create.on("click", (e) => {
-        e.preventDefault();
-        create_prods(tbl_json);
-    });
-
-    /**
-     *
-     *
-     * @param {string} table_str
-     * @return {string}
-     */
-    function remove_extra_tabs(table_str) {
-        return table_str.replace(new RegExp("\t\t", "g"), "\t");
-    }
-    /**
-     * Validates the form based on the provided table string.
-     *
-     * @param {string} table_str - The table string to validate.
-     */
-    function generate_table(table_str) {
-        // TODO: remove empty rows
-        let rows = table_str.split("\n");
-        let table = [];
-        let htmlTable = $("<table>");
-        for (let row_num in rows) {
-            let row = remove_extra_tabs(rows[row_num]);
-            let cells = row.split("\t");
-            let obj = {};
-            let htmlTr = $("<tr>");
-            for (let cell_num in cells) {
-                let cell = cells[cell_num];
-                let header = get_header(cell_num);
-                if (row_num !== "0") {
-                    obj[header] = cell;
-                }
-                let htmlTd = $("<td>");
-                htmlTd.text(cell);
-                htmlTr.append(htmlTd);
-            }
-            htmlTable.append(htmlTr);
-            if (row_num !== "0") {
-                table.push(obj);
-            }
-        }
-        output.empty().append(htmlTable);
-        return table;
-    }
 
     /**
      *
@@ -74,6 +28,40 @@ $(function () {
         if (!table_str.includes("\t")) return false;
         return true;
     }
+    /**
+     * Validates the form based on the provided table string.
+     *
+     * @param {string} table_str - The table string to validate.
+     */
+    function generate_table(table_str) {
+        // TODO: remove empty rows
+        let rows = table_str.split("\n");
+        let table = [];
+        for (let row_num in rows) {
+            let row = remove_extra_tabs(rows[row_num]);
+            let cells = row.split("\t");
+            let obj = {};
+            for (let cell_num in cells) {
+                let cell = cells[cell_num];
+                let header = get_header(cell_num);
+                if (row_num !== "0") {
+                    obj[header] = cell;
+                }
+            }
+            if (row_num !== "0") {
+                table.push(obj);
+            }
+        }
+        return table;
+    }
+
+    /**
+     * 
+     * @param {[Object]} table_json 
+     */
+    function extract_product_no_to_list(table_json) {
+        return table_json.map((prod) => {return prod.prod_no})
+    }
 
     /**
      * Get the header based on the cell number.
@@ -82,27 +70,37 @@ $(function () {
      * @returns {string} - The header corresponding to the cell number.
      */
     function get_header(cell_num) {
-        const headers = [
-            "prod_no",
-            "prod_name",
-            "prod_desc",
-            "prod_type",
-            "prod_img",
-            "prod_quantity",
-            "prod_status",
-        ];
+        const headers = ["prod_no", "prod_quantity"];
         return headers[cell_num] || "";
     }
+    /**
+     *
+     *
+     * @param {string} table_str
+     * @return {string}
+     */
+    function remove_extra_tabs(table_str) {
+        return table_str.replace(new RegExp("\t\t", "g"), "\t");
+    }
 
-    function create_prods(json) {
+    /**
+     * 
+     * @param {[Object]} obj_list 
+     */
+    function update_prods(obj_list) {
         $.ajax({
-            url: "{% url 'ajax_create_prods' %}",
+            url: "{% url 'ajax_update_prods' %}",
             method: "post",
             headers: { "X-CSRFToken": "{{ csrf_token }}" },
-            data: { prods: JSON.stringify(json) },
+            data: { prods: JSON.stringify(obj_list) },
             success: (_) => {
-                output.text(_["message"])
+                $("#btn_query").trigger("click")
             },
         });
     }
+
+    btn_update.on("click", (e) => {
+        e.preventDefault();
+        update_prods(tbl_json);
+    });
 });

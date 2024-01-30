@@ -13,7 +13,7 @@
             </form>
         </div>
     {% endif %}
-    <div class="container max-w-7xl">{% render_table table %}</div>
+    <div class="container">{% render_table table %}</div>
 {% endblock content %}
 {% block nav %}
     <a href="{% url 'prod_create' %}" class="nav-item">Create</a>

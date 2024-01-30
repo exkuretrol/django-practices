@@ -24,4 +24,9 @@ urlpatterns = [
         ProdCreateMultipleView.as_view(),
         name="prod_create_multiple",
     ),
+    path(
+        "prods/update_multiple/",
+        ProdUpdateMultipleView.as_view(),
+        name="prod_update_multiple",
+    ),
 ]
