@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     "django_seed",
     "django_filters",
     "django_tables2",
+    # "debug_toolbar",
     # local apps
     "prod",
     "accounts",
@@ -64,7 +65,9 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    # 3rd party
     "django_browser_reload.middleware.BrowserReloadMiddleware",
+    # "debug_toolbar.middleware.DebugToolbarMiddleware",
 ]
 
 ROOT_URLCONF = "django_project.urls"
@@ -153,3 +156,29 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 DJANGO_TABLES2_TABLE_ATTRS = {
     'class': 'table',
 }
+DJANGO_TABLES2_TEMPLATE = "django_tables2/custom_table.html"
+
+INTERNAL_IPS = [
+    # ...
+    "127.0.0.1",
+    # ...
+]
+
+# Logging
+# https://docs.djangoproject.com/en/dev/topics/logging/
+# import os
+# LOGGING = {
+#     'version': 1,
+#     'disable_existing_loggers': False,
+#     'handlers': {
+#         'console': {
+#             'class': 'logging.StreamHandler',
+#         },
+#     },
+#     'loggers': {
+#         'django.template': {
+#             'handlers': ['console'],
+#             'level': os.getenv('DJANGO_LOG_LEVEL', 'DEBUG'),
+#         },
+#     },
+# }

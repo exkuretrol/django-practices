@@ -1,9 +1,9 @@
-from django.views.generic import DetailView
+from django.views.generic import DetailView, TemplateView
 from django.views.generic.edit import CreateView, DeleteView, UpdateView, FormMixin
 from django.contrib.auth.mixins import LoginRequiredMixin
 from .models import Prod
 from django.urls import reverse_lazy
-from .forms import ProdCreateForm, ProdUpdateForm
+from .forms import ProdCreateForm, ProdUpdateForm, ExcelTableCreateForm, ExcelTableUpdateForm
 from .tables import ProdTable
 from .filters import ProdFilter
 from django_tables2 import SingleTableMixin
@@ -41,3 +41,12 @@ class ProdDeleteView(LoginRequiredMixin, DeleteView):
     template_name = "prod_delete.html"
     context_object_name = "prod"
     success_url = reverse_lazy("prod_list")
+
+
+class ProdCreateMultipleView(FormMixin, TemplateView):
+    form_class = ExcelTableCreateForm
+    template_name = "prod_create_multiple.html"
+
+class ProdUpdateMultipleView(FormMixin, TemplateView):
+    form_class = ExcelTableUpdateForm
+    template_name = "prod_update_multiple.html"

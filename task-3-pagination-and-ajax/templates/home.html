@@ -1,6 +1,9 @@
 {% extends "_base.html" %}
 {% block content %}
     <div class="container">
-        <a href="{% url 'prod_list' %}" class="btn-primary">View All Prods</a>
+        <div class="flex flex-row space-x-4">
+            <a href="{% url 'prod_list' %}" class="btn-primary">View All Prods</a>
+            <a href="{% url 'prod_update_multiple' %}" class="btn-primary">Update Prods</a>
+        </div>
     </div>
 {% endblock content %}

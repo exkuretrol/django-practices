@@ -26,6 +26,10 @@
   @apply bg-slate-500 hover:bg-slate-700 text-white font-bold py-2 px-4 h-10 w-fit block;
 }
 
+.btn-secondary {
+  @apply bg-slate-100 hover:bg-slate-300 text-slate-500 font-bold py-2 px-4 h-10 w-fit block;
+}
+
 .input-normal {
   @apply focus:outline-none p-2.5 focus:ring-slate-500 text-sm text-slate-700 border-slate-300 border focus:border-slate-500 bg-slate-200 focus:ring w-80 mb-4;
 }
@@ -79,5 +83,17 @@
 }
 
 .table {
-  @apply w-full divide-y divide-gray-200 mb-4;
+  @apply w-full divide-y divide-gray-200 mb-4 overflow-y-scroll;
+}
+
+.table tr th {
+  @apply px-6 py-3 bg-slate-200 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider;
+}
+
+.table tr td {
+  @apply px-6 py-4 whitespace-nowrap;
+}
+
+.table-container {
+  @apply w-0 min-w-full overflow-x-auto;
 }

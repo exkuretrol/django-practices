@@ -1,63 +1,19 @@
 {% extends "_base.html" %}
-{% load widget_tweaks %}
-{% load prod_extra %}
 {% load django_tables2 %}
 {% block content %}
-    <div class="container mb-4">
-            {% if filter %}
+    {% if filter %}
+        <div class="container mb-4">
             <form method="get">
-                {{ filter.form.as_p }}
-                <input type="submit" />
-            </form>
-            {% endif %}
-    </div>
-    <div class="container">
-        {% render_table table %}
-        {% comment %} <table class="min-w-full divide-y divide-gray-200">
-            <thead>
-                <tr>
-                    <th class="">
-                        Product No / Name
-                    </th>
-                    <th class="px-6 py-3 bg-slate-200 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
-                        Product Description
-                    </th>
-                    <th class="px-6 py-3 bg-slate-200 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
-                        Product Image
-                    </th>
-                    <th class="px-6 py-3 bg-slate-200 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
-                        Product Type
-                    </th>
-                    <th class="px-6 py-3 bg-slate-200 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
-                        Product Quantity
-                    </th>
-                    <th class="px-6 py-3 bg-slate-200 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
-                        Product Status
-                    </th>
-                </tr>
-            </thead>
-            <tbody class="bg-white divide-y divide-gray-200">
-                {% for prod in prods %}
-                    <tr>
-                        <td class="px-6 py-4 whitespace-no-wrap">
-                            <a href="{% url 'prod_detail' prod.pk %}"
-                               class="text-slate-400 underline">{{ prod.prod_no }}<span class="text-slate-100"> | </span>{{ prod.prod_name }}</a>
-                        </td>
-                        <td class="px-6 py-4 whitespace-no-wrap">{{ prod.prod_desc|truncatechars:8 }}</td>
-                        <td class="px-6 py-4 whitespace-no-wrap">
-                            <img src="{{ prod.prod_img.url }}"
-                                 alt="{{ prod.prod_desc }}"
-                                 height="100" width="auto">
-                        </td>
-                        <td class="px-6 py-4 whitespace-no-wrap">{{ prod.prod_type }}</td>
-                        <td class="px-6 py-4 whitespace-no-wrap">{{ prod.prod_quantity|truncatechars:8 }}</td>
-                        <td class="px-6 py-4 whitespace-no-wrap">{{ prod.prod_status }}</td>
-                    </tr>
+                {% for field in filter.form %}
+                    <label for="{{ field.auto_id }}" class="label-normal">{{ field.label }}</label>
+                    {{ field }}
+                    {{ field.errors }}
                 {% endfor %}
-            </tbody>
-        </table> {% endcomment %}
-    
-                                </div>
+                    <input type="submit" value="Query" class="btn-primary">
+            </form>
+        </div>
+    {% endif %}
+    <div class="container max-w-7xl">{% render_table table %}</div>
 {% endblock content %}
 {% block nav %}
     <a href="{% url 'prod_create' %}" class="nav-item">Create</a>
