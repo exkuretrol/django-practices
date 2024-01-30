@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     "prod",
     "accounts",
     "api",
+    "manufacturer",
     # django override templaets
     "django.forms",
 ]
