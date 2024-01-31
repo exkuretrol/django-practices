@@ -1,0 +1,99 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.wrapper {
+  @apply max-w-3xl mx-auto bg-slate-200;
+}
+
+.container {
+  @apply p-4 bg-slate-50;
+}
+
+.page-title {
+  @apply bg-slate-50 px-4 py-2 text-4xl font-serif mb-4;
+}
+
+.nav-bar {
+  @apply flex flex-row gap-4 mb-4 mt-4;
+}
+
+.nav-title {
+  @apply ml-0 px-4 py-2 bg-slate-700 text-slate-200;
+}
+
+.btn-primary {
+  @apply bg-slate-500 hover:bg-slate-700 text-white font-bold py-2 px-4 h-10 w-fit block;
+}
+
+.btn-secondary {
+  @apply bg-slate-100 hover:bg-slate-300 text-slate-500 font-bold py-2 px-4 h-10 w-fit block;
+}
+
+.input-normal {
+  @apply focus:outline-none p-2.5 focus:ring-slate-500 text-sm text-slate-700 border-slate-300 border focus:border-slate-500 bg-slate-200 focus:ring w-80 mb-4;
+}
+
+.input-form {
+  @apply focus:outline-none p-2.5 focus:ring-slate-500 text-sm text-slate-700 border-slate-300 border focus:border-slate-500 bg-slate-200 focus:ring mb-4 w-full;
+}
+
+.input-file {
+  @apply focus:file:outline-none focus:file:ring-slate-500 file:mr-4 file:py-2 file:px-4 file:border-0 file:text-sm file:font-semibold file:bg-slate-200 file:text-slate-700 hover:file:bg-slate-100 mb-4;
+}
+
+.nav-item {
+  @apply px-4 py-2 bg-slate-50;
+}
+
+.label-normal {
+  @apply block mb-2 text-sm font-medium text-slate-900;
+}
+
+.errorlist {
+  @apply text-sm text-rose-600;
+}
+
+.pagination {
+  @apply flex flex-row items-center justify-center space-x-1;
+}
+
+.pagination li.active {
+  @apply text-slate-50 bg-slate-500 border-slate-400 inline-flex items-center whitespace-nowrap shrink-0 justify-center text-sm focus-visible:outline-none focus-visible:ring-1 disabled:pointer-events-none disabled:opacity-50 border shadow-sm h-9 w-9;
+}
+
+.pagination li:not(.previous, .next, .active) a:not([href="#"]) {
+  @apply text-slate-500 bg-slate-50 border-slate-400 inline-flex items-center whitespace-nowrap shrink-0 justify-center text-sm focus-visible:outline-none focus-visible:ring-1 disabled:pointer-events-none disabled:opacity-50 border shadow-sm h-9 w-9 hover:bg-slate-100 hover:text-slate-600;
+}
+
+.pagination a {
+  @apply w-full h-full grid place-items-center;
+}
+
+.previous, .next {
+  @apply px-2 text-slate-500 bg-slate-50 h-9 inline-flex items-center whitespace-nowrap shrink-0 justify-center text-sm hover:bg-slate-100 hover:text-slate-600 w-auto;
+}
+
+.pagination li a[href="#"]{
+  @apply border-none shadow-none hover:bg-slate-50 hover:text-slate-500 pointer-events-none h-8 w-8;
+}
+
+.disabled {
+  @apply opacity-50 hover:text-slate-500 hover:bg-slate-50 pointer-events-none;
+}
+
+.table {
+  @apply w-full divide-y divide-gray-200 mb-4 overflow-y-scroll;
+}
+
+.table tr th {
+  @apply px-6 py-3 bg-slate-200 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider;
+}
+
+.table tr td {
+  @apply px-6 py-4 whitespace-nowrap;
+}
+
+.table-container {
+  @apply w-0 min-w-full overflow-x-auto;
+}

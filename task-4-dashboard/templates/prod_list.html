@@ -1,0 +1,20 @@
+{% extends "_base.html" %}
+{% load django_tables2 %}
+{% block content %}
+    {% if filter %}
+        <div class="container mb-4">
+            <form method="get">
+                {% for field in filter.form %}
+                    <label for="{{ field.auto_id }}" class="label-normal">{{ field.label }}</label>
+                    {{ field }}
+                    {{ field.errors }}
+                {% endfor %}
+                <input type="submit" value="Query" class="btn-primary">
+            </form>
+        </div>
+    {% endif %}
+    <div class="container">{% render_table table %}</div>
+{% endblock content %}
+{% block nav %}
+    <a href="{% url 'prod_create' %}" class="nav-item">Create</a>
+{% endblock nav %}
