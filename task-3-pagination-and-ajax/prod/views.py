@@ -1,13 +1,20 @@
+from typing import Any
 from django.views.generic import DetailView, TemplateView
 from django.views.generic.edit import CreateView, DeleteView, UpdateView, FormMixin
 from django.contrib.auth.mixins import LoginRequiredMixin
 from .models import Prod
 from django.urls import reverse_lazy
-from .forms import ProdCreateForm, ProdUpdateForm, ExcelTableCreateForm, ExcelTableUpdateForm
+from .forms import (
+    ProdCreateForm,
+    ProdUpdateForm,
+    ExcelTableCreateForm,
+    ExcelTableUpdateForm,
+)
 from .tables import ProdTable
 from .filters import ProdFilter, ProdNoFilter
-from django_tables2 import SingleTableMixin, SingleTableView
+from django_tables2 import SingleTableMixin
 from django_filters.views import FilterView
+from manufacturer.models import Manufacturer
 
 
 class ProdDetailView(LoginRequiredMixin, DetailView):
@@ -28,6 +35,15 @@ class ProdCreateView(LoginRequiredMixin, CreateView):
     template_name = "prod_create.html"
     form_class = ProdCreateForm
 
+    def get_form_kwargs(self) -> dict[str, Any]:
+        kwargs = super(CreateView, self).get_form_kwargs()
+        user = self.request.user
+        if user.is_superuser:
+            kwargs["mfrs"] = Manufacturer.objects.all()
+        else:
+            kwargs["mfrs"] = user.manufacturer_set.all()
+        return kwargs
+
 
 class ProdUpdateView(LoginRequiredMixin, UpdateView):
     model = Prod
@@ -45,6 +61,7 @@ class ProdDeleteView(LoginRequiredMixin, DeleteView):
 class ProdCreateMultipleView(FormMixin, TemplateView):
     form_class = ExcelTableCreateForm
     template_name = "prod_create_multiple.html"
+
 
 class ProdUpdateMultipleView(SingleTableMixin, FormMixin, FilterView):
     paginate_by = 10

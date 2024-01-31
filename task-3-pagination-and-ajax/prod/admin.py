@@ -10,6 +10,7 @@ class ProdAdmin(admin.ModelAdmin):
         "prod_type",
         "prod_status",
         "prod_quantity",
+        "prod_mfr_id",
     ]
 
 

@@ -2,6 +2,7 @@ from typing import Any
 from django.core.management.base import BaseCommand, CommandParser
 from prod.models import Prod
 from django_seed import Seed
+from manufacturer.models import Manufacturer
 import random
 
 MODE_REFRESH = "refresh"
@@ -10,7 +11,7 @@ seeder = Seed.seeder()
 
 
 class Command(BaseCommand):
-    help = "seed database prod for development and testing"
+    help = "seed table prod for development and testing"
 
     def add_arguments(self, parser: CommandParser) -> None:
         parser.add_argument("--mode", type=str, help="Mode")
@@ -30,6 +31,9 @@ def run_seed(self, mode: str, nums: int = 10) -> None:
     clear_data()
     if mode == MODE_EMPTY:
         return
+    test_mfr = Manufacturer.objects.get(pk=1)
+    test_mfr2 = Manufacturer.objects.get(pk=2)
+    test_mfr3 = Manufacturer.objects.get(pk=3)
 
     seeder.add_entity(
         Prod,
@@ -40,6 +44,7 @@ def run_seed(self, mode: str, nums: int = 10) -> None:
             "prod_status": lambda x: random.choice(["AC", "IA"]),
             "prod_img": lambda x: random.choice(["images/300_fzfQXUx.jpeg"]),
             "prod_quantity": lambda x: random.randint(1, 10),
+            "prod_mfr_id": lambda x: random.choice([test_mfr, test_mfr2, test_mfr3]),
         },
     )
     seeder.execute()

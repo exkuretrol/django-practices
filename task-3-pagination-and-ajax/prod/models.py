@@ -1,5 +1,6 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+from manufacturer.models import Manufacturer
 from django.urls import reverse
 
 
@@ -33,6 +34,9 @@ class Prod(models.Model):
         max_length=2,
         choices=StatusInProd,
         default=StatusInProd.ACTIVE,
+    )
+    prod_mfr_id = models.ForeignKey(
+        to=Manufacturer, on_delete=models.CASCADE, default=1
     )
 
     def __str__(self) -> str:

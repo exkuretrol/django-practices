@@ -45,6 +45,7 @@ class ProdCommonInfo(forms.ModelForm):
             "prod_img": forms.FileInput(attrs={"class": "input-file"}),
             "prod_quantity": forms.TextInput(attrs={"class": "input-normal"}),
             "prod_status": forms.Select(attrs={"class": "input-normal"}),
+            "prod_mfr_id": forms.Select(attrs={"class": "input-normal"}),
         }
         labels = {
             "prod_name": "Name",
@@ -57,6 +58,11 @@ class ProdCommonInfo(forms.ModelForm):
 
 
 class ProdCreateForm(forms.ModelForm):
+    def __init__(self, mfrs, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+        choices_list = [(mfr.pk, mfr.mfr_name) for mfr in mfrs]
+        self.fields["prod_mfr_id"].choices = choices_list
+
     class Meta(ProdCommonInfo.Meta):
         pass
 
@@ -82,8 +88,11 @@ class ExcelTableCreateForm(forms.Form):
     excel_table = forms.CharField(
         label="Product Create Table",
         required=True,
-        widget=forms.Textarea(attrs={"class": "input-form", "placeholder": table_template}),
+        widget=forms.Textarea(
+            attrs={"class": "input-form", "placeholder": table_template}
+        ),
     )
+
 
 class ExcelTableUpdateForm(forms.Form):
     table_template = f"""prod_no	prod_quantity
@@ -94,5 +103,7 @@ class ExcelTableUpdateForm(forms.Form):
     excel_table = forms.CharField(
         label="Product Update Table",
         required=True,
-        widget=forms.Textarea(attrs={"class": "input-form", "placeholder": table_template}),
+        widget=forms.Textarea(
+            attrs={"class": "input-form", "placeholder": table_template}
+        ),
     )
