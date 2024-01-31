@@ -33,3 +33,10 @@ prod_refresh:
 
 prod_empty:
 	@python manage.py prod_seed --mode empty
+
+clean:
+	@find . -type f -name ".DS_Store" -execdir rm -rf {} \;
+	@find . -type d -name "migrations" -execdir rm -rf {} \;
+	@find . -type d -name "__pycache__" -execdir rm -rf {} \;
+	@find . -type f -name "db.sqlite3" -execdir rm -rf {} \;
+	@find ./media -type f -execdir rm -rf {} \;

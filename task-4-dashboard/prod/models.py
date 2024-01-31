@@ -1,5 +1,6 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+from django.core.validators import RegexValidator
 from manufacturer.models import Manufacturer
 from django.urls import reverse
 
@@ -47,3 +48,37 @@ class Prod(models.Model):
 
     class Meta:
         ordering = ["prod_no"]
+
+
+class ProdCategory(models.Model):
+    class CateTypeChoices(models.TextChoices):
+        Cate = "J", _("Category")
+        SubCate = "K", _("Sub Category")
+        SubSubCate = "L", _("Sub Sub Category")
+
+    cate_id = models.CharField(
+        verbose_name="Category ID",
+        max_length=6,
+        primary_key=True,
+        validators=[
+            RegexValidator(r"^\d{6}$", message="You MUST input a 6 digits category id.")
+        ],
+    )
+    cate_name = models.CharField(verbose_name="Category Name", max_length=255)
+    cate_type = models.CharField(
+        verbose_name="Category Type",
+        max_length=1,
+        choices=CateTypeChoices,
+        default=CateTypeChoices.Cate,
+    )
+
+    @property
+    def parent_cate_id(self):
+        "Return the parent category id of the given product."
+        cate_id = self.cate_id[:4]
+        return cate_id
+
+    @property
+    def children_cate_id(self):
+        "Return the parent category id of the given product."
+        return self.cate_id[-4:]
