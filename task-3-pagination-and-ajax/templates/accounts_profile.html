@@ -1,0 +1,30 @@
+{% extends "_base.html" %}
+{% block content %}
+    <h2 class="page-title">Profile</h2>
+    <div class="container">
+        <div class="grid grid-cols-[minmax(100px,_1fr)_1fr]">
+
+        <label for="username" class="label-normal text-xl border-r-4 border-solid border-slate-300 mr-4">Username</label>
+        <p id="username">{{ user.username }}</p>
+        <label for="email" class="label-normal text-xl border-r-4 border-solid border-slate-300 mr-4">Email</label>
+        <p id="email">{{ user.email }}</p>
+        {% if user.is_staff %}
+        <label for="email" class="label-normal text-xl border-r-4 border-solid border-slate-300 mr-4">Is Staff</label>
+        <p id="is_staff">✅</p>
+        {% endif %}
+        {% if user.is_superuser %}
+        <label for="email" class="label-normal text-xl border-r-4 border-solid border-slate-300 mr-4">Is Superuser</label>
+        <p id="is_superuser">✅</p>
+        {% endif %}
+        </div>
+        <p class="border-b border-slate-500 border-solid my-4 block"></p>
+        <h2 class="text-2xl text-slate-700 mb-2">Manufacturers</h2>
+        <ul class="list-disc list-inside marker:text-slate-400 text-slate-700 space-y-4">
+            {% for mfr in mfrs %}
+                <li>{{ mfr.mfr_name }}</li>
+            {% empty %}
+                <li>This account is not accociate with any manufacturer.</li>
+            {% endfor %}
+        </ul>
+    </div>
+{% endblock content %}
