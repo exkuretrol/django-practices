@@ -1,16 +1,24 @@
 {
-	"folders": [
-		{
-			"path": "."
-		}
-	],
-	"settings": {
-		"[html][django-html][handlebars][hbs][mustache][jinja][jinja-html][nj][njk][nunjucks][twig]": {
-			"editor.defaultFormatter": "monosans.djlint",
-			"workbench.editor.languageDetection": false,
-		},
-		"[css]": {
-			"workbench.editor.languageDetection": false,
-		}
-	}
+    "folders": [
+        {
+            "path": "."
+        }
+    ],
+    "settings": {
+        "[html][django-html][handlebars][hbs][mustache][jinja][jinja-html][nj][njk][nunjucks][twig]": {
+            "editor.defaultFormatter": "monosans.djlint",
+            "workbench.editor.languageDetection": false
+        },
+        "[css]": {
+            "workbench.editor.languageDetection": false
+        },
+        "[python]": {
+            "editor.defaultFormatter": "ms-python.black-formatter",
+            "editor.formatOnSave": true,
+            "editor.codeActionsOnSave": {
+                "source.organizeImports": true
+            }
+        },
+        "isort.args": ["--profile", "black"]
+    }
 }
