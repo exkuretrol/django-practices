@@ -1,9 +1,11 @@
-from django import forms
-from django.core.validators import RegexValidator
-from django.core.exceptions import ValidationError
-from django.forms.widgets import ClearableFileInput
-from .models import Prod
 from re import findall
+
+from django import forms
+from django.core.exceptions import ValidationError
+from django.core.validators import RegexValidator
+from django.forms.widgets import ClearableFileInput
+
+from .models import Prod
 
 
 # what if

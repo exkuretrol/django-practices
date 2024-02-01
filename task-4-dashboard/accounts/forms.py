@@ -1,10 +1,12 @@
 from typing import Any
+
 from django.contrib.auth.forms import (
-    UserCreationForm,
+    AuthenticationForm,
     UserChangeForm,
+    UserCreationForm,
 )
 from django.utils.translation import gettext_lazy as _
-from django.contrib.auth.forms import AuthenticationForm
+
 from .models import CustomUser
 
 
@@ -32,6 +34,7 @@ class CustomUserCreationForm(UserCreationForm):
             print(widget.attrs)
             if widget.input_type in ["password", "email", "number", "text"]:
                 widget.attrs.update({"class": "input-normal"})
+
     class Meta(CommonUserInfo.Meta):
         pass
 

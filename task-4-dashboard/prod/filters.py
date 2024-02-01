@@ -1,13 +1,15 @@
 import django_filters as filters
-from .models import Prod, TypesInProd, StatusInProd
-from django.forms import widgets
+
+from .models import Prod
 
 
 class ProdNoFilter(filters.FilterSet):
     prod_no = filters.BaseInFilter(label="Product No", lookup_expr="in", required=False)
+
     class Meta:
         model = Prod
         fields = ["prod_no"]
+
 
 class ProdFilter(filters.FilterSet):
     prod_name = filters.CharFilter(label="Name", lookup_expr="icontains")
@@ -15,8 +17,8 @@ class ProdFilter(filters.FilterSet):
     prod_quantity = filters.NumberFilter(label="Quantity =")
     prod_quantity__gte = filters.NumberFilter(label="Quantity ≥")
     prod_quantity__lte = filters.NumberFilter(label="Quantity ≤")
-    prod_type = filters.ChoiceFilter(label="Type", choices=TypesInProd)
-    prod_status = filters.ChoiceFilter(label="Status", choices=StatusInProd)
+    # prod_type = filters.ChoiceFilter(label="Type", choices=TypesChoices)
+    # prod_status = filters.ChoiceFilter(label="Status", choices=StatusInProd)
 
     def __init__(self, data=None, queryset=None, *, request=None, prefix=None):
         super().__init__(data, queryset, request=request, prefix=prefix)
@@ -34,6 +36,6 @@ class ProdFilter(filters.FilterSet):
             "prod_quantity",
             "prod_quantity__gte",
             "prod_quantity__lte",
-            "prod_type",
-            "prod_status",
+            # "prod_type",
+            # "prod_status",
         ]

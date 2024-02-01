@@ -1,20 +1,22 @@
 from typing import Any
-from django.views.generic import DetailView, TemplateView
-from django.views.generic.edit import CreateView, DeleteView, UpdateView, FormMixin
+
 from django.contrib.auth.mixins import LoginRequiredMixin
-from .models import Prod
 from django.urls import reverse_lazy
+from django.views.generic import DetailView, TemplateView
+from django.views.generic.edit import CreateView, DeleteView, FormMixin, UpdateView
+from django_filters.views import FilterView
+from django_tables2 import SingleTableMixin
+from manufacturer.models import Manufacturer
+
+from .filters import ProdFilter, ProdNoFilter
 from .forms import (
-    ProdCreateForm,
-    ProdUpdateForm,
     ExcelTableCreateForm,
     ExcelTableUpdateForm,
+    ProdCreateForm,
+    ProdUpdateForm,
 )
+from .models import Prod
 from .tables import ProdTable
-from .filters import ProdFilter, ProdNoFilter
-from django_tables2 import SingleTableMixin
-from django_filters.views import FilterView
-from manufacturer.models import Manufacturer
 
 
 class ProdDetailView(LoginRequiredMixin, DetailView):

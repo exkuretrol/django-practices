@@ -1,61 +1,17 @@
-from django.db import models
-from django.utils.translation import gettext_lazy as _
 from django.core.validators import RegexValidator
-from manufacturer.models import Manufacturer
+from django.db import models
 from django.urls import reverse
+from django.utils.translation import gettext_lazy as _
+from manufacturer.models import Manufacturer
 
 
-class TypesInProd(models.TextChoices):
-    TYPE1 = "T1", _("Human Readable Type 1")
-    TYPE2 = "T2", _("Human Readable Type 2")
-    TYPE3 = "T3", _("Human Readable Type 3")
-
-
-class StatusInProd(models.TextChoices):
-    ACTIVE = "AC", _("Active")
-    INACTIVE = "IA", _("Inactive")
-
-
-class Prod(models.Model):
-    prod_no = models.BigAutoField(primary_key=True, verbose_name="Product No.")
-    prod_name = models.CharField(verbose_name="Product Name", max_length=255)
-    prod_desc = models.TextField(verbose_name="Product Desc")
-    prod_type = models.CharField(
-        verbose_name="Product Types",
-        max_length=2,
-        choices=TypesInProd,
-        default=TypesInProd.TYPE1,
-    )
-    prod_img = models.ImageField(upload_to="images/", verbose_name="Product Img")
-    prod_quantity = models.PositiveIntegerField(
-        default=0, verbose_name="Product Quantity"
-    )
-    prod_status = models.CharField(
-        verbose_name="Product Status",
-        max_length=2,
-        choices=StatusInProd,
-        default=StatusInProd.ACTIVE,
-    )
-    prod_mfr_id = models.ForeignKey(
-        to=Manufacturer, on_delete=models.CASCADE, default=1
-    )
-
-    def __str__(self) -> str:
-        return self.prod_name
-
-    def get_absolute_url(self):
-        return reverse("prod_list")
-
-    class Meta:
-        ordering = ["prod_no"]
+class CateTypeChoices(models.TextChoices):
+    Cate = "J", _("Category")
+    SubCate = "K", _("Sub Category")
+    SubSubCate = "L", _("Sub Sub Category")
 
 
 class ProdCategory(models.Model):
-    class CateTypeChoices(models.TextChoices):
-        Cate = "J", _("Category")
-        SubCate = "K", _("Sub Category")
-        SubSubCate = "L", _("Sub Sub Category")
-
     cate_id = models.CharField(
         verbose_name="Category ID",
         max_length=6,
@@ -82,3 +38,70 @@ class ProdCategory(models.Model):
     def children_cate_id(self):
         "Return the parent category id of the given product."
         return self.cate_id[-4:]
+
+    def __str__(self) -> str:
+        return self.cate_id + " - " + self.cate_name
+
+    class Meta:
+        ordering = ["cate_id"]
+
+
+class SalesStatusChoices(models.IntegerChoices):
+    NORMAL = 1, _("Normal")
+    ABNORMAL = 0, _("Abnormal (Sales Suspended due to Quality Abnormality)")
+
+
+class QualityAssuranceStatusChoices(models.IntegerChoices):
+    NORMAL = 1, _("Normal Tracking")
+    NEW_PROD = 2, _("New Product Tracking")
+    CASE = 3, _("Case Tracking")
+    LICENSE = 4, _("License Tracking")
+
+
+class Prod(models.Model):
+    prod_no = models.BigAutoField(primary_key=True, verbose_name="Product No.")
+    prod_name = models.CharField(verbose_name="Product Name", max_length=255)
+    prod_desc = models.TextField(verbose_name="Product Description", null=True)
+    prod_img = models.ImageField(
+        upload_to="images/", verbose_name="Product Img", null=True
+    )
+    prod_quantity = models.PositiveIntegerField(
+        default=0, verbose_name="Product Quantity"
+    )
+
+    prod_category = models.ForeignKey(
+        to=ProdCategory, on_delete=models.SET_NULL, null=True
+    )
+
+    prod_effective_date = models.DateField(
+        verbose_name="Product Effective Date",
+        auto_now_add=True,
+    )
+
+    prod_sales_status = models.IntegerField(
+        verbose_name="Product Sales Status",
+        choices=SalesStatusChoices,
+        default=SalesStatusChoices.NORMAL,
+    )
+
+    prod_quality_assurance_status = models.IntegerField(
+        verbose_name="Product Quality Assurance Status",
+        choices=QualityAssuranceStatusChoices,
+        default=QualityAssuranceStatusChoices.NORMAL,
+    )
+
+    prod_mfr_id = models.ForeignKey(
+        verbose_name="Manufacturer",
+        to=Manufacturer,
+        on_delete=models.CASCADE,
+        default=1,
+    )
+
+    def __str__(self) -> str:
+        return self.prod_name
+
+    def get_absolute_url(self):
+        return reverse("prod_list")
+
+    class Meta:
+        ordering = ["prod_no"]

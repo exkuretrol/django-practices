@@ -1,4 +1,6 @@
 from django.db.models import Q
+
+
 def prod_query(query: str) -> Q:
     conds = query.split(" ")
     filters = Q()
