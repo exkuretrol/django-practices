@@ -1,13 +1,15 @@
 from django.urls import path
 from django.views.generic.base import TemplateView
+
 from .views import (
-    ProdListView,
-    ProdCreateView,
-    ProdDetailView,
-    ProdDeleteView,
-    ProdUpdateView,
     ProdCreateMultipleView,
+    ProdCreateView,
+    ProdDashboardView,
+    ProdDeleteView,
+    ProdDetailView,
+    ProdListView,
     ProdUpdateMultipleView,
+    ProdUpdateView,
 )
 
 urlpatterns = [
@@ -17,7 +19,6 @@ urlpatterns = [
     path("prods/<int:pk>/", ProdDetailView.as_view(), name="prod_detail"),
     path("prods/<int:pk>/update/", ProdUpdateView.as_view(), name="prod_update"),
     path("prods/<int:pk>/delete/", ProdDeleteView.as_view(), name="prod_delete"),
-
     # with ajax
     path(
         "prods/create_multiple/",
@@ -28,5 +29,11 @@ urlpatterns = [
         "prods/update_multiple/",
         ProdUpdateMultipleView.as_view(),
         name="prod_update_multiple",
+    ),
+    # d3.js
+    path(
+        "prods/dashboard/",
+        ProdDashboardView.as_view(),
+        name="prod_dashboard",
     ),
 ]

@@ -1,9 +1,19 @@
 from django.conf import settings
+from django.core.validators import RegexValidator
 from django.db import models
 
 
 class Manufacturer(models.Model):
-    mfr_id = models.BigAutoField(primary_key=True)
+    mfr_id = models.CharField(
+        primary_key=True,
+        max_length=10,
+        validators=[
+            RegexValidator(
+                r"^\d{8}$|^\d{10}$",
+                message="You MUST input an 8 or 10 digits category id.",
+            )
+        ],
+    )
     mfr_name = models.CharField(max_length=255)
     mfr_location = models.CharField(max_length=255)
     mfr_created_at = models.DateTimeField(auto_now_add=True)

@@ -1,3 +1,5 @@
+import datetime
+import json
 from typing import Any
 
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -71,3 +73,22 @@ class ProdUpdateMultipleView(SingleTableMixin, FormMixin, FilterView):
     filterset_class = ProdNoFilter
     table_class = ProdTable
     form_class = ExcelTableUpdateForm
+
+
+def datetimeconverter(o):
+    if isinstance(o, datetime.date):
+        return o.isoformat()
+    elif isinstance(o, datetime.datetime):
+        return o.isoformat()
+
+
+class ProdDashboardView(TemplateView):
+    template_name = "prod_dashboard.html"
+
+    def get_context_data(self, **kwargs) -> dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+        context["json"] = json.dumps(
+            list(Prod.objects.all().values()),
+            default=datetimeconverter,
+        )
+        return context

@@ -69,15 +69,13 @@ def run_seed(self, mode: str, nums: int = 10) -> None:
     if mode == MODE_EMPTY:
         return
 
+    mfr_run_seed("refresh", nums=int(nums * 0.2))
     mfrs = Manufacturer.objects.all()
-    if mfrs.count() == 0:
-        mfr_run_seed("refresh")
-        mfrs = Manufacturer.objects.all()
 
     categories = ProdCategory.objects.all()
     if categories.count() == 0:
         init_categories()
-        categories = ProdCategory.objects.all()
+    categories = ProdCategory.objects.filter(cate_type=CateTypeChoices.SubSubCate)
 
     seeder.add_entity(
         Prod,
