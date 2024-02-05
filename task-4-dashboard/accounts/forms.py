@@ -16,13 +16,11 @@ class CommonUserInfo(UserCreationForm):
         fields = (
             "username",
             "email",
-            "age",
         )
 
         labels = {
             "username": "Username",
             "email": "Email",
-            "age": "Age",
         }
 
 
@@ -61,5 +59,4 @@ class CustomUserChangeForm(UserChangeForm):
         fields = (
             "username",
             "email",
-            "age",
         )
