@@ -2,12 +2,15 @@ import datetime
 import json
 from typing import Any
 
+import django_tables2
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db.models import Count, F
+from django.db.models.functions import Substr
 from django.urls import reverse_lazy
 from django.views.generic import DetailView, TemplateView
 from django.views.generic.edit import CreateView, DeleteView, FormMixin, UpdateView
 from django_filters.views import FilterView
-from django_tables2 import SingleTableMixin
+from django_tables2 import MultiTableMixin, SingleTableMixin
 from manufacturer.models import Manufacturer
 
 from .filters import ProdFilter, ProdNoFilter
@@ -18,7 +21,7 @@ from .forms import (
     ProdUpdateForm,
 )
 from .models import Prod
-from .tables import ProdTable
+from .tables import ProdCateTable, ProdMfrTable, ProdTable
 
 
 class ProdDetailView(LoginRequiredMixin, DetailView):
@@ -82,13 +85,73 @@ def datetimeconverter(o):
         return o.isoformat()
 
 
-class ProdDashboardView(TemplateView):
+class ProdDashboardView(MultiTableMixin, TemplateView):
     template_name = "prod_dashboard.html"
+
+    user_prods_nums = (
+        Prod.objects.all()
+        .select_related("prod_mfr_id_id__mfr_user_id_id")
+        .annotate(
+            user_id=F("prod_mfr_id_id__mfr_user_id_id__id"),
+            user_name=F("prod_mfr_id_id__mfr_user_id_id__username"),
+        )
+        .values("user_id", "user_name")
+        .annotate(
+            prod_nums=Count("prod_no"),
+        )
+    )
+
+    user_mfr_nums = (
+        Manufacturer.objects.all()
+        .values("mfr_user_id")
+        .annotate(mfr_main_nums=Count("mfr_main_id"), mfr_sub_nums=Count("mfr_sub_id"))
+    )
+
+    dict2 = {d["mfr_user_id"]: d for d in user_mfr_nums}
+
+    out = []
+    for d1 in user_prods_nums:
+        d = dict(**d1)
+        d.update(dict2.get(d1["user_id"], {}))
+        d.pop("mfr_user_id")
+        out.append(d)
+
+    mfr_cate = (
+        Prod.objects.all()
+        .select_related("mfr_category_id__mfr_cate_name")
+        .select_related("prod_mfr_id_id__mfr_user_id_id")
+        .annotate(
+            user_id=F("prod_mfr_id_id__mfr_user_id_id__id"),
+            user_name=F("prod_mfr_id_id__mfr_user_id_id__username"),
+        )
+        .values("user_name")
+        .annotate(cate=Substr(F("prod_category_id__cate_name"), 1, 3))
+        .values("user_name", "cate")
+        .annotate(cate_nums=Count("cate"))
+    )
+    import pandas as pd
+
+    out2 = (
+        pd.DataFrame(mfr_cate)
+        .pivot(index=["cate"], columns=["user_name"], values="cate_nums")
+        .fillna(0)
+        .astype(int)
+        .reset_index()
+        .to_dict(orient="records")
+    )
+
+    columns = [(k, django_tables2.Column()) for k in out2[0].keys()]
+
+    t1 = ProdMfrTable(out)
+    t2 = ProdCateTable(out2, extra_columns=columns)
+    tables = [t1, t2]
 
     def get_context_data(self, **kwargs) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
-        context["json"] = json.dumps(
-            list(Prod.objects.all().values()),
-            default=datetimeconverter,
-        )
+        context["json"] = {}
         return context
+
+    # context["json"] = json.dumps(
+    #     out,
+    #     default=datetimeconverter,
+    # )
