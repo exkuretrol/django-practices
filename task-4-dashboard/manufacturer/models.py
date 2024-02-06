@@ -4,15 +4,27 @@ from django.db import models
 
 
 class Manufacturer(models.Model):
-    mfr_id = models.CharField(
+    mfr_id = models.BigAutoField(
         primary_key=True,
-        max_length=10,
+    )
+    mfr_main_id = models.CharField(
+        max_length=8,
         validators=[
             RegexValidator(
-                r"^\d{8}$|^\d{10}$",
-                message="You MUST input an 8 or 10 digits category id.",
+                r"^\d{8}$",
+                message="You MUST input an 8 digits main manufacturer id.",
             )
         ],
+    )
+    mfr_sub_id = models.CharField(
+        max_length=2,
+        validators=[
+            RegexValidator(
+                r"^\d{2}$",
+                message="You MUST input an 2 digits sub manufacturer id.",
+            )
+        ],
+        null=True,
     )
     mfr_name = models.CharField(max_length=255)
     mfr_location = models.CharField(max_length=255)

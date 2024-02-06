@@ -49,7 +49,8 @@ def run_seed(mode: str, nums: int = 10):
         Manufacturer,
         main,
         {
-            "mfr_id": lambda x: f"{np.random.random_integers(low=10**7, high=10**8-1):0>2}",
+            "mfr_main_id": lambda x: f"{np.random.random_integers(low=10**7, high=10**8-1):0>2}",
+            "mfr_sub_id": lambda x: None,
             "mfr_name": lambda x: "Test Factory " + seeder.faker.name(),
             "mfr_location": lambda x: np.random.choice(
                 ["Taipei", "Tainan", "Hsinchu", "Taichung", "Banqiao"]
@@ -66,8 +67,8 @@ def run_seed(mode: str, nums: int = 10):
         Manufacturer,
         sub,
         {
-            "mfr_id": lambda x: random.choice(mfrs).mfr_id
-            + f"{np.random.random_integers(low=1, high=99):0>2}",
+            "mfr_main_id": lambda x: random.choice(mfrs).mfr_main_id,
+            "mfr_sub_id": lambda x: f"{random.randint(1, 99):0>2}",
             "mfr_name": lambda x: "Test Factory " + seeder.faker.name(),
             "mfr_location": lambda x: random.choice(
                 ["Taipei", "Tainan", "Hsinchu", "Taichung", "Banqiao"]
