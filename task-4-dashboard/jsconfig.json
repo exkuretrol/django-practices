@@ -14,7 +14,8 @@
     ],
     "typeAcquisition": {
         "include": [
-            "jquery"
+            "jquery",
+            "d3"
         ]
     }
 }

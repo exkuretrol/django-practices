@@ -124,31 +124,42 @@ class ProdDashboardView(MultiTableMixin, TemplateView):
             user_id=F("prod_mfr_id_id__mfr_user_id_id__id"),
             user_name=F("prod_mfr_id_id__mfr_user_id_id__username"),
         )
-        .values("user_name")
+        .values("user_id", "user_name")
         .annotate(cate=Substr(F("prod_category_id__cate_name"), 1, 3))
-        .values("user_name", "cate")
+        .values("user_id", "user_name", "cate")
         .annotate(cate_nums=Count("cate"))
     )
     import pandas as pd
 
     out2 = (
         pd.DataFrame(mfr_cate)
-        .pivot(index=["cate"], columns=["user_name"], values="cate_nums")
+        .pivot(index=["user_id", "user_name"], columns=["cate"], values="cate_nums")
         .fillna(0)
         .astype(int)
         .reset_index()
         .to_dict(orient="records")
     )
 
-    columns = [(k, django_tables2.Column()) for k in out2[0].keys()]
+    columns = []
 
-    t1 = ProdMfrTable(out)
-    t2 = ProdCateTable(out2, extra_columns=columns)
+    class SummingColumn(django_tables2.Column):
+        def render_footer(self, bound_column, table):
+            return sum(bound_column.accessor.resolve(row) for row in table.data)
+
+    for k in out2[0].keys():
+        if k in ["user_id", "user_name"]:
+            continue
+        columns.append((k, SummingColumn(attrs={"td": {"col": k}})))
+
+    t1 = ProdMfrTable(out, attrs={"table-name": "prod_mfr", "class": "table"})
+    t2 = ProdCateTable(
+        out2, extra_columns=columns, attrs={"table-name": "prod_cate", "class": "table"}
+    )
     tables = [t1, t2]
 
     def get_context_data(self, **kwargs) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
-        context["json"] = {}
+        context["prod_cate_data"] = self.out2
         return context
 
     # context["json"] = json.dumps(

@@ -1,7 +1,9 @@
-from django.http import JsonResponse, HttpRequest
-from django.db.utils import IntegrityError
-from prod.models import Prod
 import json
+
+from django.db.utils import IntegrityError
+from django.http import HttpRequest, JsonResponse
+from prod.models import Prod
+
 
 def create_prods(request: HttpRequest):
     prods_str = request.POST.get("prods", "")
@@ -13,6 +15,7 @@ def create_prods(request: HttpRequest):
         except IntegrityError as e:
             return JsonResponse({"message": "error while adding new product."})
     return JsonResponse({"message": "success"})
+
 
 def update_prods(request: HttpRequest):
     prods_str = request.POST.get("prods", "")

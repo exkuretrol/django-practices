@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
 from pathlib import Path
+
 from environs import Env
 
 env = Env()
@@ -48,7 +49,7 @@ INSTALLED_APPS = [
     "django_seed",
     "django_filters",
     "django_tables2",
-    # "debug_toolbar",
+    "debug_toolbar",
     # local apps
     "prod",
     "accounts",
@@ -68,7 +69,7 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     # 3rd party
     "django_browser_reload.middleware.BrowserReloadMiddleware",
-    # "debug_toolbar.middleware.DebugToolbarMiddleware",
+    "debug_toolbar.middleware.DebugToolbarMiddleware",
 ]
 
 ROOT_URLCONF = "django_project.urls"
@@ -155,7 +156,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # django-tables2
 DJANGO_TABLES2_TABLE_ATTRS = {
-    'class': 'table',
+    "class": "table",
 }
 DJANGO_TABLES2_TEMPLATE = "django_tables2/custom_table.html"
 

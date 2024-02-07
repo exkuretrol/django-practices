@@ -36,23 +36,31 @@ def get_user_id(**kwargs):
 
 
 class ProdMfrTable(tables.Table):
-    user_name = tables.Column(
-        verbose_name="User", attrs={"td": {"user-id": get_user_id}}
-    )
-    prod_nums = tables.Column(verbose_name="Product Numbers")
-    mfr_main_nums = tables.Column(verbose_name="Main Manufacturer Numbers")
-    mfr_sub_nums = tables.Column(verbose_name="Sub Manufacturer Numbers")
+    class SummingColumn(tables.Column):
+        def render_footer(self, bound_column, table):
+            return sum(bound_column.accessor.resolve(row) for row in table.data)
 
-
-class ProdMfrTable(tables.Table):
     user_name = tables.Column(
-        verbose_name="User", attrs={"td": {"user-id": get_user_id}}
+        verbose_name="User",
+        attrs={"td": {"user-id": get_user_id}},
+        footer="Total",
     )
-    prod_nums = tables.Column(verbose_name="Product Numbers")
-    mfr_main_nums = tables.Column(verbose_name="Main Manufacturer Numbers")
-    mfr_sub_nums = tables.Column(verbose_name="Sub Manufacturer Numbers")
+
+    prod_nums = SummingColumn(
+        verbose_name="Product Numbers", attrs={"td": {"col": "prod_nums"}}
+    )
+    mfr_main_nums = SummingColumn(
+        verbose_name="Main Manufacturer Numbers", attrs={"td": {"col": "mfr_main_nums"}}
+    )
+    mfr_sub_nums = SummingColumn(
+        verbose_name="Sub Manufacturer Numbers", attrs={"td": {"col": "mfr_sub_nums"}}
+    )
 
 
 class ProdCateTable(tables.Table):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+
+    user_name = tables.Column(
+        verbose_name="User",
+        attrs={"td": {"user-id": get_user_id}},
+        footer="Total",
+    )

@@ -20,6 +20,8 @@ djangorestframework = "^3.14.0"
 django-tables2 = "^2.7.0"
 django-filter = "^23.5"
 django-debug-toolbar = "^4.2.0"
+numpy = "^1.26.3"
+pandas = "^2.2.0"
 
 [tool.poetry.group.dev.dependencies]
 black = "^23.12.1"
