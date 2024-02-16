@@ -1,9 +1,11 @@
 let prod_cate_cols = [].map
     .call(
-        document.querySelectorAll("table[table-name='prod_cate'] thead th"),
-        (el) => el.innerText
+        document.querySelectorAll(
+            "table[table-name='prod_cate'] tbody tr:first-child td"
+        ),
+        (el) => el.getAttribute("col")
     )
-    .filter((el) => el != "USER");
+    .filter((el) => el != null);
 let tables = [
     {
         table_name: "prod_mfr",

@@ -1,43 +1,55 @@
 from django.core.validators import RegexValidator
 from django.db import models
+from django.db.models import Case, Value, When
+from django.db.models.functions import Concat, Substr
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from manufacturer.models import Manufacturer
 
 
-class CateTypeChoices(models.TextChoices):
-    Cate = "J", _("Category")
-    SubCate = "K", _("Sub Category")
-    SubSubCate = "L", _("Sub Sub Category")
+class CateTypeChoices(models.IntegerChoices):
+    Cate = 1, _("Category")
+    SubCate = 2, _("Sub Category")
+    SubSubCate = 3, _("Sub Sub Category")
 
 
 class ProdCategory(models.Model):
+
     cate_id = models.CharField(
+        unique=True,
         verbose_name="Category ID",
         max_length=6,
-        primary_key=True,
         validators=[
             RegexValidator(r"^\d{6}$", message="You MUST input a 6 digits category id.")
         ],
     )
     cate_name = models.CharField(verbose_name="Category Name", max_length=255)
-    cate_type = models.CharField(
+    cate_type = models.IntegerField(
         verbose_name="Category Type",
-        max_length=1,
         choices=CateTypeChoices,
         default=CateTypeChoices.Cate,
     )
-
-    @property
-    def parent_cate_id(self):
-        "Return the parent category id of the given product."
-        cate_id = self.cate_id[:4]
-        return cate_id
-
-    @property
-    def children_cate_id(self):
-        "Return the parent category id of the given product."
-        return self.cate_id[-4:]
+    main_cate_id = models.GeneratedField(
+        expression=Case(
+            When(cate_type=CateTypeChoices.Cate, then=None),
+            When(
+                cate_type=CateTypeChoices.SubCate,
+                then=Concat(
+                    Value("0000"),
+                    Substr("cate_id", 3, 2),
+                    output_field=models.CharField(max_length=6),
+                ),
+            ),
+            default=Concat(
+                Value("0000"),
+                Substr("cate_id", 1, 2),
+                output_field=models.CharField(max_length=6),
+            ),
+        ),
+        output_field=models.CharField(max_length=6),
+        db_persist=True,
+        null=True,
+    )
 
     def __str__(self) -> str:
         return self.cate_id + " - " + self.cate_name

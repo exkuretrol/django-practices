@@ -21,9 +21,8 @@ class ProdCategoryAdmin(admin.ModelAdmin):
     list_display = [
         "cate_id",
         "cate_name",
-        "parent_cate_id",
-        "children_cate_id",
         "cate_type",
+        "main_cate_id",
     ]
     list_display_links = ["cate_id"]
 

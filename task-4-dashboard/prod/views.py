@@ -3,6 +3,7 @@ import json
 from typing import Any
 
 import django_tables2
+import pandas as pd
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Count, F
 from django.db.models.functions import Substr
@@ -20,7 +21,7 @@ from .forms import (
     ProdCreateForm,
     ProdUpdateForm,
 )
-from .models import Prod
+from .models import CateTypeChoices, Prod, ProdCategory
 from .tables import ProdCateTable, ProdMfrTable, ProdTable
 
 
@@ -85,6 +86,16 @@ def datetimeconverter(o):
         return o.isoformat()
 
 
+d3 = {
+    cate.cate_id: cate.cate_name
+    for cate in ProdCategory.objects.filter(cate_type=CateTypeChoices.Cate)
+}
+
+
+def get_cate_name_by_id(cate_id: str):
+    return d3.get(cate_id, None)
+
+
 class ProdDashboardView(MultiTableMixin, TemplateView):
     template_name = "prod_dashboard.html"
 
@@ -107,15 +118,19 @@ class ProdDashboardView(MultiTableMixin, TemplateView):
         .annotate(mfr_main_nums=Count("mfr_main_id"), mfr_sub_nums=Count("mfr_sub_id"))
     )
 
-    dict2 = {d["mfr_user_id"]: d for d in user_mfr_nums}
-
     out = []
-    for d1 in user_prods_nums:
-        d = dict(**d1)
-        d.update(dict2.get(d1["user_id"], {}))
-        d.pop("mfr_user_id")
-        out.append(d)
+    if user_prods_nums.exists() and user_mfr_nums.exists():
+        dict2 = {d["mfr_user_id"]: d for d in user_mfr_nums}
 
+        for d1 in user_prods_nums:
+            d = dict(**d1)
+            d.update(dict2.get(d1["user_id"], {}))
+            d.pop("mfr_user_id")
+            out.append(d)
+
+        t1 = ProdMfrTable(out, attrs={"table-name": "prod_mfr", "class": "table"})
+    else:
+        t1 = ProdMfrTable({}, attrs={"table-name": "prod_mfr", "class": "table"})
     mfr_cate = (
         Prod.objects.all()
         .select_related("mfr_category_id__mfr_cate_name")
@@ -125,44 +140,51 @@ class ProdDashboardView(MultiTableMixin, TemplateView):
             user_name=F("prod_mfr_id_id__mfr_user_id_id__username"),
         )
         .values("user_id", "user_name")
-        .annotate(cate=Substr(F("prod_category_id__cate_name"), 1, 3))
+        .annotate(cate=F("prod_category_id__main_cate_id"))
         .values("user_id", "user_name", "cate")
         .annotate(cate_nums=Count("cate"))
     )
-    import pandas as pd
+    if mfr_cate.exists():
 
-    out2 = (
-        pd.DataFrame(mfr_cate)
-        .pivot(index=["user_id", "user_name"], columns=["cate"], values="cate_nums")
-        .fillna(0)
-        .astype(int)
-        .reset_index()
-        .to_dict(orient="records")
-    )
+        out2 = (
+            pd.DataFrame(mfr_cate)
+            .pivot(index=["user_id", "user_name"], columns=["cate"], values="cate_nums")
+            .fillna(0)
+            .astype(int)
+            .reset_index()
+            .to_dict(orient="records")
+        )
 
-    columns = []
+        columns = []
 
-    class SummingColumn(django_tables2.Column):
-        def render_footer(self, bound_column, table):
-            return sum(bound_column.accessor.resolve(row) for row in table.data)
+        class SummingColumn(django_tables2.Column):
+            def render_footer(self, bound_column, table):
+                return sum(bound_column.accessor.resolve(row) for row in table.data)
 
-    for k in out2[0].keys():
-        if k in ["user_id", "user_name"]:
-            continue
-        columns.append((k, SummingColumn(attrs={"td": {"col": k}})))
+        for k in out2[0].keys():
+            if k in ["user_id", "user_name"]:
+                continue
+            columns.append(
+                (
+                    k,
+                    SummingColumn(
+                        verbose_name=get_cate_name_by_id(k), attrs={"td": {"col": k}}
+                    ),
+                )
+            )
 
-    t1 = ProdMfrTable(out, attrs={"table-name": "prod_mfr", "class": "table"})
-    t2 = ProdCateTable(
-        out2, extra_columns=columns, attrs={"table-name": "prod_cate", "class": "table"}
-    )
+        t2 = ProdCateTable(
+            out2,
+            extra_columns=columns,
+            attrs={"table-name": "prod_cate", "class": "table"},
+        )
+
+    else:
+        t2 = ProdCateTable({})
+
     tables = [t1, t2]
 
     def get_context_data(self, **kwargs) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
-        context["prod_cate_data"] = self.out2
+        context["prod_cate_data"] = self.out
         return context
-
-    # context["json"] = json.dumps(
-    #     out,
-    #     default=datetimeconverter,
-    # )

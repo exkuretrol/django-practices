@@ -21,3 +21,6 @@ staticfiles
 
 # media files
 media
+
+# csv files
+*.csv
