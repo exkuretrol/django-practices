@@ -1,5 +1,7 @@
 import django_tables2 as tables
+from django.urls import reverse
 from django.utils.html import format_html
+from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
 
 from .models import Prod
@@ -18,6 +20,10 @@ class DescColumn(tables.Column):
 class ProdTable(tables.Table):
     prod_img = ImageColumn()
     prod_desc = DescColumn()
+
+    def render_prod_name(self, record):
+        prod_detail_url = reverse("prod_detail", kwargs={"pk": record.pk})
+        return mark_safe(f"<a href={prod_detail_url}>{record.prod_name}</a>")
 
     class Meta:
         model = Prod

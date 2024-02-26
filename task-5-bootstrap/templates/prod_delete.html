@@ -2,13 +2,14 @@
 {% load widget_tweaks %}
 {% block content %}
     <div class="bg-slate-50 p-4 ">
-        <h2 class="text-4xl font-serif mb-4">Delete</h2>
-        <p class="mb-4 text-xl">Do you really want to delete prod "{{ prod.prod_name }}"?</p>
+        <h2>刪除產品</h2>
+        <p class="mb-4 text-xl">確定刪除產品 "{{ prod.prod_name }}"?</p>
         <form action="" method="post">
             {% csrf_token %}
+            <input type="button" class="btn btn-outline-primary" value="取消" onclick="window.history.back();">
             <input type="submit"
-                   value="Delete"
-                   class="bg-rose-500 hover:bg-rose-700 text-white font-bold py-2 px-4 h-10 w-fit block" />
+                   value="確定"
+                   class="btn btn-danger" />
         </form>
     </div>
 {% endblock content %}

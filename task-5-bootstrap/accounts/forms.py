@@ -19,19 +19,16 @@ class CommonUserInfo(UserCreationForm):
         )
 
         labels = {
-            "username": "Username",
-            "email": "Email",
+            "username": "使用者名稱",
+            "email": "電子信箱",
         }
 
 
 class CustomUserCreationForm(UserCreationForm):
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
-        for field in self.fields:
-            widget = self.fields[field].widget
-            print(widget.attrs)
-            if widget.input_type in ["password", "email", "number", "text"]:
-                widget.attrs.update({"class": "input-normal"})
+        self.fields["password1"].label = "密碼"
+        self.fields["password2"].label = "確認密碼"
 
     class Meta(CommonUserInfo.Meta):
         pass
@@ -40,10 +37,16 @@ class CustomUserCreationForm(UserCreationForm):
 class CustomUserAuthenticationForm(AuthenticationForm):
     def __init__(self, request: Any = ..., *args: Any, **kwargs: Any) -> None:
         super().__init__(request, *args, **kwargs)
-        for field in self.fields:
-            widget = self.fields[field].widget
-            if widget.input_type in ["password", "text"]:
-                widget.attrs.update({"class": "input-normal"})
+
+        self.fields["username"].label = "使用者名稱"
+        self.fields["password"].label = "密碼"
+
+    error_messages = {
+        "invalid_login": _(
+            "請輸入正確的使用者名稱和密碼。請注意，兩個欄位可能區分大小寫。"
+        ),
+        "inactive": _("此帳戶未啟用。"),
+    }
 
     # username = UsernameField(widget=forms.TextInput(attrs={"autofocus": True, "class": "input-normal"}))
     # password = forms.CharField(

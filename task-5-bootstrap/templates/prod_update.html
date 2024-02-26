@@ -1,17 +1,12 @@
 {% extends "_base.html" %}
-{% load widget_tweaks %}
+{% load crispy_forms_tags %}
 {% block content %}
-    <h2 class="page-title">Update Product</h2>
+    <h2 class="page-title">更新商品</h2>
     <form action=""
           method="post"
-          class="container flex flex-col mb-4"
           enctype="multipart/form-data">
         {% csrf_token %}
-        {% for field in form %}
-            {{ field.errors }}
-            <label for="{{ field.auto_id }}" class="label-normal">{{ field.label }}</label>
-            {{ field }}
-        {% endfor %}
-        <input type="submit" value="Update" class="btn-primary" />
+        {{ form | crispy }}
+        <input type="submit" value="更新" class="btn btn-primary" />
     </form>
 {% endblock content %}

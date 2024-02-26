@@ -1,9 +1,7 @@
 {% extends "_base.html" %}
 {% block content %}
-    <div class="container">
-        <div class="flex flex-row space-x-4">
-            <a href="{% url 'prod_list' %}" class="btn-primary">View All Prods</a>
-            <a href="{% url 'prod_update_multiple' %}" class="btn-primary">Update Prods</a>
-        </div>
-    </div>
+<div class="d-flex flex-row gap-2">
+    <a href="{% url 'prod_list' %}" class="btn btn-info">顯示全部產品</a>
+    <a href="{% url 'prod_update_multiple' %}" class="btn btn-info">更新多個產品</a>
+</div>
 {% endblock content %}

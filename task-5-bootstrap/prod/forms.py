@@ -8,8 +8,6 @@ from django.forms.widgets import ClearableFileInput
 from .models import Prod
 
 
-# what if
-# "name:david type"
 def validate_query_str(query: str) -> None:
     colon_num = len(findall(":", query))
     res = findall(pattern=r"(name:|desc:|type:|status:)[a-zA-Z0-9]+", string=query)

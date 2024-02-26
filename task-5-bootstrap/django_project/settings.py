@@ -50,6 +50,8 @@ INSTALLED_APPS = [
     "django_filters",
     "django_tables2",
     "debug_toolbar",
+    "crispy_forms",
+    "crispy_bootstrap5",
     # local apps
     "prod",
     "accounts",
@@ -89,6 +91,9 @@ TEMPLATES = [
         },
     },
 ]
+
+CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
+CRISPY_TEMPLATE_PACK = "bootstrap5"
 
 FORM_RENDERER = "django.forms.renderers.TemplatesSetting"
 
@@ -155,10 +160,11 @@ MEDIA_ROOT = BASE_DIR / "media"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # django-tables2
-DJANGO_TABLES2_TABLE_ATTRS = {
-    "class": "table",
-}
-DJANGO_TABLES2_TEMPLATE = "django_tables2/custom_table.html"
+# DJANGO_TABLES2_TABLE_ATTRS = {
+#     "class": "table",
+# }
+# DJANGO_TABLES2_TEMPLATE = "django_tables2/custom_table.html"
+DJANGO_TABLES2_TEMPLATE = "django_tables2/custom_bootstrap5.html"
 
 INTERNAL_IPS = [
     # ...

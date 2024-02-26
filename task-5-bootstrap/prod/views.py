@@ -58,6 +58,15 @@ class ProdUpdateView(LoginRequiredMixin, UpdateView):
     form_class = ProdUpdateForm
     template_name = "prod_update.html"
 
+    def get_form_kwargs(self) -> dict[str, Any]:
+        kwargs = super(UpdateView, self).get_form_kwargs()
+        user = self.request.user
+        if user.is_superuser:
+            kwargs["mfrs"] = Manufacturer.objects.all()
+        else:
+            kwargs["mfrs"] = user.manufacturer_set.all()
+        return kwargs
+
 
 class ProdDeleteView(LoginRequiredMixin, DeleteView):
     model = Prod

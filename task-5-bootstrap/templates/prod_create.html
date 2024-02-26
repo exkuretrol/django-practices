@@ -1,21 +1,17 @@
 {% extends "_base.html" %}
-{% load widget_tweaks %}
+{% load crispy_forms_tags %}
 {% block content %}
-    <h2 class="page-title">Create Product</h2>
+    <h2 class="page-title">新增商品</h2>
     <form action=""
           method="post"
-          class="container flex flex-col mb-4"
           enctype="multipart/form-data">
-        {% csrf_token %}
-        {% for field in form %}
-            {{ field.errors }}
-            <label for="{{ field.auto_id }}" class="label-normal">{{ field.label }}</label>
-            {{ field }}
-        {% endfor %}
-        <input type="submit" value="Create" class="btn-primary">
+        {{ form | crispy }}
+        <input type="submit" value="新增" class="btn btn-primary">
     </form>
 {% endblock content %}
 
 {% block nav %}
-    <a href="{% url 'prod_create_multiple' %}" class="nav-item">Create Multiple</a>
+<li class="nav-item">
+    <a href="{% url 'prod_create_multiple' %}" class="nav-link">新增多個商品</a>
+</li>
 {% endblock nav %}
