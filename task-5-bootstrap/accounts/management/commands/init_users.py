@@ -27,4 +27,7 @@ def init_users(nums: int = 10):
     for _ in range(nums):
         u_name = Faker().user_name()
         u_pass = u_name + str("1234")
-        User.objects.create_user(username=u_name, password=u_pass)
+        try:
+            User.objects.create_user(username=u_name, password=u_pass)
+        except:
+            pass

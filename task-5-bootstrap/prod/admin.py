@@ -8,7 +8,7 @@ class ProdAdmin(admin.ModelAdmin):
         "prod_no",
         "prod_name",
         "prod_quantity",
-        "prod_category",
+        "prod_cate_no",
         "prod_sales_status",
         "prod_quality_assurance_status",
         "prod_mfr_id",
@@ -19,12 +19,12 @@ class ProdAdmin(admin.ModelAdmin):
 
 class ProdCategoryAdmin(admin.ModelAdmin):
     list_display = [
-        "cate_id",
+        "cate_no",
         "cate_name",
         "cate_type",
-        "main_cate_id",
+        "cate_main_no",
     ]
-    list_display_links = ["cate_id"]
+    list_display_links = ["cate_no"]
 
 
 admin.site.register(Prod, ProdAdmin)

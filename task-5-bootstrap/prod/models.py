@@ -8,41 +8,42 @@ from manufacturer.models import Manufacturer
 
 
 class CateTypeChoices(models.IntegerChoices):
-    Cate = 1, _("Category")
-    SubCate = 2, _("Sub Category")
-    SubSubCate = 3, _("Sub Sub Category")
+    Cate = 1, _("大分類")
+    SubCate = 2, _("中分類")
+    SubSubCate = 3, _("小分類")
 
 
 class ProdCategory(models.Model):
 
-    cate_id = models.CharField(
-        unique=True,
-        verbose_name="Category ID",
+    cate_no = models.CharField(
+        primary_key=True,
+        verbose_name=_("分類編號"),
         max_length=6,
         validators=[
-            RegexValidator(r"^\d{6}$", message="You MUST input a 6 digits category id.")
+            RegexValidator(r"^\d{6}$", message=_("您必須輸入一個 6 位數的分類編號。"))
         ],
     )
-    cate_name = models.CharField(verbose_name="Category Name", max_length=255)
-    cate_type = models.IntegerField(
-        verbose_name="Category Type",
+    cate_name = models.CharField(verbose_name=_("分類名稱"), max_length=255)
+    cate_type = models.PositiveSmallIntegerField(
+        verbose_name=_("分類大小"),
         choices=CateTypeChoices,
         default=CateTypeChoices.Cate,
     )
-    main_cate_id = models.GeneratedField(
+    cate_main_no = models.GeneratedField(
+        verbose_name=_("分類大類編號"),
         expression=Case(
             When(cate_type=CateTypeChoices.Cate, then=None),
             When(
                 cate_type=CateTypeChoices.SubCate,
                 then=Concat(
                     Value("0000"),
-                    Substr("cate_id", 3, 2),
+                    Substr("cate_no", 3, 2),
                     output_field=models.CharField(max_length=6),
                 ),
             ),
             default=Concat(
                 Value("0000"),
-                Substr("cate_id", 1, 2),
+                Substr("cate_no", 1, 2),
                 output_field=models.CharField(max_length=6),
             ),
         ),
@@ -52,68 +53,69 @@ class ProdCategory(models.Model):
     )
 
     def __str__(self) -> str:
-        return self.cate_id + " - " + self.cate_name
+        return self.cate_no + " - " + self.cate_name
 
     class Meta:
-        ordering = ["cate_id"]
+        ordering = ["cate_no"]
 
 
 class SalesStatusChoices(models.IntegerChoices):
-    NORMAL = 1, _("Normal")
-    ABNORMAL = 0, _("Abnormal (Sales Suspended due to Quality Abnormality)")
+    NORMAL = 0, _("正常")
+    ABNORMAL = 1, _("異常 (因為商品品質異常暫時停止銷售)")
 
 
 class QualityAssuranceStatusChoices(models.IntegerChoices):
-    NORMAL = 1, _("Normal Tracking")
-    NEW_PROD = 2, _("New Product Tracking")
-    CASE = 3, _("Case Tracking")
-    LICENSE = 4, _("License Tracking")
+    NORMAL = 0, _("正常追蹤")
+    NEW_PROD = 1, _("新產品追蹤")
+    CASE = 2, _("案例追蹤")
+    LICENSE = 3, _("證照追蹤")
 
 
 class Prod(models.Model):
-    prod_no = models.BigAutoField(primary_key=True, verbose_name="Product No.")
-    prod_name = models.CharField(verbose_name="Product Name", max_length=255)
-    prod_desc = models.TextField(verbose_name="Product Description", null=True)
+    prod_no = models.BigAutoField(primary_key=True, verbose_name=_("商品編號"))
+    prod_name = models.CharField(verbose_name=_("商品名稱"), max_length=255)
+    prod_desc = models.TextField(verbose_name=_("商品描述"), null=True)
     prod_img = models.ImageField(
-        upload_to="images/", verbose_name="Product Img", null=True
+        upload_to="images/", verbose_name=_("商品圖片"), null=True
     )
-    prod_quantity = models.PositiveIntegerField(
-        default=0, verbose_name="Product Quantity"
-    )
+    prod_quantity = models.PositiveIntegerField(default=0, verbose_name=_("商品數量"))
 
-    prod_category = models.ForeignKey(
-        to=ProdCategory, on_delete=models.SET_NULL, null=True
+    prod_cate_no = models.ForeignKey(
+        verbose_name=_("商品分類編號"),
+        to=ProdCategory,
+        on_delete=models.SET_NULL,
+        null=True,
     )
 
     prod_effective_date = models.DateField(
-        verbose_name="Product Effective Date",
+        verbose_name=_("商品生效日期"),
         auto_now_add=True,
     )
 
-    prod_sales_status = models.IntegerField(
-        verbose_name="Product Sales Status",
+    prod_sales_status = models.PositiveSmallIntegerField(
+        verbose_name=_("商品銷售狀態"),
         choices=SalesStatusChoices,
         default=SalesStatusChoices.NORMAL,
     )
 
-    prod_quality_assurance_status = models.IntegerField(
-        verbose_name="Product Quality Assurance Status",
+    prod_quality_assurance_status = models.PositiveSmallIntegerField(
+        verbose_name=_("商品品保狀態"),
         choices=QualityAssuranceStatusChoices,
         default=QualityAssuranceStatusChoices.NORMAL,
     )
 
     prod_mfr_id = models.ForeignKey(
-        verbose_name="Manufacturer",
+        verbose_name=_("商品廠商 ID"),
         to=Manufacturer,
         on_delete=models.CASCADE,
         default=1,
     )
 
     def __str__(self) -> str:
-        return self.prod_name
+        return str(self.prod_no) + " - " + self.prod_name
 
     def get_absolute_url(self):
-        return reverse("prod_list")
+        return reverse("prod_detail", kwargs={"pk": self.prod_no})
 
     class Meta:
         ordering = ["prod_no"]

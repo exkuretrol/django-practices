@@ -65,7 +65,7 @@ def parse_csv(filename: str):
                 continue
 
             try:
-                cate = ProdCategory.objects.get(cate_id=row["CatID3"])
+                cate = ProdCategory.objects.get(cate_no=row["CatID3"])
             except ProdCategory.DoesNotExist as e:
                 cate = None
 
@@ -75,14 +75,11 @@ def parse_csv(filename: str):
 
             try:
                 Prod.objects.create(
-                    prod_no=row["ItemCode"],
+                    prod_no=int(row["ItemCode"]),
                     prod_name=row["ItemNM"],
-                    prod_category=cate,
+                    prod_cate_no=cate,
                 )
             except:
-                print("Duplicated")
-                print(Prod.objects.get(prod_no=row["ItemCode"]).prod_name)
-                print(row["ItemNM"])
                 c["Duplicated"] += 1
 
         print(c)

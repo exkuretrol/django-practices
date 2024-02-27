@@ -45,37 +45,28 @@ def run_seed(mode: str, nums: int = 10):
     if mode == MODE_EMPTY:
         return
 
-    seeder.add_entity(
-        Manufacturer,
-        main,
-        {
-            "mfr_main_id": lambda x: f"{np.random.random_integers(low=10**7, high=10**8-1):0>2}",
-            "mfr_sub_id": lambda x: None,
-            "mfr_name": lambda x: "Test Factory " + seeder.faker.name(),
-            "mfr_location": lambda x: np.random.choice(
+    for _ in range(main):
+        Manufacturer.objects.create(
+            mfr_main_id=f"{np.random.random_integers(low=10**7, high=10**8-1):0>2}",
+            mfr_sub_id="00",
+            mfr_name="Test Factory " + seeder.faker.name(),
+            mfr_address=np.random.choice(
                 ["Taipei", "Tainan", "Hsinchu", "Taichung", "Banqiao"]
             ),
-            "mfr_created_at": lambda x: seeder.faker.date_time(tzinfo=tz),
-            "mfr_updated_at": lambda x: seeder.faker.date_time(tzinfo=tz),
-            "mfr_user_id": lambda x: np.random.choice(users),
-        },
-    )
-    seeder.execute()
+            mfr_user_id=np.random.choice(users),
+        )
 
     mfrs = Manufacturer.objects.all()
-    seeder.add_entity(
-        Manufacturer,
-        sub,
-        {
-            "mfr_main_id": lambda x: random.choice(mfrs).mfr_main_id,
-            "mfr_sub_id": lambda x: f"{random.randint(1, 99):0>2}",
-            "mfr_name": lambda x: "Test Factory " + seeder.faker.name(),
-            "mfr_location": lambda x: random.choice(
-                ["Taipei", "Tainan", "Hsinchu", "Taichung", "Banqiao"]
-            ),
-            "mfr_created_at": lambda x: seeder.faker.date_time(tzinfo=tz),
-            "mfr_updated_at": lambda x: seeder.faker.date_time(tzinfo=tz),
-            "mfr_user_id": lambda x: random.choice(users),
-        },
-    )
-    seeder.execute()
+    for _ in range(sub):
+        try:
+            Manufacturer.objects.create(
+                mfr_main_id=np.random.choice(mfrs).mfr_main_id,
+                mfr_sub_id=f"{np.random.random_integers(low=1, high=99):0>2}",
+                mfr_name="Test Factory " + seeder.faker.name(),
+                mfr_address=np.random.choice(
+                    ["Taipei", "Tainan", "Hsinchu", "Taichung", "Banqiao"], 1
+                )[0],
+                mfr_user_id=np.random.choice(users),
+            )
+        except:
+            pass

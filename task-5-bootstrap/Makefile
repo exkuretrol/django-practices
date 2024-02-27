@@ -13,8 +13,13 @@ run:
 test:
 	@python manage.py test
 
+makemigrations:
+	@python manage.py makemigrations accounts
+	@python manage.py makemigrations manufacturer
+	@python manage.py makemigrations prod 
+	@python manage.py makemigrations order
+
 migrate:
-	@python manage.py makemigrations
 	@python manage.py migrate
 
 collectstatic:
@@ -35,3 +40,4 @@ clean:
 	@find . -type d -name "__pycache__" -execdir rm -rf {} \;
 	@find . -type f -name "db.sqlite3" -execdir rm -rf {} \;
 	@find ./media -type f -execdir rm -rf {} \;
+

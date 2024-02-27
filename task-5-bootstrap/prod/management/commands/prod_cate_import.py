@@ -36,18 +36,18 @@ def parse_csv(filename: str):
             for i, line in enumerate(lines):
                 if i == 0:
                     continue
-                cate_id, cate_type, cate_name, parent_cate_id, _ = line.split(",")
+                cate_no, cate_type, cate_name, parent_cate_no, _ = line.split(",")
                 if cate_type == "T":
                     c["Team"] += 1
                     continue
-                if (parent_cate_id != "00" + cate_id[:4]) & (cate_type != "1"):
+                if (parent_cate_no != "00" + cate_no[:4]) & (cate_type != "1"):
                     print(
-                        f"id: {cate_id}, name: {cate_name}, parent_id: {parent_cate_id}"
+                        f"id: {cate_no}, name: {cate_name}, parent_id: {parent_cate_no}"
                     )
                     c["Invalid"] += 1
                     continue
                 cate = ProdCategory.objects.create(
-                    cate_id=cate_id, cate_name=cate_name, cate_type=int(cate_type)
+                    cate_no=cate_no, cate_name=cate_name, cate_type=int(cate_type)
                 )
                 cate.save()
 
