@@ -1,7 +1,7 @@
 {% extends "_base.html" %}
 {% block content %}
     <h2>個人檔案</h2>
-    <div class="row">
+    <div class="row row-cols-2">
         <div class="col">
             <label for="username"
                    class="label-normal text-xl border-r-4 border-solid border-slate-300 mr-4">使用者名稱</label>
@@ -9,8 +9,6 @@
         <div class="col">
             <p id="username">{{ user.username }}</p>
         </div>
-    </div>
-    <div class="row">
         <div class="col">
             <label for="email"
                    class="label-normal text-xl border-r-4 border-solid border-slate-300 mr-4">電子信箱</label>
@@ -18,9 +16,7 @@
         <div class="col">
             <p id="email">{{ user.email }}</p>
         </div>
-    </div>
-    {% if user.is_staff %}
-        <div class="row">
+        {% if user.is_staff %}
             <div class="col">
                 <label for="email"
                        class="label-normal text-xl border-r-4 border-solid border-slate-300 mr-4">為管理員</label>
@@ -28,10 +24,8 @@
             <div class="col">
                 <p id="is_staff">✅</p>
             </div>
-        </div>
-    {% endif %}
-    {% if user.is_superuser %}
-        <div class="row">
+        {% endif %}
+        {% if user.is_superuser %}
             <div class="col">
                 <label for="email"
                        class="label-normal text-xl border-r-4 border-solid border-slate-300 mr-4">為超級使用者</label>
@@ -39,9 +33,9 @@
             <div class="col">
                 <p id="is_superuser">✅</p>
             </div>
-        </div>
-    {% endif %}
-    <p class="border-bottom "></p>
+        {% endif %}
+    </div>
+    <p class="border-bottom"></p>
     <h2>廠商</h2>
     <ul>
         {% for mfr in mfrs %}

@@ -6,6 +6,7 @@
     ],
     "settings": {
         "[html][django-html][handlebars][hbs][mustache][jinja][jinja-html][nj][njk][nunjucks][twig]": {
+            "editor.formatOnSave": true,
             "editor.defaultFormatter": "monosans.djlint",
             "workbench.editor.languageDetection": false
         },

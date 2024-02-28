@@ -20,15 +20,25 @@ class WarehouseStorageFeeRecipientChoices(models.IntegerChoices):
 class Order(models.Model):
     od_no = models.BigIntegerField(primary_key=True, verbose_name="訂單編號")
     od_prod_no = models.ForeignKey(
-        to=Prod, verbose_name=_("商品編號"), on_delete=models.SET_NULL, null=True
+        to=Prod, verbose_name=_("訂單商品編號"), on_delete=models.SET_NULL, null=True
     )
     od_mfr_id = models.ForeignKey(
-        to=Manufacturer, verbose_name=_("廠商 ID"), on_delete=models.SET_NULL, null=True
+        to=Manufacturer,
+        verbose_name=_("訂單廠商 ID"),
+        on_delete=models.SET_NULL,
+        null=True,
+    )
+    od_quantity = models.PositiveBigIntegerField(
+        verbose_name=_("訂單訂貨數量"), default=0
     )
     od_date = models.DateTimeField(verbose_name=_("訂單下訂日期"), auto_now_add=True)
-    od_except_arrival_date = models.DateTimeField(verbose_name=_("預期到貨日期"))
-    od_has_contact_form = models.BooleanField(verbose_name=_("有聯絡單"), default=False)
-    od_contact_form_no = models.BigIntegerField(verbose_name=_("聯絡單編號"), default=0)
+    od_except_arrival_date = models.DateTimeField(verbose_name=_("定單預期到貨日期"))
+    od_has_contact_form = models.BooleanField(
+        verbose_name=_("訂單有聯絡單"), default=False
+    )
+    od_contact_form_no = models.BigIntegerField(
+        verbose_name=_("訂單聯絡單編號"), default=0
+    )
     od_status = models.PositiveSmallIntegerField(
         verbose_name=_("訂單狀態"),
         choices=StatusChoices,

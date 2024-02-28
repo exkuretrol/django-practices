@@ -1,7 +1,12 @@
 {% extends "_base.html" %}
 {% block content %}
-<div class="d-flex flex-row gap-2">
-    <a href="{% url 'prod_list' %}" class="btn btn-info">顯示全部產品</a>
-    <a href="{% url 'prod_update_multiple' %}" class="btn btn-info">更新多個產品</a>
-</div>
+    <h1>產品</h1>
+    <div class="d-flex flex-column gap-2 mb-4">
+        <a href="{% url 'prod_list' %}" class="btn btn-info">顯示全部產品</a>
+        <a href="{% url 'prod_update_multiple' %}" class="btn btn-info">更新多個產品</a>
+    </div>
+    <h1>訂單</h1>
+    <div class="d-flex flex-column gap-2 mb-4">
+        <a href="{% url 'order_list' %}" class="btn btn-info">顯示全部訂單</a>
+    </div>
 {% endblock content %}
