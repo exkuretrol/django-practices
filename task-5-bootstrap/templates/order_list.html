@@ -5,3 +5,6 @@
     {% crispy filter.form filter.form.helper %}
     {% render_table table %}
 {% endblock content %}
+{% block head %}
+    {% include "order_list_head.html" %}
+{% endblock head %}

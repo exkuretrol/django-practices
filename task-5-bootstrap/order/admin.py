@@ -1,11 +1,10 @@
 from django.contrib import admin
-from order.models import Order
+from order.models import Order, OrderProd
 
 
 class OrderAdmin(admin.ModelAdmin):
     list_display = [
         "od_no",
-        "od_prod_no",
         "od_mfr_id",
         "od_date",
         "od_except_arrival_date",
@@ -15,4 +14,14 @@ class OrderAdmin(admin.ModelAdmin):
     ]
 
 
+class OrderProdAdmin(admin.ModelAdmin):
+    list_display = [
+        "op_id",
+        "op_od_no",
+        "op_prod_no",
+        "op_quantity",
+    ]
+
+
 admin.site.register(Order, OrderAdmin)
+admin.site.register(OrderProd, OrderProdAdmin)

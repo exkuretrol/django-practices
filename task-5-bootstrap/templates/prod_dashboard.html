@@ -2,9 +2,9 @@
 {% load django_tables2 %}
 {% block content %}
     {% for table in tables %}
-    <div class="container">{% render_table table %}</div>
+        <div class="container">{% render_table table %}</div>
     {% endfor %}
 {% endblock content %}
 {% block head %}
-{% include "prod_dashboard_head.html" %}
+    {% include "prod_dashboard_head.html" %}
 {% endblock head %}

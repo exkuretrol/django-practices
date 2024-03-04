@@ -1,5 +1,5 @@
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Submit
+from crispy_forms.layout import BaseInput, Button, Submit
 from django_filters.views import FilterView
 from django_tables2 import SingleTableMixin
 
@@ -17,6 +17,11 @@ class OrderList(SingleTableMixin, FilterView):
         form = context["filter"].form
         form.helper = FormHelper()
         form.helper.add_input(Submit("submit", "篩選", css_class="btn btn-primary"))
+        form.helper.add_input(
+            Button(
+                "clear", "清除", css_class="btn btn-secondary", onclick="clearFilter()"
+            )
+        )
         form.helper.form_class = "row row-cols-4"
         form.helper.form_method = "get"
         form.helper.form_id = "order-filter-form"

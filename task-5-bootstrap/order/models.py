@@ -19,17 +19,11 @@ class WarehouseStorageFeeRecipientChoices(models.IntegerChoices):
 
 class Order(models.Model):
     od_no = models.BigIntegerField(primary_key=True, verbose_name="訂單編號")
-    od_prod_no = models.ForeignKey(
-        to=Prod, verbose_name=_("訂單商品編號"), on_delete=models.SET_NULL, null=True
-    )
     od_mfr_id = models.ForeignKey(
         to=Manufacturer,
         verbose_name=_("訂單廠商 ID"),
         on_delete=models.SET_NULL,
         null=True,
-    )
-    od_quantity = models.PositiveBigIntegerField(
-        verbose_name=_("訂單訂貨數量"), default=0
     )
     od_date = models.DateTimeField(verbose_name=_("訂單下訂日期"), auto_now_add=True)
     od_except_arrival_date = models.DateTimeField(verbose_name=_("定單預期到貨日期"))
@@ -50,3 +44,17 @@ class Order(models.Model):
         default=WarehouseStorageFeeRecipientChoices.NoCharge,
     )
     od_notes = models.TextField(verbose_name=_("訂單備註"), null=True)
+
+
+class OrderProd(models.Model):
+    op_id = models.BigAutoField(primary_key=True, verbose_name="訂單商品 ID")
+    op_od_no = models.ForeignKey(
+        to=Order,
+        verbose_name="訂單編號",
+        on_delete=models.CASCADE,
+        related_name="orderprod_set",
+    )
+    op_prod_no = models.ForeignKey(
+        to=Prod, verbose_name="訂單商品編號", on_delete=models.SET_NULL, null=True
+    )
+    op_quantity = models.PositiveBigIntegerField(verbose_name="訂單商品數量", default=0)
