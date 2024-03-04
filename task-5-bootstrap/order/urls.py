@@ -1,11 +1,12 @@
-from django.urls import path, reverse
+from django.urls import path
 
-from .views import OrderList
+from .views import OrderListView, OrderUpdateView
 
 urlpatterns = [
     path(
         "order/",
-        OrderList.as_view(),
+        OrderListView.as_view(),
         name="order_list",
-    )
+    ),
+    path("order/<int:pk>/update/", OrderUpdateView.as_view(), name="order_update"),
 ]

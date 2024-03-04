@@ -31,7 +31,12 @@ SECRET_KEY = env.str("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env.bool("DEBUG", default=False)
 
-ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
+ALLOWED_HOSTS = [
+    "localhost",
+    "127.0.0.1",
+    DEBUG and env.str("TUNNELMOLE_HOST", default=""),
+]
+CSRF_TRUSTED_ORIGINS = [DEBUG and "https://" + env.str("TUNNELMOLE_HOST", default="")]
 
 
 # Application definition
@@ -164,7 +169,6 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # DJANGO_TABLES2_TABLE_ATTRS = {
 #     "class": "table",
 # }
-# DJANGO_TABLES2_TEMPLATE = "django_tables2/custom_table.html"
 DJANGO_TABLES2_TEMPLATE = "django_tables2/custom_bootstrap5.html"
 
 INTERNAL_IPS = [

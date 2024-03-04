@@ -1,4 +1,5 @@
 import django_tables2 as tables
+from django.urls import reverse
 from django.utils.html import format_html
 
 from .models import Order
@@ -50,8 +51,10 @@ class OrderTable(tables.Table):
             f"<input type='checkbox' class='position-absolute top-50 start-50 translate-middle w-75 h-75' />"
         )
 
-    def render_od_func(self, value):
-        return format_html(f"<a href='#' class='btn btn-info'>編輯訂單</a>")
+    def render_od_func(self, record):
+        return format_html(
+            f"<a href='{reverse(viewname="order_update", kwargs={"pk": record.pk})}' class='btn btn-info'>編輯訂單</a>"
+        )
 
     def render_od_date(self, value):
 
