@@ -11,10 +11,13 @@ def prod_filter(queryset, name, value):
             filtered_queryset = filtered_queryset.exclude(od_no=order.od_no)
             continue
         if name == "prod_name":
-            for prod in order.orderprod_set.all():
-                if value not in prod.op_prod_no.prod_name:
-                    filtered_queryset = filtered_queryset.exclude(od_no=order.od_no)
-                    break
+            if (
+                order.orderprod_set.all()
+                .filter(op_prod_no__prod_name__icontains=value)
+                .count()
+                == 0
+            ):
+                filtered_queryset = filtered_queryset.exclude(od_no=order.od_no)
         elif name == "prod_no":
             if order.orderprod_set.all().filter(op_prod_no__prod_no=value).count() == 0:
                 filtered_queryset = filtered_queryset.exclude(od_no=order.od_no)
