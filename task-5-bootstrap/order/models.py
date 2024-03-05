@@ -27,7 +27,7 @@ class Order(models.Model):
         null=True,
     )
     od_date = models.DateTimeField(verbose_name=_("訂單下訂日期"), default=timezone.now)
-    od_except_arrival_date = models.DateTimeField(verbose_name=_("定單預期到貨日期"))
+    od_except_arrival_date = models.DateField(verbose_name=_("定單預期到貨日期"))
     od_has_contact_form = models.BooleanField(
         verbose_name=_("訂單有聯絡單"), default=False
     )

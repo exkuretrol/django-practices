@@ -1,12 +1,20 @@
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Button, Submit
+from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect
+from django.urls import reverse_lazy
 from django.views.generic import UpdateView
+from django.views.generic.edit import FormView
 from django_filters.views import FilterView
 from django_tables2 import SingleTableMixin
 
 from .filters import OrderFilter
-from .forms import OrderProdFormSet, OrderUpdateForm
+from .forms import (
+    OrderBeforeCreateForm,
+    OrderCreateForm,
+    OrderProdFormset,
+    OrderUpdateForm,
+)
 from .models import Order
 from .tables import OrderTable
 
@@ -82,10 +90,25 @@ class OrderUpdateView(OrderProdInline, UpdateView):
 
     def get_named_formsets(self):
         return {
-            "orderprod": OrderProdFormSet(
+            "orderprod": OrderProdFormset(
                 self.request.POST or None,
                 self.request.FILES or None,
                 instance=self.object,
                 prefix="orderprod",
             )
         }
+
+
+class OrderBeforeCreateView(FormView):
+    form_class = OrderBeforeCreateForm
+    template_name = "order_create_clipboard_before_create.html"
+
+    def get_success_url(self) -> str:
+        self.request.session["clipboard"] = self.request.POST["clipboard"]
+        return reverse_lazy("order_create")
+
+
+class OrderCreateView(FormView):
+
+    form_class = OrderCreateForm
+    template_name = "order_create.html"
