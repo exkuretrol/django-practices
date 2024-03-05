@@ -1,0 +1,9 @@
+{% extends "_base.html" %}
+{% load crispy_forms_tags %}
+{% block content %}
+    <button id="generate" class="btn btn-info">產生訂單</button>
+    {% crispy form form.helper %}
+{% endblock content %}
+{% block head %}
+    {% include "order_create_clipboard_before_create_head.html" %}
+{% endblock head %}
