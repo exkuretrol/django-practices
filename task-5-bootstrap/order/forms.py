@@ -5,9 +5,10 @@ from io import StringIO
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit
 from django import forms
-from django.forms import formset_factory, inlineformset_factory
+from django.forms import inlineformset_factory, modelformset_factory
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
+from manufacturer.models import Manufacturer
 from prod.models import Prod
 
 from .models import Order, OrderProd
@@ -25,7 +26,7 @@ class OrderUpdateForm(forms.ModelForm):
         self.fields["od_date"].disabled = True
 
 
-class OrderProdsForm(forms.ModelForm):
+class OrderProdForm(forms.ModelForm):
     op_prod = forms.CharField(label="產品名稱", disabled=True, empty_value=())
 
     class Meta:
@@ -34,7 +35,8 @@ class OrderProdsForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
-        self.fields["op_prod"].initial = self.instance.op_prod_no.prod_name
+        if self.instance.op_prod_no:
+            self.fields["op_prod"].initial = self.instance.op_prod_no.prod_name
 
     field_order = ["op_prod", "op_quantity"]
 
@@ -42,7 +44,7 @@ class OrderProdsForm(forms.ModelForm):
 OrderProdFormset = inlineformset_factory(
     parent_model=Order,
     model=OrderProd,
-    form=OrderProdsForm,
+    form=OrderProdForm,
     can_delete=True,
     can_delete_extra=True,
     extra=0,
@@ -85,7 +87,7 @@ note: it should not contain the header row.
     )
     clipboard = forms.CharField(
         strip=False,
-        widget=forms.HiddenInput(attrs={"placeholder": clipblard_placeholder}),
+        widget=forms.Textarea(attrs={"placeholder": clipblard_placeholder}),
         validators=[validate_tsv],
     )
 
@@ -109,7 +111,8 @@ note: it should not contain the header row.
                     _("Product number should be an integer."), code="invalid_prod_no"
                 )
 
-            if not Prod.objects.filter(prod_no=prod_no).exists():
+            prod = Prod.objects.filter(prod_no=prod_no)
+            if not prod.exists():
                 raise forms.ValidationError(
                     _("Product number %(prod_no)s does not exist. Please check again."),
                     code="prod_no_not_exist",
@@ -139,9 +142,48 @@ note: it should not contain the header row.
                     code="duplicated_prod_no",
                     params={"prod_no": prod_no},
                 )
-            orders_to_be_updated.update({prod_no: prod_quantity})
+            orders_to_be_updated.update(
+                {
+                    prod_no: {
+                        "quantity": prod_quantity,
+                        "mfr_id": prod.first().prod_mfr_id.mfr_id,
+                    }
+                }
+            )
 
-        return orders_to_be_updated
+        grouped_orders = {}
+        # TODO: if same manufacturer has more than five products, it should be split into multiple orders
+        for prod_no, order_info in orders_to_be_updated.items():
+            mfr_id = order_info["mfr_id"]
+            if mfr_id not in grouped_orders:
+                grouped_orders[mfr_id] = list()
+            grouped_orders[mfr_id].append(
+                {"prod_no": prod_no, "quantity": order_info["quantity"]}
+            )
+        return grouped_orders
+
+    def clean(self):
+        return super().clean()
+
+
+def get_current_order_no():
+    today = timezone.now().date()
+    today_str = today.strftime("%Y%m%d")
+
+    # Month + 30
+    # YYYYmmdd
+    # 0123^
+    today_str_list = list(today_str)
+    today_str_list[4] = str(int(today_str[4]) + 3)
+    today_str = "".join(today_str_list)
+
+    # TODO: 以 od_data range 查詢
+    orders = Order.objects.filter(od_date__exact=today)
+    if orders.exists():
+        order_no = orders.last().od_no
+    else:
+        order_no = int(today_str + "00000")
+    return order_no
 
 
 class OrderCreateForm(forms.ModelForm):
@@ -149,34 +191,14 @@ class OrderCreateForm(forms.ModelForm):
         model = Order
         fields = "__all__"
 
-    def get_current_order_no(self):
-        today_str = timezone.now().strftime("%Y%m%d")
-
-        # Month + 30
-        # YYYYmmdd
-        # 0123^
-        today_str = str(int(today_str[4]) + 3)
-
-        lb = int(today_str + "00000")
-        hb = int(today_str + "99999")
-        orders = Order.objects.filter(od_no__range=(lb, hb))
-        if orders.exists():
-            order_no = orders.last().od_no
-        else:
-            order_no = int(lb)
-        return order_no
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        order_no = self.get_current_order_no() + 1
-        self.fields["od_no"].disabled = True
+        # self.fields["od_no"].disabled = True
         self.fields["od_no"].widget = forms.TextInput()
-        self.fields["od_no"].initial = order_no
         self.fields["od_except_arrival_date"].initial = (
-            timezone.now().date() + datetime.timedelta(days=7)
-        )
-        self.fields["od_date"].disabled = True
+            timezone.now() + datetime.timedelta(days=7)
+        ).date()
         self.fields["od_status"].disabled = True
 
 
-OrderFormset = formset_factory(OrderCreateForm)
+OrderFormset = modelformset_factory(Order, OrderCreateForm, extra=3)

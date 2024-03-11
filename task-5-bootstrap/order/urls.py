@@ -3,6 +3,7 @@ from django.views.generic import TemplateView
 
 from .views import (
     OrderBeforeCreateView,
+    OrderCreateMultipleView,
     OrderCreateView,
     OrderListView,
     OrderUpdateView,
@@ -19,6 +20,15 @@ urlpatterns = [
         OrderBeforeCreateView.as_view(),
         name="order_create_clipboard",
     ),
-    path("order/create/", OrderCreateView.as_view(), name="order_create"),
+    path(
+        "order/create/",
+        OrderCreateView.as_view(),
+        name="order_create",
+    ),
+    path(
+        "order/create_multiple/",
+        OrderCreateMultipleView.as_view(),
+        name="order_create_multiple",
+    ),
     path("order/<int:pk>/update/", OrderUpdateView.as_view(), name="order_update"),
 ]

@@ -1,9 +1,11 @@
 from django.contrib import admin
 
+from .forms import ProdCommonInfo
 from .models import Prod, ProdCategory
 
 
 class ProdAdmin(admin.ModelAdmin):
+    form = ProdCommonInfo
     list_display = [
         "prod_no",
         "prod_name",

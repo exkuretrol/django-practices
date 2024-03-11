@@ -1,8 +1,12 @@
 from re import findall
+from typing import Any, Mapping
 
 from django import forms
 from django.core.exceptions import ValidationError
+from django.core.files.base import File
 from django.core.validators import RegexValidator
+from django.db.models.base import Model
+from django.forms.utils import ErrorList
 from django.forms.widgets import ClearableFileInput
 
 from .models import Prod
@@ -34,27 +38,23 @@ class QueryForm(forms.Form):
     )
 
 
+class CustomFileInput(ClearableFileInput):
+    template_name = "custom_file_input.html"
+
+
 class ProdCommonInfo(forms.ModelForm):
     class Meta:
         model = Prod
         fields = "__all__"
         widgets = {
-            "prod_name": forms.TextInput(attrs={"class": "input-normal"}),
-            "prod_desc": forms.Textarea(attrs={"class": "input-form"}),
-            "prod_type": forms.Select(attrs={"class": "input-normal"}),
-            "prod_img": forms.FileInput(attrs={"class": "input-file"}),
-            "prod_quantity": forms.TextInput(attrs={"class": "input-normal"}),
-            "prod_status": forms.Select(attrs={"class": "input-normal"}),
-            "prod_mfr_id": forms.Select(attrs={"class": "input-normal"}),
+            "prod_desc": forms.Textarea,
+            "prod_img": CustomFileInput,
         }
-        labels = {
-            "prod_name": "Name",
-            "prod_desc": "Description",
-            "prod_type": "Type",
-            "prod_img": "Image",
-            "prod_quantity": "Quantity",
-            "prod_status": "Status",
-        }
+
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+        self.fields["prod_img"].required = False
+        self.fields["prod_desc"].required = False
 
 
 class ProdCreateForm(forms.ModelForm):
@@ -65,10 +65,6 @@ class ProdCreateForm(forms.ModelForm):
 
     class Meta(ProdCommonInfo.Meta):
         pass
-
-
-class CustomFileInput(ClearableFileInput):
-    template_name = "custom_file_input.html"
 
 
 class ProdUpdateForm(ProdCreateForm):
