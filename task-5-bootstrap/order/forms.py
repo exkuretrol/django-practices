@@ -177,8 +177,7 @@ def get_current_order_no():
     today_str_list[4] = str(int(today_str[4]) + 3)
     today_str = "".join(today_str_list)
 
-    # TODO: 以 od_data range 查詢
-    orders = Order.objects.filter(od_date__exact=today)
+    orders = Order.objects.filter(od_date__date__exact=today)
     if orders.exists():
         order_no = orders.last().od_no
     else:
