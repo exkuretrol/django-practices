@@ -8,7 +8,7 @@
             "name": "Python Debugger: Django",
             "type": "debugpy",
             "request": "launch",
-            "program": "${workspaceFolder}/task-5-bootstrap/manage.py",
+            "program": "${workspaceFolder}/task-6-formset/manage.py",
             "args": [
                 "runserver"
             ],

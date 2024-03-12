@@ -1,18 +1,22 @@
 {% extends "_base.html" %}
 {% load crispy_forms_tags %}
+{% load order_tags %}
 {% block head %}
     {% include "order_create_multiple_head.html" %}
 {% endblock head %}
 {% block content %}
     <form action="" method="post">
         {% csrf_token %}
-        {{ formset.management_form }}
-        {% for form in formset %}{{ form | crispy }}{% endfor %}
-        {% comment %} {% for form, prod in forms %}
-            <h1>{{ forloop.counter }}</h1>
-            {{ form|crispy }}
-            {{ prod|crispy }}
-        {% endfor %} {% endcomment %}
+        {% with order_formset=named_formset.order_formset %}
+            {{ order_formset.management_form }}
+            {% for form in order_formset %}
+                {{ form|crispy }}
+                {% with prods_formset=named_formset.prods_formset_list|index:forloop.counter0 %}
+                    {{ prods_formset.management_form }}
+                    {% for prod_form in prods_formset %}{{ prod_form|crispy }}{% endfor %}
+                {% endwith %}
+            {% endfor %}
+        {% endwith %}
         <input type="submit" value="建立">
     </form>
 {% endblock content %}

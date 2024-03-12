@@ -142,61 +142,54 @@ class OrderCreateMultipleView(CreateView):
     def get_success_url(self) -> str:
         return reverse_lazy("order_create_clipboard")
 
-    def get_formset(self):
-        if self.request.method == "GET":
-            clipboard = self.request.session.pop("clipboard", None)
-            OrderDynamicFormset = modelformset_factory(
-                Order, OrderCreateForm, extra=len(clipboard.items())
+    def get_named_formset(self):
+        clipboard = self.request.session.pop("clipboard", None)
+        OrderDynamicFormset = modelformset_factory(
+            Order, OrderCreateForm, extra=len(clipboard.items())
+        )
+        initial = []
+        prods_formset_list = []
+
+        for i, (mfr_id, prods) in enumerate(clipboard.items()):
+            OrderProdDynamicFormset = modelformset_factory(
+                OrderProd, OrderProdForm, extra=len(prods)
             )
-            initial = []
-            for i, (mfr_id, prods) in enumerate(clipboard.items()):
-                initial.append(
-                    {
-                        "od_no": get_current_order_no() + i + 1,
-                        "od_mfr_id": Manufacturer.objects.get(mfr_id=mfr_id),
-                        "od_notes": prods,
-                    }
+            initial.append(
+                {
+                    "od_no": get_current_order_no() + i + 1,
+                    "od_mfr_id": Manufacturer.objects.get(mfr_id=mfr_id),
+                    "od_notes": prods,
+                }
+            )
+
+            prods_formset_list.append(
+                OrderProdDynamicFormset(
+                    initial=[
+                        {
+                            "op_prod": Prod.objects.get(pk=int(prod["prod_no"])),
+                            "op_quantity": prod["quantity"],
+                        }
+                        for prod in prods
+                    ],
+                    queryset=OrderProd.objects.none(),
+                    prefix=f"orderprod_{i}",
                 )
-            return OrderDynamicFormset(
+            )
+        return {
+            "order_formset": OrderDynamicFormset(
                 initial=initial,
                 queryset=Order.objects.none(),
                 prefix="order",
-            )
-        elif self.request.method == "POST":
-            return OrderFormset(
-                data=self.request.POST,
-                prefix="order",
-            )
+            ),
+            "prods_formset_list": prods_formset_list,
+        }
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        formset = self.get_formset()
-        context["formset"] = formset
+        context.pop("form")
+        if self.request.method == "GET":
+            context["named_formset"] = self.get_named_formset()
         return context
-        # prods_formset = []
-
-        # prods_formset.append(
-        #     OrderProdFormset(
-        #         initial=[
-        #             {
-        #                 "op_prod": Prod.objects.get(pk=int(prod["prod_no"])),
-        #                 "op_quantity": prod["quantity"],
-        #             }
-        #             for prod in prods
-        #         ],
-        #         queryset=OrderProd.objects.none(),
-        #         prefix=f"orderprod_{i}",
-        #     )
-        # )
-
-        # context["forms"] = zip(
-        #     OrderFormset(
-        #         initial=initial,
-        #         queryset=Order.objects.none(),
-        #         prefix="order",
-        #     ),
-        #     prods_formset,
-        # )
 
     def form_valid(self, formset):
         instances = formset.save(commit=False)
@@ -216,8 +209,11 @@ class OrderCreateMultipleView(CreateView):
 
         return super().get(request, *args, **kwargs)
 
-    def post(self, request: HttpRequest, *args, **kwargs):
+    def post(self, request, *args, **kwargs):
+        self.object = None
         order_formset = OrderFormset(data=self.request.POST, prefix="order")
+        prods_formset = OrderProdFormset(data=self.request.POST, prefix="orderprod_1")
+
         if order_formset.is_valid():
             return self.form_valid(order_formset)
         else:
