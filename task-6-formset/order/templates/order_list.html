@@ -1,0 +1,25 @@
+{% extends "_base.html" %}
+{% load crispy_forms_tags %}
+{% load django_tables2 %}
+{% block content %}
+    {% crispy filter.form filter.form.helper %}
+    {% render_table table %}
+    {% comment %} <div class="modal fade" id="order_edit" tabindex="-1" aria-labelledby="order_edit_label" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content ">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="order_edit_label ">Modal title</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">...</div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary">Save changes</button>
+                </div>
+            </div>
+        </div>
+    </div> {% endcomment %}
+{% endblock content %}
+{% block head %}
+    {% include "order_list_head.html" %}
+{% endblock head %}

@@ -1,0 +1,18 @@
+{% extends "_base.html" %}
+{% load crispy_forms_tags %}
+{% block head %}
+    {% include "order_create_multiple_head.html" %}
+{% endblock head %}
+{% block content %}
+    <form action="" method="post">
+        {% csrf_token %}
+        {{ formset.management_form }}
+        {% for form in formset %}{{ form | crispy }}{% endfor %}
+        {% comment %} {% for form, prod in forms %}
+            <h1>{{ forloop.counter }}</h1>
+            {{ form|crispy }}
+            {{ prod|crispy }}
+        {% endfor %} {% endcomment %}
+        <input type="submit" value="建立">
+    </form>
+{% endblock content %}
