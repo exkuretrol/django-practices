@@ -192,12 +192,28 @@ class OrderCreateForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # self.fields["od_no"].disabled = True
-        self.fields["od_no"].widget = forms.TextInput()
         self.fields["od_except_arrival_date"].initial = (
             timezone.now() + datetime.timedelta(days=7)
         ).date()
         self.fields["od_status"].disabled = True
+        for name, field in self.fields.items():
+            if name in ["od_mfr_id", "od_no", "od_date"]:
+                field.widget.attrs.update(
+                    {"class": "pe-none", "tabindex": "-1", "aria-disabled": "true"}
+                )
+            elif name == "od_except_arrival_date":
+                field.widget = forms.DateInput(
+                    format=("%Y-%m-%d"),
+                )
+
+    def clean(self):
+        data = self.cleaned_data
+        if data["od_except_arrival_date"] < data["od_date"].date():
+            raise forms.ValidationError(
+                _("Except arrival date should be later than order date."),
+                code="invalid_except_arrival_date",
+            )
+        return super().clean()
 
 
 OrderFormset = modelformset_factory(Order, OrderCreateForm, extra=3)

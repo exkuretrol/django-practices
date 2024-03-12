@@ -142,9 +142,6 @@ class OrderCreateMultipleView(CreateView):
     def get_success_url(self) -> str:
         return reverse_lazy("order_create_clipboard")
 
-    def get_queryset(self):
-        return None
-
     def get_formset(self):
         if self.request.method == "GET":
             clipboard = self.request.session.pop("clipboard", None)
@@ -165,7 +162,7 @@ class OrderCreateMultipleView(CreateView):
                 queryset=Order.objects.none(),
                 prefix="order",
             )
-        else:
+        elif self.request.method == "POST":
             return OrderFormset(
                 data=self.request.POST,
                 prefix="order",
@@ -173,7 +170,8 @@ class OrderCreateMultipleView(CreateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["formset"] = self.get_formset()
+        formset = self.get_formset()
+        context["formset"] = formset
         return context
         # prods_formset = []
 
@@ -211,6 +209,12 @@ class OrderCreateMultipleView(CreateView):
         for form in formset:
             print(form.errors)
         return super().form_invalid(formset)
+
+    def get(self, request, *args, **kwargs):
+        if request.session.get("clipboard", None) is None:
+            return redirect("order_create_clipboard")
+
+        return super().get(request, *args, **kwargs)
 
     def post(self, request: HttpRequest, *args, **kwargs):
         order_formset = OrderFormset(data=self.request.POST, prefix="order")
