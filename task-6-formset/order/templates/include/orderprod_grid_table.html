@@ -13,7 +13,9 @@
         {% include "base_inputs/input_field.html" with field=form.op_quantity %}
     </div>
     {% include "include/non_field_errors.html" with form=form %}
-    <button type="button"
-            class="btn btn-danger btn-delete w-25"
-            prefix="{{ prefix }}">{% translate "刪除" %}</button>
+    {% translate "刪除" as delete_text %}
+    {{ form.DELETE|add_class:"d-none delete-checkbox" }}
+    <input type="button"
+           value='{% translate "刪除" %}'
+           class="btn btn-danger btn-delete">
 </div>

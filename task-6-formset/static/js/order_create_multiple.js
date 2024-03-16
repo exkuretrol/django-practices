@@ -14,7 +14,8 @@ $(function () {
             event.preventDefault();
             let prefix = "#" + $(this).attr("prefix") + "-TOTAL_FORMS";
             $(prefix).val(parseInt($(prefix).val()) - 1);
-            $(this).parent().remove();
+            $(this).parent().find(".delete-checkbox").prop("checked", true);
+            $(this).parent().addClass("d-none");
         });
     });
 });

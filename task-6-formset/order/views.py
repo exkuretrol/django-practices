@@ -150,7 +150,7 @@ class OrderCreateMultipleView(CreateView):
 
         for i, (mfr_id, prods) in enumerate(clipboard.items()):
             OrderProdDynamicFormset = modelformset_factory(
-                OrderProd, OrderProdCreateForm, extra=len(prods)
+                OrderProd, OrderProdCreateForm, extra=len(prods), can_delete=True
             )
             od_no = get_current_order_no() + i + 1
             initial.append(
@@ -235,6 +235,8 @@ class OrderCreateMultipleView(CreateView):
         prods = formset.save(commit=False)
         for prod in prods:
             prod.save()
+        for prod in formset.deleted_objects:
+            prod.delete()
 
     def get(self, request, *args, **kwargs):
         if request.session.get("clipboard", None) is None:

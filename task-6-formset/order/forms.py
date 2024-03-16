@@ -75,8 +75,8 @@ OrderProdUpdateFormset = inlineformset_factory(
 OrderProdCreateFormset = modelformset_factory(
     model=OrderProd,
     form=OrderProdCreateForm,
-    can_delete=False,
-    can_delete_extra=False,
+    can_delete=True,
+    can_delete_extra=True,
     extra=0,
 )
 
