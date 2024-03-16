@@ -1,0 +1,4 @@
+{% load widget_tweaks %}
+{% with placeholder_attr="placeholder:"|add:field.label %}
+    {{ field|add_class:"form-control"|attr:placeholder_attr }}
+{% endwith %}

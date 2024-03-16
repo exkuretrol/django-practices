@@ -1,12 +1,15 @@
+import re
+from typing import List
+
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Button, Submit
-from django.forms import inlineformset_factory, modelformset_factory
-from django.http import HttpRequest
+from django.forms import modelformset_factory
+from django.forms.models import BaseModelFormSet
 from django.http.response import HttpResponse as HttpResponse
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.utils.translation import gettext as _
-from django.views.generic import TemplateView, UpdateView
+from django.views.generic import UpdateView
 from django.views.generic.edit import CreateView, FormView
 from django_filters.views import FilterView
 from django_tables2 import SingleTableMixin
@@ -18,8 +21,9 @@ from .forms import (
     OrderBeforeCreateForm,
     OrderCreateForm,
     OrderFormset,
-    OrderProdForm,
-    OrderProdFormset,
+    OrderProdCreateForm,
+    OrderProdCreateFormset,
+    OrderProdUpdateFormset,
     OrderUpdateForm,
     get_current_order_no,
 )
@@ -71,12 +75,6 @@ class OrderProdInline:
 
     def formset_orderprod_valid(self, formset):
         prods = formset.save(commit=False)
-        # for form in formset:
-        #     if form.instance.op_quantity <= 0:
-        #         form.add_error(
-        #             "op_quantity",
-        #             "訂貨數量必須大於 0",
-        #         )
         for prod in formset.deleted_objects:
             prod.delete()
         for prod in prods:
@@ -98,7 +96,7 @@ class OrderUpdateView(OrderProdInline, UpdateView):
 
     def get_named_formsets(self):
         return {
-            "orderprod": OrderProdFormset(
+            "orderprod": OrderProdUpdateFormset(
                 self.request.POST or None,
                 self.request.FILES or None,
                 instance=self.object,
@@ -152,11 +150,12 @@ class OrderCreateMultipleView(CreateView):
 
         for i, (mfr_id, prods) in enumerate(clipboard.items()):
             OrderProdDynamicFormset = modelformset_factory(
-                OrderProd, OrderProdForm, extra=len(prods)
+                OrderProd, OrderProdCreateForm, extra=len(prods)
             )
+            od_no = get_current_order_no() + i + 1
             initial.append(
                 {
-                    "od_no": get_current_order_no() + i + 1,
+                    "od_no": od_no,
                     "od_mfr_id": Manufacturer.objects.get(mfr_id=mfr_id),
                     "od_notes": prods,
                 }
@@ -166,8 +165,12 @@ class OrderCreateMultipleView(CreateView):
                 OrderProdDynamicFormset(
                     initial=[
                         {
-                            "op_prod": Prod.objects.get(pk=int(prod["prod_no"])),
+                            "op_prod": Prod.objects.get(
+                                pk=int(prod["prod_no"])
+                            ).prod_name,
+                            "op_prod_no": prod["prod_no"],
                             "op_quantity": prod["quantity"],
+                            "op_od_no": od_no,
                         }
                         for prod in prods
                     ],
@@ -191,17 +194,47 @@ class OrderCreateMultipleView(CreateView):
             context["named_formset"] = self.get_named_formset()
         return context
 
-    def form_valid(self, formset):
-        instances = formset.save(commit=False)
-        for instance in instances:
-            instance.save()
+    def form_valid(
+        self,
+        order_formset: BaseModelFormSet,
+        orderprod_formset_list: List[BaseModelFormSet],
+    ):
+        orders = order_formset.save(commit=False)
+        for order in orders:
+            order.save()
+        if not all((_.is_valid() for _ in orderprod_formset_list)):
+            # TODO: remove orders when orderprod_formset_list is invalid
+            return self.render_to_response(
+                self.get_context_data(
+                    named_formset={
+                        "order_formset": order_formset,
+                        "prods_formset_list": orderprod_formset_list,
+                    }
+                )
+            )
+
+        for orderprod in orderprod_formset_list:
+            self.formset_orderprod_valid(orderprod)
 
         return redirect("order_create_clipboard")
 
-    def form_invalid(self, formset):
-        for form in formset:
-            print(form.errors)
-        return super().form_invalid(formset)
+    def form_invalid(self, order_formset, orderprod_formset_list):
+        print(order_formset.errors)
+        for orderprod_formset in orderprod_formset_list:
+            print(orderprod_formset.errors)
+        return self.render_to_response(
+            self.get_context_data(
+                named_formset={
+                    "order_formset": order_formset,
+                    "prods_formset_list": orderprod_formset_list,
+                }
+            )
+        )
+
+    def formset_orderprod_valid(self, formset):
+        prods = formset.save(commit=False)
+        for prod in prods:
+            prod.save()
 
     def get(self, request, *args, **kwargs):
         if request.session.get("clipboard", None) is None:
@@ -212,9 +245,21 @@ class OrderCreateMultipleView(CreateView):
     def post(self, request, *args, **kwargs):
         self.object = None
         order_formset = OrderFormset(data=self.request.POST, prefix="order")
-        prods_formset = OrderProdFormset(data=self.request.POST, prefix="orderprod_1")
+
+        orderprod_formset_list = []
+        orderprod_prefix = set(
+            [
+                "orderprod_" + re.search(r"\d+", k).group()
+                for k in request.POST.keys()
+                if k.startswith("orderprod")
+            ]
+        )
+        for prefix in orderprod_prefix:
+            orderprod_formset_list.append(
+                OrderProdCreateFormset(data=self.request.POST, prefix=prefix)
+            )
 
         if order_formset.is_valid():
-            return self.form_valid(order_formset)
+            return self.form_valid(order_formset, orderprod_formset_list)
         else:
-            return self.form_invalid(order_formset)
+            return self.form_invalid(order_formset, orderprod_formset_list)

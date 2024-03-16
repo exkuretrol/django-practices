@@ -1,7 +1,7 @@
 $(function () {
     document.getElementById("generate").addEventListener("click", function () {
         navigator.clipboard
-            .readText()
+            .read()
             .then((text) => {
                 console.log("Pasted content: ", text);
                 let input_clipboard = $("#id_clipboard");

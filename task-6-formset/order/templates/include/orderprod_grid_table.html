@@ -1,0 +1,19 @@
+{% load widget_tweaks %}
+{% load i18n %}
+<div class="gap-3 d-flex flex-row mb-3">
+    {% for field in form %}
+        {% if field.is_hidden %}{{ field }}{% endif %}
+    {% endfor %}
+    {% include "base_inputs/field_errors.html" with field=form.op_prod %}
+    {% include "base_inputs/field_errors.html" with field=form.quantity %}
+    <div class="input-group">
+        <span class="input-group-text">{{ form.op_prod.label }}</span>
+        {% include "base_inputs/input_field.html" with field=form.op_prod %}
+        <span class="input-group-text">{{ form.op_quantity.label }}</span>
+        {% include "base_inputs/input_field.html" with field=form.op_quantity %}
+    </div>
+    {% include "include/non_field_errors.html" with form=form %}
+    <button type="button"
+            class="btn btn-danger btn-delete w-25"
+            prefix="{{ prefix }}">{% translate "刪除" %}</button>
+</div>

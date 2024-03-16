@@ -26,7 +26,7 @@ class OrderUpdateForm(forms.ModelForm):
         self.fields["od_date"].disabled = True
 
 
-class OrderProdForm(forms.ModelForm):
+class OrderProdUpdateForm(forms.ModelForm):
     op_prod = forms.CharField(label="產品名稱", disabled=True, empty_value=())
 
     class Meta:
@@ -41,12 +41,42 @@ class OrderProdForm(forms.ModelForm):
     field_order = ["op_prod", "op_quantity"]
 
 
-OrderProdFormset = inlineformset_factory(
+class OrderProdCreateForm(forms.ModelForm):
+    op_prod = forms.CharField(
+        label="產品名稱", disabled=True, empty_value=(), required=False
+    )
+    op_prod_no = forms.CharField(widget=forms.HiddenInput())
+    op_od_no = forms.CharField(widget=forms.HiddenInput())
+
+    class Meta:
+        model = OrderProd
+        fields = ["op_od_no", "op_prod_no", "op_quantity"]
+
+    def clean_op_prod_no(self):
+        op_prod_no_object = Prod.objects.get(pk=self.cleaned_data["op_prod_no"])
+        return op_prod_no_object
+
+    def clean_op_od_no(self):
+        op_od_no_object = Order.objects.get(pk=self.cleaned_data["op_od_no"])
+        return op_od_no_object
+
+    field_order = ["op_prod", "op_quantity"]
+
+
+OrderProdUpdateFormset = inlineformset_factory(
     parent_model=Order,
     model=OrderProd,
-    form=OrderProdForm,
+    form=OrderProdUpdateForm,
     can_delete=True,
     can_delete_extra=True,
+    extra=0,
+)
+
+OrderProdCreateFormset = modelformset_factory(
+    model=OrderProd,
+    form=OrderProdCreateForm,
+    can_delete=False,
+    can_delete_extra=False,
     extra=0,
 )
 
@@ -167,7 +197,11 @@ note: it should not contain the header row.
 
 
 def get_current_order_no():
-    today = timezone.now().date()
+    # TODO: order and timezone.now().date() didn't not sync,
+    #       if user enter the order create page at 23:59:59,
+    #       and then create an order at 00:00:00 (the form failed, and the user re-enter the form),
+    #       the od_date will update, but the od_no didn't.
+    today = timezone.localdate()
     today_str = today.strftime("%Y%m%d")
 
     # Month + 30

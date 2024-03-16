@@ -1,5 +1,6 @@
 import django_tables2 as tables
 from django.urls import reverse
+from django.utils import timezone
 from django.utils.html import format_html
 
 from .models import Order
@@ -23,6 +24,10 @@ class OrderTable(tables.Table):
         verbose_name="預期到貨日", accessor="od_except_arrival_date"
     )
     od_has_contact_form = tables.Column(verbose_name="聯絡單")
+
+    def convert_datetime_to_local_datetime(self, dt: timezone.datetime):
+        tz = timezone.get_current_timezone()
+        return dt.astimezone(tz)
 
     def render_od_prod(self, record):
         ops = record.orderprod_set.all()
@@ -57,8 +62,8 @@ class OrderTable(tables.Table):
         )
 
     def render_od_date(self, value):
-
-        return format_html(f"{value.strftime('%Y-%m-%d')}")
+        date = self.convert_datetime_to_local_datetime(value).strftime('%Y-%m-%d')
+        return format_html(f"{date}")
 
     def render_od_except_arrival_date(self, value):
         return format_html(f"<input type='date' value={value} />")

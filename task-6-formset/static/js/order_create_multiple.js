@@ -8,4 +8,13 @@ $(function () {
             locale: { format: "YYYY-MM-DD" },
         });
     });
+
+    $(".btn-delete").each(function (_, e) {
+        $(e).on("click", function (event) {
+            event.preventDefault();
+            let prefix = "#" + $(this).attr("prefix") + "-TOTAL_FORMS";
+            $(prefix).val(parseInt($(prefix).val()) - 1);
+            $(this).parent().remove();
+        });
+    });
 });
