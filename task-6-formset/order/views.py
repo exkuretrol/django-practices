@@ -85,13 +85,6 @@ class OrderUpdateView(OrderProdInline, UpdateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["named_formset"] = self.get_named_formsets()
-        form = context["form"]
-        form.helper = FormHelper()
-        form.helper.add_input(Submit("submit", "篩選", css_class="btn btn-primary"))
-        form.helper.form_class = "row row-cols-4"
-        form.helper.form_method = "post"
-        form.helper.form_id = "order-update-form"
-
         return context
 
     def get_named_formsets(self):
@@ -153,11 +146,14 @@ class OrderCreateMultipleView(CreateView):
                 OrderProd, OrderProdCreateForm, extra=len(prods), can_delete=True
             )
             od_no = get_current_order_no() + i + 1
+            mfr = Manufacturer.objects.get(mfr_id=mfr_id)
             initial.append(
                 {
                     "od_no": od_no,
-                    "od_mfr_id": Manufacturer.objects.get(mfr_id=mfr_id),
-                    "od_notes": prods,
+                    "od_mfr_id": mfr.pk,
+                    "od_mfr_name": mfr.mfr_name,
+                    "od_mfr_full_id": mfr.mfr_full_id,
+                    "od_mfr_user_id_username": mfr.mfr_user_id.username,
                 }
             )
 
@@ -235,8 +231,6 @@ class OrderCreateMultipleView(CreateView):
         prods = formset.save(commit=False)
         for prod in prods:
             prod.save()
-        for prod in formset.deleted_objects:
-            prod.delete()
 
     def get(self, request, *args, **kwargs):
         if request.session.get("clipboard", None) is None:

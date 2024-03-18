@@ -1,13 +1,19 @@
 {% extends "_base.html" %}
 {% load crispy_forms_tags %}
+{% load i18n %}
 {% block content %}
     <form action="" method="post">
         {% csrf_token %}
-        {{ form | crispy }}
+        {% include "include/order_form.html" with form=form %}
         {% with named_formset.orderprod as formset %}
             {{ formset.management_form }}
-            {% for form in formset %}{{ form | crispy }}{% endfor %}
+            {% for form in formset %}
+                {% include "include/orderprod_grid_table.html" with form=form %}
+            {% endfor %}
         {% endwith %}
-        <input type="submit" value="更新">
+        <input type="submit" value={% translate "更新" %} class="btn btn-primary">
     </form>
 {% endblock content %}
+{% block head %}
+    {% include "order_update_head.html" %}
+{% endblock head %}

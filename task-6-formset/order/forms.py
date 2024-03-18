@@ -15,15 +15,57 @@ from .models import Order, OrderProd
 
 
 class OrderUpdateForm(forms.ModelForm):
+    od_mfr_full_id = forms.CharField(label="廠商編號", disabled=True, empty_value=())
+    od_mfr_name = forms.CharField(label="廠商名稱", disabled=True, empty_value=())
+    od_mfr_user_id_username = forms.CharField(
+        label="訂貨人員", disabled=True, empty_value=()
+    )
+
     class Meta:
         model = Order
-        fields = "__all__"
+        fields = [
+            "od_no",
+            "od_date",
+            "od_except_arrival_date",
+            "od_has_contact_form",
+            "od_contact_form_no",
+            "od_warehouse_storage_fee_recipient",
+            "od_notes",
+            "od_contact_form_notes",
+        ]
 
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.fields["od_no"].disabled = True
-        self.fields["od_mfr_id"].disabled = True
         self.fields["od_date"].disabled = True
+        self.fields["od_mfr_full_id"].initial = self.instance.od_mfr_id.mfr_full_id
+        self.fields["od_mfr_name"].initial = self.instance.od_mfr_id.mfr_name
+        self.fields["od_mfr_user_id_username"].initial = (
+            self.instance.od_mfr_id.mfr_user_id.username
+        )
+
+    field_order = [
+        "od_no",
+        "od_mfr_user_id_username",
+        "od_mfr_full_id",
+        "od_mfr_name",
+        "od_date",
+        "od_except_arrival_date",
+        "od_notes",
+        "od_has_contact_form",
+        "od_contact_form_no",
+        "od_warehouse_storage_fee_recipient",
+        "od_contact_form_notes",
+    ]
+
+    def clean(self):
+        data = self.cleaned_data
+        if data["od_except_arrival_date"] < data["od_date"].date():
+            raise forms.ValidationError(
+                _("Except arrival date should be later than order date."),
+                code="invalid_except_arrival_date",
+            )
+        return super().clean()
 
 
 class OrderProdUpdateForm(forms.ModelForm):
@@ -31,14 +73,14 @@ class OrderProdUpdateForm(forms.ModelForm):
 
     class Meta:
         model = OrderProd
-        fields = ["op_quantity"]
+        fields = ["op_quantity", "op_status"]
 
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         if self.instance.op_prod_no:
             self.fields["op_prod"].initial = self.instance.op_prod_no.prod_name
 
-    field_order = ["op_prod", "op_quantity"]
+    field_order = ["op_prod", "op_quantity", "op_status"]
 
 
 class OrderProdCreateForm(forms.ModelForm):
@@ -71,6 +113,7 @@ OrderProdUpdateFormset = inlineformset_factory(
     can_delete_extra=True,
     extra=0,
 )
+
 
 OrderProdCreateFormset = modelformset_factory(
     model=OrderProd,
@@ -220,25 +263,49 @@ def get_current_order_no():
 
 
 class OrderCreateForm(forms.ModelForm):
+    od_mfr_full_id = forms.CharField(
+        label="廠商編號", disabled=True, empty_value=(), required=False
+    )
+    od_mfr_name = forms.CharField(
+        label="廠商名稱", disabled=True, empty_value=(), required=False
+    )
+    od_mfr_user_id_username = forms.CharField(
+        label="訂貨人員", disabled=True, empty_value=(), required=False
+    )
+    od_mfr_id = forms.CharField(widget=forms.HiddenInput())
+
     class Meta:
         model = Order
         fields = "__all__"
+
+    field_order = [
+        "od_no",
+        "od_mfr_user_id_username",
+        "od_mfr_full_id",
+        "od_mfr_name",
+        "od_date",
+        "od_except_arrival_date",
+        "od_notes",
+        "od_has_contact_form",
+        "od_contact_form_no",
+        "od_warehouse_storage_fee_recipient",
+        "od_contact_form_notes",
+    ]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["od_except_arrival_date"].initial = (
             timezone.now() + datetime.timedelta(days=7)
         ).date()
-        self.fields["od_status"].disabled = True
         for name, field in self.fields.items():
-            if name in ["od_mfr_id", "od_no", "od_date"]:
+            if name in ["od_no", "od_date"]:
                 field.widget.attrs.update(
                     {"class": "pe-none", "tabindex": "-1", "aria-disabled": "true"}
                 )
-            elif name == "od_except_arrival_date":
-                field.widget = forms.DateInput(
-                    format=("%Y-%m-%d"),
-                )
+
+    def clean_od_mfr_id(self):
+        od_mfr_id_object = Manufacturer.objects.get(pk=self.cleaned_data["od_mfr_id"])
+        return od_mfr_id_object
 
     def clean(self):
         data = self.cleaned_data

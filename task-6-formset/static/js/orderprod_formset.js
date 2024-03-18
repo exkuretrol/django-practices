@@ -1,14 +1,4 @@
 $(function () {
-    $("input[type='text'].dateinput").each(function (_, e) {
-        $(e).daterangepicker({
-            autoApply: true,
-            singleDatePicker: true,
-            startDate: new Date($(e).val()),
-            endDate: new Date($(e).val()),
-            locale: { format: "YYYY-MM-DD" },
-        });
-    });
-
     $(".btn-delete").each(function (_, e) {
         $(e).on("click", function (event) {
             event.preventDefault();
@@ -17,5 +7,16 @@ $(function () {
             $(this).parent().find(".delete-checkbox").prop("checked", true);
             $(this).parent().addClass("d-none");
         });
+    });
+
+    $(".input-group").each(function () {
+        $(this)
+            .children()
+            .filter(":not(.d-none):not(span):not([type='hidden'])")
+            .last()
+            .attr(
+                "style",
+                "border-top-right-radius: var(--bs-border-radius); border-bottom-right-radius: var(--bs-border-radius);"
+            );
     });
 });

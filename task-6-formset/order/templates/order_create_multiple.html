@@ -1,6 +1,6 @@
 {% extends "_base.html" %}
 {% load crispy_forms_tags %}
-{% load order_tags %}
+{% load helper_tags %}
 {% block head %}
     {% include "order_create_multiple_head.html" %}
 {% endblock head %}
@@ -10,13 +10,13 @@
         {% with order_formset=named_formset.order_formset %}
             {{ order_formset.management_form }}
             {% for form in order_formset %}
-                {% include "include/non_field_errors.html" with form=form %}
-                {{ form|crispy }}
+                {% include "base_inputs/non_field_errors.html" with form=form %}
+                {% include "include/order_form.html" with form=form %}
                 {% with prods_formset=named_formset.prods_formset_list|index:forloop.counter0 loop_index=forloop.counter0|stringformat:"i" %}
                     {% with prefix="id_orderprod_"|add:loop_index %}
                         {{ prods_formset.management_form }}
                         {% for prod_form in prods_formset %}
-                            {% include "include/orderprod_grid_table.html" with form=prod_form prefix=prefix %}
+                            {% include "include/orderprod_grid_table.html" with form=prod_form prefix=prefix can_delete=prods_formset.can_delete %}
                         {% endfor %}
                     {% endwith %}
                 {% endwith %}
