@@ -5,13 +5,6 @@ from manufacturer.models import Manufacturer
 from prod.models import Prod
 
 
-class StatusChoices(models.IntegerChoices):
-    Generated = 0, _("訂單產生")
-    Submitted = 1, _("訂單已傳檔")
-    Closured = 2, _("訂單結案")
-    Cancelled = 3, _("訂單取消")
-
-
 class WarehouseStorageFeeRecipientChoices(models.IntegerChoices):
     NoCharge = 0, _("不收費")
     Manufacturer = 1, _("廠商")
@@ -34,17 +27,23 @@ class Order(models.Model):
     od_contact_form_no = models.BigIntegerField(
         verbose_name=_("訂單聯絡單編號"), default=0
     )
-    od_status = models.PositiveSmallIntegerField(
-        verbose_name=_("訂單狀態"),
-        choices=StatusChoices,
-        default=StatusChoices.Generated,
-    )
     od_warehouse_storage_fee_recipient = models.PositiveSmallIntegerField(
         verbose_name=_("訂單寄倉費對象"),
         choices=WarehouseStorageFeeRecipientChoices,
         default=WarehouseStorageFeeRecipientChoices.NoCharge,
     )
-    od_notes = models.TextField(verbose_name=_("訂單備註"), null=True)
+    # TODO: add order source field
+    od_notes = models.TextField(verbose_name=_("訂單備註"), null=True, blank=True)
+    od_contact_form_notes = models.TextField(
+        verbose_name=_("聯絡單備註"), null=True, blank=True
+    )
+
+
+class StatusChoices(models.IntegerChoices):
+    Generated = 0, _("訂單產生")
+    Submitted = 1, _("訂單已傳檔")
+    Closured = 2, _("訂單結案")
+    Cancelled = 3, _("訂單取消")
 
 
 class OrderProd(models.Model):
@@ -54,6 +53,11 @@ class OrderProd(models.Model):
         verbose_name="訂單編號",
         on_delete=models.CASCADE,
         related_name="orderprod_set",
+    )
+    op_status = models.PositiveSmallIntegerField(
+        verbose_name=_("訂單狀態"),
+        choices=StatusChoices,
+        default=StatusChoices.Generated,
     )
     op_prod_no = models.ForeignKey(
         to=Prod, verbose_name="訂單商品編號", on_delete=models.SET_NULL, null=True
