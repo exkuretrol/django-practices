@@ -1,5 +1,6 @@
 $(function () {
     document.getElementById("generate").addEventListener("click", function () {
+        // TODO: add some validation
         navigator.clipboard
             .read()
             .then((text) => {

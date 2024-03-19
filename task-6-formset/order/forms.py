@@ -15,6 +15,9 @@ from .models import Order, OrderProd
 
 
 class OrderUpdateForm(forms.ModelForm):
+    od_mfr_id = forms.CharField(
+        label="廠商 ID", disabled=True, empty_value=(), widget=forms.HiddenInput()
+    )
     od_mfr_full_id = forms.CharField(label="廠商編號", disabled=True, empty_value=())
     od_mfr_name = forms.CharField(label="廠商名稱", disabled=True, empty_value=())
     od_mfr_user_id_username = forms.CharField(
@@ -38,6 +41,7 @@ class OrderUpdateForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.fields["od_no"].disabled = True
         self.fields["od_date"].disabled = True
+        self.fields["od_mfr_id"].initial = self.instance.od_mfr_id
         self.fields["od_mfr_full_id"].initial = self.instance.od_mfr_id.mfr_full_id
         self.fields["od_mfr_name"].initial = self.instance.od_mfr_id.mfr_name
         self.fields["od_mfr_user_id_username"].initial = (
@@ -47,6 +51,7 @@ class OrderUpdateForm(forms.ModelForm):
     field_order = [
         "od_no",
         "od_mfr_user_id_username",
+        "od_mfr_id",
         "od_mfr_full_id",
         "od_mfr_name",
         "od_date",
@@ -125,7 +130,6 @@ OrderProdCreateFormset = modelformset_factory(
 
 
 def validate_tsv(input_text: str) -> None:
-
     f = StringIO(input_text)
     csv_reader = csv.reader(f, delimiter="\t")
     headers = next(csv_reader)

@@ -7,12 +7,6 @@ from .models import Order
 
 
 class OrderTable(tables.Table):
-    od_selected = tables.Column(
-        verbose_name="選擇",
-        empty_values=(),
-        orderable=False,
-        attrs={"td": {"class": "position-relative"}},
-    )
     od_func = tables.Column(verbose_name="功能", empty_values=(), orderable=False)
     od_no = tables.Column(verbose_name="訂單編號", accessor="od_no", orderable=False)
     od_prod = tables.Column(verbose_name="商品", empty_values=(), orderable=False)
@@ -35,11 +29,10 @@ class OrderTable(tables.Table):
         for op in ops:
             prods.append(
                 f"""
-                <label for='prod-{op.op_prod_no.prod_no}'>{op.op_prod_no.prod_name}</label>
-                <input type='number' id='prod-{op.op_prod_no.prod_no}' value={op.op_quantity} />
+                <p class="m-0">{op.op_prod_no.prod_name} ➡ {op.op_quantity}</p>
                 """
             )
-        return format_html("<br>".join(prods))
+        return format_html("".join(prods))
 
     def render_od_quantity(self, record):
         ops = record.orderprod_set.all()
@@ -66,7 +59,7 @@ class OrderTable(tables.Table):
         return format_html(f"{date}")
 
     def render_od_except_arrival_date(self, value):
-        return format_html(f"<input type='date' value={value} />")
+        return format_html(f"{value}")
 
     def render_od_has_contact_form(self, value):
         if value:
@@ -77,7 +70,6 @@ class OrderTable(tables.Table):
         model = Order
         fields = []
         sequence = (
-            "od_selected",
             "od_func",
             "od_no",
             "od_prod",
