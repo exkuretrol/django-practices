@@ -1,4 +1,5 @@
 import django_tables2 as tables
+from django.templatetags.static import static
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.html import format_html
@@ -13,7 +14,9 @@ class OrderTable(tables.Table):
     od_mfr_id = tables.Column(
         verbose_name="廠商", orderable=False, accessor="od_mfr_id"
     )
-    od_date = tables.Column(verbose_name="訂貨日期", accessor="od_date", order_by=["od_no"])
+    od_date = tables.Column(
+        verbose_name="訂貨日期", accessor="od_date", order_by=["od_no"]
+    )
     od_except_arrival_date = tables.Column(
         verbose_name="預期到貨日", accessor="od_except_arrival_date"
     )
@@ -51,11 +54,19 @@ class OrderTable(tables.Table):
 
     def render_od_func(self, record):
         return format_html(
-            f"<a href='{reverse(viewname="order_update", kwargs={"pk": record.pk})}' class='btn btn-info'>編輯訂單</a>"
+            f"""
+            <a href='{reverse(viewname="order_update", kwargs={"pk": record.pk})}' class='btn btn-info'>
+                <svg class="bi" width="16" height="16" role="img" aria-label="pencil-square" fill="currentColor">
+                    <use xlink:href="{static("sprite/bootstrap-icons.svg")}#pencil-square"/>
+                </svg>
+                <span class="ms-1">
+                編輯
+                </span>
+            </a>"""
         )
 
     def render_od_date(self, value):
-        date = self.convert_datetime_to_local_datetime(value).strftime('%Y-%m-%d')
+        date = self.convert_datetime_to_local_datetime(value).strftime("%Y-%m-%d")
         return format_html(f"{date}")
 
     def render_od_except_arrival_date(self, value):
@@ -80,4 +91,3 @@ class OrderTable(tables.Table):
         )
         attrs = {"class": "table table-striped table-bordered table-hover"}
         row_attrs = {"data-id": lambda record: record.pk}
-    
