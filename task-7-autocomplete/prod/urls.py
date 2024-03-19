@@ -2,6 +2,8 @@ from django.urls import path
 from django.views.generic.base import TemplateView
 
 from .views import (
+    ManufacturerAutocomplete,
+    ProdCategoryAutocomplete,
     ProdCreateMultipleView,
     ProdCreateView,
     ProdDashboardView,
@@ -13,7 +15,6 @@ from .views import (
 )
 
 urlpatterns = [
-    path("", TemplateView.as_view(template_name="home.html"), name="home"),
     path("prods/", ProdListView.as_view(), name="prod_list"),
     path("prods/create/", ProdCreateView.as_view(), name="prod_create"),
     path("prods/<int:pk>/", ProdDetailView.as_view(), name="prod_detail"),
@@ -35,5 +36,16 @@ urlpatterns = [
         "prods/dashboard/",
         ProdDashboardView.as_view(),
         name="prod_dashboard",
+    ),
+    # autocomplete
+    path(
+        "prods/autocomplete/",
+        ProdCategoryAutocomplete.as_view(),
+        name="prod_autocomplete",
+    ),
+    path(
+        "mfrs/autocomplete/",
+        ManufacturerAutocomplete.as_view(),
+        name="manufacturer_autocomplete",
     ),
 ]

@@ -74,9 +74,15 @@ class QualityAssuranceStatusChoices(models.IntegerChoices):
 class Prod(models.Model):
     prod_no = models.BigAutoField(primary_key=True, verbose_name=_("商品編號"))
     prod_name = models.CharField(verbose_name=_("商品名稱"), max_length=255)
-    prod_desc = models.TextField(verbose_name=_("商品描述"), null=True, default=None)
+    prod_desc = models.TextField(
+        verbose_name=_("商品描述"), null=True, default=None, blank=True
+    )
     prod_img = models.ImageField(
-        upload_to="images/", verbose_name=_("商品圖片"), null=True, default=None
+        upload_to="images/",
+        verbose_name=_("商品圖片"),
+        null=True,
+        default=None,
+        blank=True,
     )
     prod_quantity = models.PositiveIntegerField(default=0, verbose_name=_("商品數量"))
 

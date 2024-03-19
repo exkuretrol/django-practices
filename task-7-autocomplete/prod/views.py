@@ -3,8 +3,9 @@ from typing import Any
 
 import django_tables2
 import pandas as pd
+from dal import autocomplete
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db.models import Count, F
+from django.db.models import Count, F, Q
 from django.urls import reverse_lazy
 from django.views.generic import DetailView, TemplateView
 from django.views.generic.edit import CreateView, DeleteView, FormMixin, UpdateView
@@ -57,7 +58,7 @@ class ProdUpdateView(LoginRequiredMixin, UpdateView):
     template_name = "prod_update.html"
 
     def get_form_kwargs(self) -> dict[str, Any]:
-        kwargs = super(UpdateView, self).get_form_kwargs()
+        kwargs = super().get_form_kwargs()
         user = self.request.user
         if user.is_superuser:
             kwargs["mfrs"] = Manufacturer.objects.all()
@@ -192,3 +193,26 @@ class ProdDashboardView(MultiTableMixin, TemplateView):
     #     context = super().get_context_data(**kwargs)
     #     context["prod_cate_data"] = self.out
     #     return context
+
+
+class ProdCategoryAutocomplete(autocomplete.Select2QuerySetView):
+    paginate_by = 100
+
+    def get_queryset(self):
+        qs = ProdCategory.objects.all()
+        if self.q:
+            qs = qs.filter(
+                Q(cate_no__icontains=self.q) | Q(cate_name__icontains=self.q)
+            )
+        return qs
+
+
+class ManufacturerAutocomplete(autocomplete.Select2QuerySetView):
+    paginate_by = 100
+
+    def get_queryset(self):
+        qs = Manufacturer.objects.all()
+        if self.q:
+            qs = qs.filter(mfr_name__icontains=self.q)
+
+        return qs

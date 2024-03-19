@@ -1,6 +1,7 @@
 from re import findall
 from typing import Any, Mapping
 
+from dal import autocomplete
 from django import forms
 from django.core.exceptions import ValidationError
 from django.core.files.base import File
@@ -8,6 +9,7 @@ from django.core.validators import RegexValidator
 from django.db.models.base import Model
 from django.forms.utils import ErrorList
 from django.forms.widgets import ClearableFileInput
+from django.utils.translation import gettext_lazy as _
 
 from .models import Prod
 
@@ -39,7 +41,7 @@ class QueryForm(forms.Form):
 
 
 class CustomFileInput(ClearableFileInput):
-    template_name = "custom_file_input.html"
+    template_name = "base_inputs/file_input.html"
 
 
 class ProdCommonInfo(forms.ModelForm):
@@ -47,14 +49,23 @@ class ProdCommonInfo(forms.ModelForm):
         model = Prod
         fields = "__all__"
         widgets = {
-            "prod_desc": forms.Textarea,
+            "prod_desc": forms.Textarea(attrs={"rows": 5}),
             "prod_img": CustomFileInput,
+            "prod_cate_no": autocomplete.ModelSelect2(
+                url="prod_autocomplete",
+                attrs={
+                    "data-theme": "bootstrap-5",
+                    "data-placeholder": _("輸入一個商品分類編號或是商品名稱"),
+                },
+            ),
+            "prod_mfr_id": autocomplete.ListSelect2(
+                url="manufacturer_autocomplete",
+                attrs={
+                    "data-theme": "bootstrap-5",
+                    "data-placeholder": _("輸入一個製造商編號或是廠商名稱"),
+                },
+            ),
         }
-
-    def __init__(self, *args, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
-        self.fields["prod_img"].required = False
-        self.fields["prod_desc"].required = False
 
 
 class ProdCreateForm(forms.ModelForm):
@@ -69,8 +80,6 @@ class ProdCreateForm(forms.ModelForm):
 
 class ProdUpdateForm(ProdCreateForm):
     class Meta(ProdCommonInfo.Meta):
-        widgets = ProdCommonInfo.Meta.widgets
-        widgets["prod_img"] = CustomFileInput(attrs={"class": "input-file"})
         pass
 
 

@@ -42,6 +42,10 @@ CSRF_TRUSTED_ORIGINS = [DEBUG and "https://" + env.str("TUNNELMOLE_HOST", defaul
 # Application definition
 
 INSTALLED_APPS = [
+    # 3rd party packages
+    "dal",
+    "dal_select2",
+    # django build-in apps
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",

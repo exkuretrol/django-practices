@@ -17,15 +17,11 @@ class ProdFilter(filters.FilterSet):
     prod_quantity = filters.NumberFilter(label="Quantity =")
     prod_quantity__gte = filters.NumberFilter(label="Quantity ≥")
     prod_quantity__lte = filters.NumberFilter(label="Quantity ≤")
+    prod_cate_no__cate_no = filters.CharFilter(
+        label="Category No", lookup_expr="icontains"
+    )
     # prod_type = filters.ChoiceFilter(label="Type", choices=TypesChoices)
     # prod_status = filters.ChoiceFilter(label="Status", choices=StatusInProd)
-
-    def __init__(self, data=None, queryset=None, *, request=None, prefix=None):
-        super().__init__(data, queryset, request=request, prefix=prefix)
-        for field in self.form.fields:
-            widget = self.form.fields[field].widget
-            if widget.input_type in ["text", "number", "select"]:
-                widget.attrs.update({"class": "input-normal"})
 
     class Meta:
         model = Prod
@@ -36,6 +32,6 @@ class ProdFilter(filters.FilterSet):
             "prod_quantity",
             "prod_quantity__gte",
             "prod_quantity__lte",
-            # "prod_type",
+            "prod_cate_no__cate_no",
             # "prod_status",
         ]

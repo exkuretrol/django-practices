@@ -1,3 +1,4 @@
+{% load i18n %}
 {% if widget.is_initial %}
     {{ widget.initial_text }} <a href="{{ widget.value.url }}">{{ widget.value }}</a>
     {% if not widget.required %}
