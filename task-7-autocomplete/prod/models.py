@@ -29,7 +29,7 @@ class ProdCategory(models.Model):
         choices=CateTypeChoices,
         default=CateTypeChoices.Cate,
     )
-    cate_main_no = models.GeneratedField(
+    cate_cate_no = models.GeneratedField(
         verbose_name=_("分類大類編號"),
         expression=Case(
             When(cate_type=CateTypeChoices.Cate, then=None),
@@ -44,6 +44,47 @@ class ProdCategory(models.Model):
             default=Concat(
                 Value("0000"),
                 Substr("cate_no", 1, 2),
+                output_field=models.CharField(max_length=6),
+            ),
+        ),
+        output_field=models.CharField(max_length=6),
+        db_persist=True,
+        null=True,
+    )
+
+    cate_subcate_no = models.GeneratedField(
+        verbose_name=_("分類中類編號"),
+        expression=Case(
+            When(
+                cate_type=CateTypeChoices.SubSubCate,
+                then=Concat(
+                    Value("00"),
+                    Substr("cate_no", 1, 4),
+                    output_field=models.CharField(max_length=6),
+                ),
+            ),
+            default=None,
+        ),
+        output_field=models.CharField(max_length=6),
+        db_persist=True,
+        null=True,
+    )
+
+    cate_parent_no = models.GeneratedField(
+        verbose_name=_("分類上層編號"),
+        expression=Case(
+            When(cate_type=CateTypeChoices.Cate, then=None),
+            When(
+                cate_type=CateTypeChoices.SubCate,
+                then=Concat(
+                    Value("0000"),
+                    Substr("cate_no", 3, 2),
+                    output_field=models.CharField(max_length=6),
+                ),
+            ),
+            default=Concat(
+                Value("00"),
+                Substr("cate_no", 1, 4),
                 output_field=models.CharField(max_length=6),
             ),
         ),

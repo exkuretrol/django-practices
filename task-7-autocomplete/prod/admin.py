@@ -24,7 +24,8 @@ class ProdCategoryAdmin(admin.ModelAdmin):
         "cate_no",
         "cate_name",
         "cate_type",
-        "cate_main_no",
+        "cate_parent_no",
+        "cate_cate_no",
     ]
     list_display_links = ["cate_no"]
 

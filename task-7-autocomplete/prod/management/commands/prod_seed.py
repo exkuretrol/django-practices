@@ -33,6 +33,7 @@ class Command(BaseCommand):
 
 def clear_data() -> None:
     Prod.objects.all().delete()
+    ProdCategory.objects.all().delete()
 
 
 def init_categories(l_offset: int = 88, m_offset: int = 95, s_offset: int = 0) -> None:

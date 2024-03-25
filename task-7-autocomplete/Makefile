@@ -19,6 +19,12 @@ makemigrations:
 	@python manage.py makemigrations prod 
 	@python manage.py makemigrations order
 
+import_and_seed:
+	@python manage.py mfr_seed --mode refresh --nums 100
+	@python manage.py prod_cate_import --csv Category_A_0206.csv
+	@python manage.py prod_import --csv ItemBasic_A_0216.csv
+	
+
 migrate:
 	@python manage.py migrate
 

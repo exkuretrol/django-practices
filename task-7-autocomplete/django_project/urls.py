@@ -20,17 +20,21 @@ from pathlib import Path
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
+from django.db.utils import OperationalError
 from django.urls import include, path
 from django.views.generic import TemplateView
 from prod.models import Prod
 
-title = " ".join([i.capitalize() for i in Path.cwd().name.split("-")])
+try:
+    last_prod = Prod.objects.last()
+except OperationalError:
+    last_prod = None
 
 urlpatterns = [
     path(
         "",
         TemplateView.as_view(template_name="home.html"),
-        kwargs={"last_prod": Prod.objects.last(), "title": title},
+        kwargs={"last_prod": last_prod},
         name="home",
     ),
     path("admin/", admin.site.urls),

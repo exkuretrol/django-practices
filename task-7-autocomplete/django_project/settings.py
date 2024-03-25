@@ -204,3 +204,5 @@ INTERNAL_IPS = [
 #         },
 #     },
 # }
+
+APP_TITLE = env.str("TITLE", default="Django Project")

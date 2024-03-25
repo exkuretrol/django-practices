@@ -32,7 +32,7 @@ class OrderTable(tables.Table):
         for op in ops:
             prods.append(
                 f"""
-                <p class="m-0">{op.op_prod_no.prod_name} ➡ {op.op_quantity}</p>
+                <p class="m-0"><a href={reverse("prod_detail", kwargs={"pk":op.op_prod_no.pk})}>{op.op_prod_no.prod_name} ➡ {op.op_quantity}</a></p>
                 """
             )
         return format_html("".join(prods))
