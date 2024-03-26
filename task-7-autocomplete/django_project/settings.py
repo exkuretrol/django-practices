@@ -53,14 +53,15 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     # 3rd party packages
-    "django_browser_reload",
+    # "django_browser_reload",
     "widget_tweaks",
     "django_seed",
     "django_filters",
     "django_tables2",
-    "debug_toolbar",
+    # "debug_toolbar",
     "crispy_forms",
     "crispy_bootstrap5",
+    "silk",
     # local apps
     "prod",
     "accounts",
@@ -80,8 +81,9 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     # 3rd party
-    "django_browser_reload.middleware.BrowserReloadMiddleware",
-    "debug_toolbar.middleware.DebugToolbarMiddleware",
+    # "django_browser_reload.middleware.BrowserReloadMiddleware",
+    # "debug_toolbar.middleware.DebugToolbarMiddleware",
+    "silk.middleware.SilkyMiddleware",
 ]
 
 ROOT_URLCONF = "django_project.urls"
@@ -165,8 +167,10 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
 STATIC_URL = "static/"
-MEDIA_URL = "/media/"
 STATICFILES_DIRS = [BASE_DIR / "static"]
+STATIC_ROOT = BASE_DIR / "staticfiles"
+
+MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
 # Default primary key field type
@@ -206,3 +210,6 @@ INTERNAL_IPS = [
 # }
 
 APP_TITLE = env.str("TITLE", default="Django Project")
+
+# Profiler
+SILKY_PYTHON_PROFILER = True

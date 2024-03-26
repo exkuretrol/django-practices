@@ -44,10 +44,13 @@ urlpatterns = [
     path("", include("api.urls")),
     path("", include("order.urls")),
     # reloader
-    path("__reload__/", include("django_browser_reload.urls")),
+    # path("__reload__/", include("django_browser_reload.urls")),
     # debug
-    path("__debug__/", include("debug_toolbar.urls")),
+    # path("__debug__/", include("debug_toolbar.urls")),
 ]
+
+# performance profiling
+urlpatterns += [path("silk/", include("silk.urls", namespace="silk"))]
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
