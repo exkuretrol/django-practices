@@ -16,7 +16,7 @@ from django_tables2 import SingleTableMixin
 from manufacturer.models import Manufacturer
 from prod.models import Prod
 
-from .filters import OrderFilter
+from .filters import OrderFilter, OrderRulesFilter
 from .forms import (
     OrderBeforeCreateForm,
     OrderCreateForm,
@@ -25,10 +25,10 @@ from .forms import (
     OrderProdCreateFormset,
     OrderProdUpdateFormset,
     OrderUpdateForm,
-    get_current_order_no,
+    get_order_no_from_day,
 )
 from .models import Order, OrderProd
-from .tables import OrderTable
+from .tables import OrderRulesTable, OrderTable
 
 
 class OrderListView(SingleTableMixin, FilterView):
@@ -145,7 +145,7 @@ class OrderCreateMultipleView(CreateView):
             OrderProdDynamicFormset = modelformset_factory(
                 OrderProd, OrderProdCreateForm, extra=len(prods), can_delete=True
             )
-            od_no = get_current_order_no() + i + 1
+            od_no = get_order_no_from_day() + i + 1
             mfr = Manufacturer.objects.get(mfr_id=mfr_id)
             initial.append(
                 {
@@ -259,3 +259,8 @@ class OrderCreateMultipleView(CreateView):
             return self.form_valid(order_formset, orderprod_formset_list)
         else:
             return self.form_invalid(order_formset, orderprod_formset_list)
+
+
+class OrderRulesView(SingleTableMixin, FilterView):
+    filterset_class = OrderRulesFilter
+    table_class = OrderRulesTable

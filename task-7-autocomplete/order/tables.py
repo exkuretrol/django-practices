@@ -9,11 +9,11 @@ from .models import Order
 
 class OrderTable(tables.Table):
     od_func = tables.Column(verbose_name="功能", empty_values=(), orderable=False)
-    od_no = tables.Column(verbose_name="訂單編號", accessor="od_no", orderable=False)
-    od_prod = tables.Column(verbose_name="商品", empty_values=(), orderable=False)
-    od_mfr_id = tables.Column(
-        verbose_name="廠商", orderable=False, accessor="od_mfr_id"
-    )
+    od_no = tables.Column(verbose_name="訂單編號", accessor="od_no")
+    # od_prod = tables.Column(verbose_name="商品", empty_values=(), orderable=False)
+    # od_mfr_id = tables.Column(
+    #     verbose_name="廠商", orderable=False, accessor="od_mfr_id"
+    # )
     od_date = tables.Column(
         verbose_name="訂貨日期", accessor="od_date", order_by=["od_no"]
     )
@@ -26,16 +26,16 @@ class OrderTable(tables.Table):
         tz = timezone.get_current_timezone()
         return dt.astimezone(tz)
 
-    def render_od_prod(self, record):
-        ops = record.orderprod_set.all()
-        prods = []
-        for op in ops:
-            prods.append(
-                f"""
-                <p class="m-0"><a href={reverse("prod_detail", kwargs={"pk":op.op_prod_no.pk})}>{op.op_prod_no.prod_name} ➡ {op.op_quantity}</a></p>
-                """
-            )
-        return format_html("".join(prods))
+    # def render_od_prod(self, record):
+    #     ops = record.orderprod_set.all()
+    #     prods = []
+    #     for op in ops:
+    #         prods.append(
+    #             f"""
+    #             <p class="m-0"><a href={reverse("prod_detail", kwargs={"pk":op.op_prod_no.pk})}>{op.op_prod_no.prod_name} ➡ {op.op_quantity}</a></p>
+    #             """
+    #         )
+    #     return format_html("".join(prods))
 
     def render_od_quantity(self, record):
         ops = record.orderprod_set.all()
@@ -44,8 +44,8 @@ class OrderTable(tables.Table):
             inputs.append(f"<input type='number' value={op.op_quantity} />")
         return format_html("".join(inputs))
 
-    def render_od_mfr_id(self, value):
-        return format_html(f"{value.mfr_full_id}<br>{value.mfr_name}")
+    # def render_od_mfr_id(self, value):
+    #     return format_html(f"{value.mfr_full_id}<br>{value.mfr_name}")
 
     def render_od_selected(self, value):
         return format_html(
@@ -83,11 +83,16 @@ class OrderTable(tables.Table):
         sequence = (
             "od_func",
             "od_no",
-            "od_prod",
-            "od_mfr_id",
+            # "od_prod",
+            # "od_mfr_id",
             "od_date",
             "od_except_arrival_date",
             "od_has_contact_form",
         )
         attrs = {"class": "table table-striped table-bordered table-hover"}
         row_attrs = {"data-id": lambda record: record.pk}
+        order_by = ("-od_no",)
+
+
+class OrderRulesTable(tables.Table):
+    pass

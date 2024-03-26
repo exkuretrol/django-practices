@@ -7,6 +7,7 @@ from .views import (
     OrderCreateMultipleView,
     OrderCreateView,
     OrderListView,
+    OrderRulesView,
     OrderUpdateView,
 )
 
@@ -43,4 +44,9 @@ urlpatterns = [
         name="test_linked_autocomplete",
     ),
     path("order/<int:pk>/update/", OrderUpdateView.as_view(), name="order_update"),
+    path(
+        "order/rules/",
+        OrderRulesView.as_view(),
+        name="order_rules",
+    ),
 ]

@@ -25,7 +25,7 @@ class Order(models.Model):
         verbose_name=_("訂單有聯絡單"), default=False
     )
     od_contact_form_no = models.BigIntegerField(
-        verbose_name=_("訂單聯絡單編號"), default=0
+        verbose_name=_("訂單聯絡單編號"), default=None, null=True, blank=True
     )
     od_warehouse_storage_fee_recipient = models.PositiveSmallIntegerField(
         verbose_name=_("訂單寄倉費對象"),
@@ -37,6 +37,11 @@ class Order(models.Model):
     od_contact_form_notes = models.TextField(
         verbose_name=_("聯絡單備註"), null=True, blank=True
     )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["od_no", "od_date"], name="unique_order")
+        ]
 
 
 class StatusChoices(models.IntegerChoices):
@@ -63,3 +68,10 @@ class OrderProd(models.Model):
         to=Prod, verbose_name="訂單商品編號", on_delete=models.SET_NULL, null=True
     )
     op_quantity = models.PositiveBigIntegerField(verbose_name="訂單商品數量", default=0)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["op_od_no", "op_prod_no"], name="unique_order_prod"
+            )
+        ]

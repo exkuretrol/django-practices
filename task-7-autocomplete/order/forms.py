@@ -244,26 +244,25 @@ note: it should not contain the header row.
         return super().clean()
 
 
-def get_current_order_no():
+def get_order_no_from_day(day=timezone.localdate()):
     # TODO: order and timezone.now().date() didn't not sync,
     #       if user enter the order create page at 23:59:59,
     #       and then create an order at 00:00:00 (the form failed, and the user re-enter the form),
     #       the od_date will update, but the od_no didn't.
-    today = timezone.localdate()
-    today_str = today.strftime("%Y%m%d")
+    day_str = day.strftime("%Y%m%d")
 
     # Month + 30
     # YYYYmmdd
     # 0123^
-    today_str_list = list(today_str)
-    today_str_list[4] = str(int(today_str[4]) + 3)
-    today_str = "".join(today_str_list)
+    day_str_list = list(day_str)
+    day_str_list[4] = str(int(day_str[4]) + 3)
+    day_str = "".join(day_str_list)
 
-    orders = Order.objects.filter(od_date__date__exact=today)
+    orders = Order.objects.filter(od_date__date__exact=day)
     if orders.exists():
         order_no = orders.last().od_no
     else:
-        order_no = int(today_str + "00000")
+        order_no = int(day_str + "00000")
     return order_no
 
 
