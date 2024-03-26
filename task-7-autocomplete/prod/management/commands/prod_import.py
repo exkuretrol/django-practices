@@ -1,9 +1,11 @@
 from collections import Counter
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 from django.core.management.base import BaseCommand, CommandParser
-from prod.models import CateTypeChoices, Prod, ProdCategory
+from manufacturer.models import Manufacturer
+from prod.models import Prod, ProdCategory
 
 
 class Command(BaseCommand):
@@ -27,7 +29,7 @@ def empty():
 def parse_csv(filename: str):
 
     curr_path = Path().cwd()
-    file_path = curr_path / filename
+    path_to_file = curr_path / filename
     c = Counter()
     csv_header = [
         "ItemCode",
@@ -48,9 +50,10 @@ def parse_csv(filename: str):
         "NoChargeReason",
     ]
 
-    if file_path.exists():
+    mfrs = Manufacturer.objects.all()
+    if path_to_file.exists():
         empty()
-        df = pd.read_csv(file_path, skiprows=1, names=csv_header, dtype=str)
+        df = pd.read_csv(path_to_file, skiprows=1, names=csv_header, dtype=str)
         df["CatID1"] = df["CatID1"].str.zfill(2)
         df["CatID2"] = df["CatID2"].str.zfill(4)
         df["CatID3"] = df["CatID3"].str.zfill(6)
@@ -78,6 +81,7 @@ def parse_csv(filename: str):
                     prod_no=int(row["ItemCode"]),
                     prod_name=row["ItemNM"],
                     prod_cate_no=cate,
+                    prod_mfr_id=np.random.choice(mfrs),
                 )
             except:
                 c["Duplicated"] += 1
