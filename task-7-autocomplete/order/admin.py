@@ -1,5 +1,5 @@
 from django.contrib import admin
-from order.models import Order, OrderProd
+from order.models import Order, OrderProd, OrderRules
 
 
 @admin.register(Order)
@@ -22,4 +22,19 @@ class OrderProdAdmin(admin.ModelAdmin):
         "op_prod_no",
         "op_quantity",
         "op_status",
+    ]
+
+
+@admin.register(OrderRules)
+class OrderRulesAdmin(admin.ModelAdmin):
+    list_display = [
+        "or_id",
+        "or_type",
+        "or_object_id",
+        "or_cannot_order",
+        "or_cannot_be_shipped_as_case",
+        "or_order_amount",
+        "or_order_quantity_cases",
+        "or_effective_start_date",
+        "or_effective_end_date",
     ]

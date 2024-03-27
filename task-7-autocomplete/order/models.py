@@ -75,3 +75,41 @@ class OrderProd(models.Model):
                 fields=["op_od_no", "op_prod_no"], name="unique_order_prod"
             )
         ]
+
+
+class OrderRulesTypeChoices(models.IntegerChoices):
+    ProductNumber = 0, _("商品數量")
+    Manufacturer = 1, _("廠商")
+    ProductCategory = 2, _("商品類別")
+
+
+class OrderRules(models.Model):
+    or_id = models.BigAutoField(primary_key=True, verbose_name=_("訂單規則 ID"))
+    or_type = models.PositiveSmallIntegerField(
+        verbose_name=_("訂單規則類別"),
+        choices=OrderRulesTypeChoices,
+        default=OrderRulesTypeChoices.ProductNumber,
+    )
+    or_object_id = models.PositiveBigIntegerField(verbose_name=_("訂單規則參考 ID"))
+    or_cannot_order = models.BooleanField(
+        verbose_name=_("訂單規則不可訂貨"), default=False
+    )
+    or_cannot_be_shipped_as_case = models.BooleanField(
+        verbose_name=_("訂單規則可不成箱"), default=False
+    )
+    or_order_amount = models.PositiveBigIntegerField(
+        verbose_name=_("訂單規則訂貨金額"), null=True, blank=True, default=None
+    )
+    or_order_quantity_cases = models.PositiveBigIntegerField(
+        verbose_name=_("訂單規則訂貨箱數"), null=True, blank=True, default=None
+    )
+    or_notes = models.TextField(
+        verbose_name=_("訂單規則備註"), null=True, blank=True, default=None
+    )
+    or_effective_start_date = models.DateField(
+        verbose_name=_("訂單規則生效起日"), default=timezone.now
+    )
+    or_effective_end_date = models.DateField(
+        verbose_name=_("訂單規則生效迄日"),
+        default=timezone.make_aware(timezone.datetime(9999, 1, 1)),
+    )
