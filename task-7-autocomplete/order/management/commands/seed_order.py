@@ -77,12 +77,12 @@ def run_seed(mode: str, nums: int = 10):
         if max_prods == 0:
             od.delete()
             continue
+        if max_prods > 5:
+            max_prods = 5
         selected_prods = np.random.choice(
             prods,
             replace=False,
-            size=np.random.choice(
-                range(1, max_prods + 1), 1, p=[0.4, 0.3, 0.1, 0.1, 0.1]
-            ),
+            size=np.random.choice(range(1, max_prods + 1), 1),
         )
         for prod in selected_prods:
             op = OrderProd.objects.create(
