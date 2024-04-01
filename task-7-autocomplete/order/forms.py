@@ -10,7 +10,7 @@ from django.forms import inlineformset_factory, modelformset_factory
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from manufacturer.models import Manufacturer
-from prod.models import Prod, ProdCategory
+from prod.models import Prod
 
 from .models import Order, OrderProd
 
@@ -322,43 +322,3 @@ class OrderCreateForm(forms.ModelForm):
 
 
 OrderFormset = modelformset_factory(Order, OrderCreateForm, extra=3)
-
-
-class TestLinkedAutoCompleteForm(forms.Form):
-    cate = forms.ModelChoiceField(
-        label="大分類",
-        widget=autocomplete.ModelSelect2(
-            url="prod_cate_autocomplete",
-            attrs={
-                # "data-theme": "bootstrap-5",
-                "data-placeholder": _("商品大分類編號或是分類名稱"),
-            },
-        ),
-        queryset=ProdCategory.objects.all(),
-    )
-
-    subcate = forms.ModelChoiceField(
-        label="中分類",
-        widget=autocomplete.ModelSelect2(
-            url="prod_subcate_autocomplete",
-            attrs={
-                # "data-theme": "bootstrap-5",
-                "data-placeholder": _("商品中分類編號或是分類名稱"),
-            },
-            forward=["cate"],
-        ),
-        queryset=ProdCategory.objects.all(),
-    )
-
-    subsubcate = forms.ModelChoiceField(
-        label="小分類",
-        widget=autocomplete.ModelSelect2(
-            url="prod_subsubcate_autocomplete",
-            attrs={
-                # "data-theme": "bootstrap-5",
-                "data-placeholder": _("商品小分類編號或是分類名稱"),
-            },
-            forward=["subcate"],
-        ),
-        queryset=ProdCategory.objects.all(),
-    )

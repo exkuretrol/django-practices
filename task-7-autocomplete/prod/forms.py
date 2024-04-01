@@ -52,17 +52,17 @@ class ProdCommonInfo(forms.ModelForm):
             "prod_desc": forms.Textarea(attrs={"rows": 5}),
             "prod_img": CustomFileInput,
             "prod_cate_no": autocomplete.ModelSelect2(
-                url="prod_autocomplete",
+                url="prod_all_cate_autocomplete",
                 attrs={
                     "data-theme": "bootstrap-5",
                     "data-placeholder": _("輸入一個商品分類編號或是商品名稱"),
                 },
             ),
             "prod_mfr_id": autocomplete.ListSelect2(
-                url="manufacturer_autocomplete",
+                url="mfr_autocomplete",
                 attrs={
                     "data-theme": "bootstrap-5",
-                    "data-placeholder": _("輸入一個製造商編號或是廠商名稱"),
+                    "data-placeholder": _("輸入一個廠商編號或是廠商名稱"),
                 },
             ),
         }

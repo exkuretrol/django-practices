@@ -3,7 +3,7 @@ from django.views.generic.base import TemplateView
 
 from .views import (
     CateAutocomplete,
-    ManufacturerAutocomplete,
+    ProdAutocomplete,
     ProdCategoryAutocomplete,
     ProdCreateMultipleView,
     ProdCreateView,
@@ -42,14 +42,9 @@ urlpatterns = [
     ),
     # autocomplete
     path(
-        "prods/autocomplete/",
+        "prod_cate/all/autocomplete/",
         ProdCategoryAutocomplete.as_view(),
-        name="prod_autocomplete",
-    ),
-    path(
-        "mfrs/autocomplete/",
-        ManufacturerAutocomplete.as_view(),
-        name="manufacturer_autocomplete",
+        name="prod_all_cate_autocomplete",
     ),
     path(
         "prod_cate/cate/autocomplete",
@@ -66,4 +61,5 @@ urlpatterns = [
         SubSubCateAutocomplete.as_view(),
         name="prod_subsubcate_autocomplete",
     ),
+    path("prod/autocomplete/", ProdAutocomplete.as_view(), name="prod_autocomplete"),
 ]

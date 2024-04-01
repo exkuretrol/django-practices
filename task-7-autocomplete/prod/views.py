@@ -1,8 +1,6 @@
 import datetime
 from typing import Any
 
-import django_tables2
-import pandas as pd
 from dal import autocomplete
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Count, F, Q
@@ -21,7 +19,7 @@ from .forms import (
     ProdUpdateForm,
 )
 from .models import CateTypeChoices, Prod, ProdCategory
-from .tables import ProdCateTable, ProdMfrTable, ProdTable
+from .tables import ProdTable
 
 
 class ProdDetailView(LoginRequiredMixin, DetailView):
@@ -207,17 +205,6 @@ class ProdCategoryAutocomplete(autocomplete.Select2QuerySetView):
         return qs
 
 
-class ManufacturerAutocomplete(autocomplete.Select2QuerySetView):
-    paginate_by = 100
-
-    def get_queryset(self):
-        qs = Manufacturer.objects.all()
-        if self.q:
-            qs = qs.filter(mfr_name__icontains=self.q)
-
-        return qs
-
-
 class CateAutocomplete(autocomplete.Select2QuerySetView):
     paginate_by = 100
 
@@ -237,7 +224,7 @@ class SubCateAutocomplete(autocomplete.Select2QuerySetView):
     def get_queryset(self):
 
         qs = ProdCategory.objects.all().filter(cate_type__exact=CateTypeChoices.SubCate)
-        cate = self.forwarded.get("od_prod_cate", None)
+        cate = self.forwarded.get("or_prod_cate", None)
 
         if cate:
             qs = qs.filter(cate_parent_no__exact=cate)
@@ -255,12 +242,25 @@ class SubSubCateAutocomplete(autocomplete.Select2QuerySetView):
         qs = ProdCategory.objects.all().filter(
             cate_type__exact=CateTypeChoices.SubSubCate
         )
-        subcate = self.forwarded.get("od_prod_subcate", None)
+        subcate = self.forwarded.get("or_prod_subcate", None)
 
         if subcate:
             qs = qs.filter(cate_parent_no__exact=subcate)
         if self.q:
             qs = qs.filter(
                 Q(cate_no__icontains=self.q) | Q(cate_name__icontains=self.q)
+            )
+        return qs
+
+
+class ProdAutocomplete(autocomplete.Select2QuerySetView):
+    paginate_by = 100
+
+    def get_queryset(self):
+        qs = Prod.objects.all()
+
+        if self.q:
+            qs = qs.filter(
+                Q(prod_name__icontains=self.q) | Q(prod_no__icontains=self.q)
             )
         return qs

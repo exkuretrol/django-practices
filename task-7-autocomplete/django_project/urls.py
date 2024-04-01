@@ -43,6 +43,7 @@ urlpatterns = [
     path("", include("prod.urls")),
     path("", include("api.urls")),
     path("", include("order.urls")),
+    path("", include("manufacturer.urls")),
     # reloader
     # path("__reload__/", include("django_browser_reload.urls")),
     # debug
