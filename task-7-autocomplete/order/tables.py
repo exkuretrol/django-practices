@@ -3,8 +3,10 @@ from django.templatetags.static import static
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.html import format_html
+from manufacturer.models import Manufacturer
+from prod.models import Prod
 
-from .models import Order
+from .models import Order, OrderRule, OrderRuleTypeChoices
 
 
 class OrderTable(tables.Table):
@@ -95,4 +97,94 @@ class OrderTable(tables.Table):
 
 
 class OrderRulesTable(tables.Table):
-    pass
+    # or_func = tables.Column(verbose_name="功能", empty_values=(), orderable=False)
+
+    or_mfr_username = tables.Column(
+        verbose_name="訂貨人員", empty_values=(), orderable=False
+    )
+
+    or_mfr_name = tables.Column(
+        verbose_name="廠商名稱", empty_values=(), orderable=False
+    )
+
+    or_prod_name = tables.Column(
+        verbose_name="商品名稱", empty_values=(), orderable=False
+    )
+
+    def render_or_func(self, record):
+        return format_html(
+            # <a href='{reverse(viewname="order_update", kwargs={"pk": record.pk})}' class='btn btn-info'>
+            f"""
+            <div class="d-flex flex-column">
+            <a href='#' class='btn btn-info'>
+                <svg class="bi" width="16" height="16" role="img" aria-label="pencil-square" fill="currentColor">
+                    <use xlink:href="{static("sprite/bootstrap-icons.svg")}#pencil-square"/>
+                </svg>
+                <span class="ms-1">
+                編輯
+                </span>
+            </a>
+            <a href='#' class='btn btn-info'>
+                <svg class="bi" width="16" height="16" role="img" aria-label="pencil-square" fill="currentColor">
+                    <use xlink:href="{static("sprite/bootstrap-icons.svg")}#trash"/>
+                </svg>
+                <span class="ms-1">
+                刪除
+                </span>
+            </a>
+            </div>
+            """
+        )
+
+    def render_or_prod_name(self, record):
+        if record.or_type == OrderRuleTypeChoices.Product:
+            prod = Prod.objects.get(prod_no=record.or_object_id)
+            return prod
+        return ""
+
+    def render_or_mfr_username(self, record):
+        if record.or_type == OrderRuleTypeChoices.Product:
+            prod = Prod.objects.get(prod_no=record.or_object_id)
+            return prod.prod_mfr_id.mfr_user_id.username
+        if record.or_type == OrderRuleTypeChoices.Manufacturer:
+            mfr = Manufacturer.objects.get(mfr_id=record.or_object_id)
+            return mfr.mfr_user_id.username
+        return ""
+
+    def render_or_mfr_name(self, record):
+        if record.or_type == OrderRuleTypeChoices.Product:
+            prod = Prod.objects.get(prod_no=record.or_object_id)
+            return prod.prod_mfr_id
+        if record.or_type == OrderRuleTypeChoices.Manufacturer:
+            mfr = Manufacturer.objects.get(mfr_id=record.or_object_id)
+            return mfr
+
+        return ""
+
+    class Meta:
+        model = OrderRule
+        fields = [
+            "or_id",
+            "or_type",
+            "or_object_id",
+            "or_cannot_order",
+            "or_cannot_be_shipped_as_case",
+            "or_order_amount",
+            "or_order_quantity_cases",
+            "or_effective_start_date",
+            "or_effective_end_date",
+        ]
+
+        sequence = (
+            # "or_func",
+            "or_type",
+            "or_object_id",
+            "or_prod_name",
+            "or_mfr_name",
+            "or_cannot_order",
+            "or_cannot_be_shipped_as_case",
+            "or_order_amount",
+            "or_order_quantity_cases",
+            "or_effective_start_date",
+            "or_effective_end_date",
+        )

@@ -3,6 +3,7 @@ from typing import List
 
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Button, Submit
+from dal import autocomplete
 from django.forms import modelformset_factory
 from django.forms.models import BaseModelFormSet
 from django.http.response import HttpResponse as HttpResponse
@@ -264,3 +265,4 @@ class OrderCreateMultipleView(CreateView):
 class OrderRulesView(SingleTableMixin, FilterView):
     filterset_class = OrderRulesFilter
     table_class = OrderRulesTable
+    template_name = "order_rules.html"
