@@ -58,4 +58,4 @@ class Manufacturer(models.Model):
     )
 
     def __str__(self):
-        return self.mfr_name
+        return self.mfr_name + " (" + self.mfr_full_id + ")"
