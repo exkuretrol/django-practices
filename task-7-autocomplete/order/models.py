@@ -77,20 +77,21 @@ class OrderProd(models.Model):
         ]
 
 
-class OrderRulesTypeChoices(models.IntegerChoices):
-    ProductNumber = 0, _("商品數量")
+class OrderRuleTypeChoices(models.IntegerChoices):
+    Product = 0, _("商品")
     Manufacturer = 1, _("廠商")
     ProductCategory = 2, _("商品類別")
 
 
-class OrderRules(models.Model):
+class OrderRule(models.Model):
     or_id = models.BigAutoField(primary_key=True, verbose_name=_("訂單規則 ID"))
     or_type = models.PositiveSmallIntegerField(
         verbose_name=_("訂單規則類別"),
-        choices=OrderRulesTypeChoices,
-        default=OrderRulesTypeChoices.ProductNumber,
+        choices=OrderRuleTypeChoices,
+        default=OrderRuleTypeChoices.Product,
     )
-    or_object_id = models.PositiveBigIntegerField(verbose_name=_("訂單規則參考 ID"))
+    or_object_id = models.CharField(verbose_name=_("訂單規則參考 ID"), max_length=255)
+    # or_object_id = models.ForeignKey()
     or_cannot_order = models.BooleanField(
         verbose_name=_("訂單規則不可訂貨"), default=False
     )

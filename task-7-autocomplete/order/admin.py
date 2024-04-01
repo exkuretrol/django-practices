@@ -1,5 +1,5 @@
 from django.contrib import admin
-from order.models import Order, OrderProd, OrderRules
+from order.models import Order, OrderProd, OrderRule
 
 
 @admin.register(Order)
@@ -25,7 +25,7 @@ class OrderProdAdmin(admin.ModelAdmin):
     ]
 
 
-@admin.register(OrderRules)
+@admin.register(OrderRule)
 class OrderRulesAdmin(admin.ModelAdmin):
     list_display = [
         "or_id",
