@@ -1,6 +1,8 @@
 from django.contrib import admin
 from order.models import Order, OrderProd, OrderRule
 
+from .forms import OrderRuleCreateForm
+
 
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
@@ -27,10 +29,13 @@ class OrderProdAdmin(admin.ModelAdmin):
 
 @admin.register(OrderRule)
 class OrderRulesAdmin(admin.ModelAdmin):
+    form = OrderRuleCreateForm
     list_display = [
         "or_id",
         "or_type",
-        "or_object_id",
+        "or_prod_no",
+        "or_mfr_id",
+        "or_prod_cate_no",
         "or_cannot_order",
         "or_cannot_be_shipped_as_case",
         "or_order_amount",

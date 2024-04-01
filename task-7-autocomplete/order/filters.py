@@ -50,56 +50,25 @@ class OrderFilter(django_filters.FilterSet):
 class OrderRulesFilter(django_filters.FilterSet):
     def order_rules_prod_filter(self, queryset, name, value):
         prod_rules = queryset.filter(or_type=OrderRuleTypeChoices.Product)
-        prods = Prod.objects.filter(
-            prod_no__in=prod_rules.values_list("or_object_id", flat=True)
-        )
-        prods = prods.filter(prod_no__exact=value.pk)
-
-        return prod_rules.filter(
-            or_object_id__in=prods.values_list("prod_no", flat=True)
-        )
+        return prod_rules.filter(or_prod_no=value.prod_no)
 
     def order_rules_mfr_filter(self, queryset, name, value):
         mfr_rules = queryset.filter(or_type=OrderRuleTypeChoices.Manufacturer)
-        mfrs = Manufacturer.objects.filter(
-            mfr_id__in=mfr_rules.values_list("or_object_id", flat=True)
-        )
-        filtered_mfr = mfrs.filter(pk=value.pk)
-        filtered_mfr_rules = mfr_rules.filter(
-            or_object_id__in=filtered_mfr.values_list("mfr_id", flat=True)
-        )
+        mfrs = mfr_rules.filter(or_mfr_id=value.pk)
 
         prod_rules = queryset.filter(or_type=OrderRuleTypeChoices.Product)
-        prods = Prod.objects.filter(
-            prod_no__in=prod_rules.values_list("or_object_id", flat=True)
-        )
-        filtered_prod = prods.filter(prod_mfr_id=value.pk)
-        filtered_prod_rules = prod_rules.filter(
-            or_object_id__in=filtered_prod.values_list("prod_no", flat=True)
-        )
+        prods = prod_rules.filter(or_prod_no__prod_mfr_id=value.pk)
 
-        return filtered_mfr_rules | filtered_prod_rules
+        return mfrs | prods
 
     def order_rules_username_filter(self, queryset, name, value):
         mfr_rules = queryset.filter(or_type=OrderRuleTypeChoices.Manufacturer)
         prod_rules = queryset.filter(or_type=OrderRuleTypeChoices.Product)
-        mfrs = Manufacturer.objects.filter(
-            mfr_id__in=mfr_rules.values_list("or_object_id", flat=True)
-        )
-        filtered_mfrs = mfrs.filter(mfr_user_id=value.pk)
-        prods = Prod.objects.filter(
-            prod_no__in=prod_rules.values_list("or_object_id", flat=True)
-        )
-        filtered_prods = prods.filter(prod_mfr_id__mfr_user_id=value.pk)
 
-        filtered_mfr_rules = mfr_rules.filter(
-            or_object_id__in=filtered_mfrs.values_list("mfr_id", flat=True)
-        )
-        filtered_prod_rules = prod_rules.filter(
-            or_object_id__in=filtered_prods.values_list("prod_no", flat=True)
-        )
+        mfrs = mfr_rules.filter(or_mfr_id__mfr_user_id=value.pk)
+        prods = prod_rules.filter(or_prod_no__prod_mfr_id__mfr_user_id=value.pk)
 
-        return filtered_mfr_rules | filtered_prod_rules
+        return mfrs | prods
 
     def order_rules_prod_cate_filter(self, queryset, name, value):
         cates = list(filter(lambda x: x.endswith("cate"), self.form.changed_data))
@@ -107,20 +76,15 @@ class OrderRulesFilter(django_filters.FilterSet):
         if cates[-1] != name:
             return queryset
 
-        cate_rules = queryset.filter(or_type=OrderRuleTypeChoices.ProductCategory)
-        cates_id = cate_rules.values_list("or_object_id", flat=True)
-        cates = ProdCategory.objects.filter(cate_no__in=cates_id)
-
+        cates = queryset.filter(or_type=OrderRuleTypeChoices.ProductCategory)
         if name == "or_prod_cate":
-            cates = cates.filter(cate_cate_no=value.pk)
+            cates = cates.filter(or_prod_cate_no__cate_cate_no=value.pk)
         elif name == "or_prod_subcate":
-            cates = cates.filter(cate_subcate_no=value.pk)
+            cates = cates.filter(or_prod_cate_no__cate_subcate_no=value.pk)
         elif name == "or_prod_subsubcate":
-            cates = cates.filter(cate_no=value.pk)
+            cates = cates.filter(or_prod_cate_no__cate_no=value.pk)
 
-        return cate_rules.filter(
-            or_object_id__in=cates.values_list("cate_no", flat=True)
-        )
+        return cates
 
     or_prod_cate = django_filters.ModelChoiceFilter(
         field_name="or_prod_cate",
@@ -181,11 +145,7 @@ class OrderRulesFilter(django_filters.FilterSet):
         queryset=Prod.objects.all(),
     )
 
-    # mfr_full_id = django_filters.CharFilter(
-    #     label="10碼廠編", lookup_expr="exact", method="order_rules_mfr_filter"
-    # )
-
-    mfr_name = django_filters.ModelChoiceFilter(
+    or_mfr = django_filters.ModelChoiceFilter(
         label="10碼廠編 / 廠商名稱",
         lookup_expr="icontains",
         method="order_rules_mfr_filter",

@@ -2,7 +2,7 @@ from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from manufacturer.models import Manufacturer
-from prod.models import Prod
+from prod.models import Prod, ProdCategory
 
 
 class WarehouseStorageFeeRecipientChoices(models.IntegerChoices):
@@ -90,8 +90,30 @@ class OrderRule(models.Model):
         choices=OrderRuleTypeChoices,
         default=OrderRuleTypeChoices.Product,
     )
-    or_object_id = models.CharField(verbose_name=_("訂單規則參考 ID"), max_length=255)
-    # or_object_id = models.ForeignKey()
+    or_prod_no = models.ForeignKey(
+        to=Prod,
+        verbose_name=_("訂單規則商品編號"),
+        on_delete=models.CASCADE,
+        null=True,
+        default=None,
+        blank=True,
+    )
+    or_mfr_id = models.ForeignKey(
+        to=Manufacturer,
+        verbose_name=_("訂單規則廠商 ID"),
+        on_delete=models.CASCADE,
+        null=True,
+        default=None,
+        blank=True,
+    )
+    or_prod_cate_no = models.ForeignKey(
+        to=ProdCategory,
+        verbose_name=_("訂單規則商品分類編號"),
+        on_delete=models.CASCADE,
+        null=True,
+        default=None,
+        blank=True,
+    )
     or_cannot_order = models.BooleanField(
         verbose_name=_("訂單規則不可訂貨"), default=False
     )

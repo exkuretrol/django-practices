@@ -12,7 +12,7 @@ from django.utils.translation import gettext_lazy as _
 from manufacturer.models import Manufacturer
 from prod.models import Prod
 
-from .models import Order, OrderProd
+from .models import Order, OrderProd, OrderRule
 
 
 class OrderUpdateForm(forms.ModelForm):
@@ -322,3 +322,16 @@ class OrderCreateForm(forms.ModelForm):
 
 
 OrderFormset = modelformset_factory(Order, OrderCreateForm, extra=3)
+
+
+class OrderRuleCreateForm(forms.ModelForm):
+    class Meta:
+        fields = "__all__"
+        model = OrderRule
+        widgets = {
+            "or_prod_no": autocomplete.ModelSelect2(url="prod_autocomplete"),
+            "or_mfr_id": autocomplete.ModelSelect2(url="mfr_autocomplete"),
+            "or_prod_cate_no": autocomplete.ModelSelect2(
+                url="prod_all_cate_autocomplete"
+            ),
+        }
