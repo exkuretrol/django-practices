@@ -1,6 +1,6 @@
 from django.core.validators import RegexValidator
 from django.db import models
-from django.db.models import Case, Value, When
+from django.db.models import Case, F, Value, When
 from django.db.models.functions import Concat, Substr
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
@@ -32,7 +32,7 @@ class ProdCategory(models.Model):
     cate_cate_no = models.GeneratedField(
         verbose_name=_("分類大類編號"),
         expression=Case(
-            When(cate_type=CateTypeChoices.Cate, then=None),
+            When(cate_type=CateTypeChoices.Cate, then=F("cate_no")),
             When(
                 cate_type=CateTypeChoices.SubCate,
                 then=Concat(
@@ -62,6 +62,10 @@ class ProdCategory(models.Model):
                     Substr("cate_no", 1, 4),
                     output_field=models.CharField(max_length=6),
                 ),
+            ),
+            When(
+                cate_type=CateTypeChoices.SubCate,
+                then=F("cate_no"),
             ),
             default=None,
         ),
