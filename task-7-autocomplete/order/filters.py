@@ -8,37 +8,71 @@ from prod.models import Prod, ProdCategory
 from .models import Order, OrderProd, OrderRule, OrderRuleTypeChoices
 
 
-def orderprod_prod_filter(queryset, name, value):
-    if name == "prod_name":
-        ops = OrderProd.objects.filter(op_prod_no__prod_name__icontains=value)
-    if name == "prod_no":
-        ops = OrderProd.objects.filter(op_prod_no=value)
-    filtered_queryset = queryset.filter(orderprod_set__in=ops)
-
-    return filtered_queryset
-
-
 class OrderFilter(django_filters.FilterSet):
-    od_no = django_filters.BaseInFilter(
-        label="訂單編號", lookup_expr="in", required=False
+    def orderprod_prod_filter(self, queryset, name, value):
+        ops = OrderProd.objects.filter(op_prod_no=value.pk)
+        filtered_queryset = queryset.filter(orderprod_set__in=ops)
+        return filtered_queryset
+
+    def orderprod_order_no_filter(self, queryset, name, value):
+        od_nos = self.request.GET.getlist("od_no")
+        return queryset.filter(od_no__in=od_nos)
+
+    od_no = django_filters.CharFilter(
+        label="訂單編號",
+        required=False,
+        method="orderprod_order_no_filter",
+        widget=autocomplete.Select2Multiple(
+            url="order_no_autocomplete",
+            attrs={
+                # "data-theme": "bootstrap-5",
+                "data-placeholder": _("輸入一個訂單編號"),
+                "data-html": True,
+            },
+        ),
     )
 
-    od_prod_name = django_filters.CharFilter(
-        field_name="prod_name", label="品名", method=orderprod_prod_filter
-    )
-    od_prod_no = django_filters.NumberFilter(
-        field_name="prod_no", label="品號", method=orderprod_prod_filter
+    od_prod = django_filters.ModelChoiceFilter(
+        field_name="prod",
+        label="品名 / 品號",
+        method="orderprod_prod_filter",
+        widget=autocomplete.ModelSelect2(
+            url="prod_autocomplete",
+            attrs={
+                # "data-theme": "bootstrap-5",
+                "data-placeholder": _("輸入一個商品編號或是商品名稱"),
+                "data-html": True,
+            },
+        ),
+        queryset=Prod.objects.all(),
     )
 
-    od_mfr_id__mfr_full_id = django_filters.CharFilter(
-        label="10碼廠編", lookup_expr="exact"
+    od_mfr_id = django_filters.ModelChoiceFilter(
+        label="10碼廠編 / 廠商名稱",
+        widget=autocomplete.ModelSelect2(
+            url="mfr_autocomplete",
+            attrs={
+                # "data-theme": "bootstrap-5",
+                "data-placeholder": _("輸入一個廠商編號或是廠商名稱"),
+                "data-html": True,
+            },
+        ),
+        queryset=Manufacturer.objects.all(),
     )
-    od_mfr_id__mfr_name = django_filters.CharFilter(
-        label="廠商名稱", lookup_expr="icontains"
+
+    od_mfr_id__mfr_user_id = django_filters.ModelChoiceFilter(
+        label="訂貨人員",
+        widget=autocomplete.ModelSelect2(
+            url="mfr_username_autocomplete",
+            attrs={
+                # "data-theme": "bootstrap-5",
+                "data-placeholder": _("訂貨人員名稱或是訂貨人員 ID"),
+                "data-html": True,
+            },
+        ),
+        queryset=get_user_model().objects.all(),
     )
-    od_mfr_id__mfr_user_id__username = django_filters.CharFilter(
-        label="訂貨人員", lookup_expr="icontains"
-    )
+
     od_date = django_filters.DateFromToRangeFilter(label="訂貨日期")
     od_except_arrival_date = django_filters.DateFromToRangeFilter(label="預期到貨日")
 

@@ -43,6 +43,9 @@ class Order(models.Model):
             models.UniqueConstraint(fields=["od_no", "od_date"], name="unique_order")
         ]
 
+    def __str__(self):
+        return f"{self.od_no}"
+
 
 class StatusChoices(models.IntegerChoices):
     Generated = 0, _("訂單產生")

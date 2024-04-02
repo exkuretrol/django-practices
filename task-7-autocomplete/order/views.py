@@ -266,3 +266,13 @@ class OrderRulesView(SingleTableMixin, FilterView):
     filterset_class = OrderRulesFilter
     table_class = OrderRulesTable
     template_name = "order_rules.html"
+
+
+class OrderNoAutocomplete(autocomplete.Select2QuerySetView):
+    paginate_by = 100
+
+    def get_queryset(self):
+        qs = Order.objects.all()
+        if self.q:
+            qs = qs.filter(od_no__startswith=self.q)
+        return qs.order_by("-od_no")
