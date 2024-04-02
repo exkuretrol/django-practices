@@ -3,6 +3,7 @@ from django.templatetags.static import static
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.html import format_html
+from django.utils.translation import gettext_lazy as _
 from manufacturer.models import Manufacturer
 from prod.models import Prod
 
@@ -97,18 +98,21 @@ class OrderTable(tables.Table):
 
 
 class OrderRulesTable(tables.Table):
-    # or_func = tables.Column(verbose_name="功能", empty_values=(), orderable=False)
+    or_func = tables.Column(verbose_name="功能", empty_values=(), orderable=False)
 
     or_mfr_username = tables.Column(
         verbose_name="訂貨人員", empty_values=(), orderable=False
     )
 
-    or_mfr_name = tables.Column(
-        verbose_name="廠商名稱", empty_values=(), orderable=False
+    or_mfr_id = tables.Column(
+        verbose_name=_("廠商名稱"), empty_values=(), orderable=False, default=""
+    )
+    or_prod_no = tables.Column(
+        verbose_name=_("商品編號"), accessor="or_prod_no", default=""
     )
 
-    or_prod_name = tables.Column(
-        verbose_name="商品名稱", empty_values=(), orderable=False
+    or_prod_cate_no = tables.Column(
+        verbose_name=_("商品類別"), accessor="or_prod_cate_no", default=""
     )
 
     def render_or_func(self, record):
@@ -136,37 +140,27 @@ class OrderRulesTable(tables.Table):
             """
         )
 
-    def render_or_prod_name(self, record):
-        if record.or_type == OrderRuleTypeChoices.Product:
-            prod = Prod.objects.get(prod_no=record.or_object_id)
-            return prod
-        return ""
-
     def render_or_mfr_username(self, record):
         if record.or_type == OrderRuleTypeChoices.Product:
-            prod = Prod.objects.get(prod_no=record.or_object_id)
-            return prod.prod_mfr_id.mfr_user_id.username
+            return record.or_prod_no.prod_mfr_id.mfr_user_id
         if record.or_type == OrderRuleTypeChoices.Manufacturer:
-            mfr = Manufacturer.objects.get(mfr_id=record.or_object_id)
-            return mfr.mfr_user_id.username
+            return record.or_mfr_id.mfr_user_id
         return ""
 
-    def render_or_mfr_name(self, record):
+    def render_or_mfr_id(self, record):
         if record.or_type == OrderRuleTypeChoices.Product:
-            prod = Prod.objects.get(prod_no=record.or_object_id)
-            return prod.prod_mfr_id
-        if record.or_type == OrderRuleTypeChoices.Manufacturer:
-            mfr = Manufacturer.objects.get(mfr_id=record.or_object_id)
-            return mfr
-
+            return record.or_prod_no.prod_mfr_id
+        elif record.or_type == OrderRuleTypeChoices.Manufacturer:
+            return record.or_mfr_id
         return ""
 
     class Meta:
         model = OrderRule
         fields = [
-            "or_id",
             "or_type",
-            "or_object_id",
+            "or_prod_no",
+            "or_prod_cate_no",
+            "or_mfr_id",
             "or_cannot_order",
             "or_cannot_be_shipped_as_case",
             "or_order_amount",
@@ -176,11 +170,12 @@ class OrderRulesTable(tables.Table):
         ]
 
         sequence = (
-            # "or_func",
+            "or_func",
             "or_type",
-            "or_object_id",
-            "or_prod_name",
-            "or_mfr_name",
+            "or_prod_no",
+            "or_prod_cate_no",
+            "or_mfr_id",
+            "or_mfr_username",
             "or_cannot_order",
             "or_cannot_be_shipped_as_case",
             "or_order_amount",
