@@ -4,14 +4,11 @@ from typing import Any, Mapping
 from dal import autocomplete
 from django import forms
 from django.core.exceptions import ValidationError
-from django.core.files.base import File
 from django.core.validators import RegexValidator
-from django.db.models.base import Model
-from django.forms.utils import ErrorList
 from django.forms.widgets import ClearableFileInput
 from django.utils.translation import gettext_lazy as _
 
-from .models import Prod
+from .models import Prod, ProdRestriction
 
 
 def validate_query_str(query: str) -> None:
@@ -54,14 +51,12 @@ class ProdCommonInfo(forms.ModelForm):
             "prod_cate_no": autocomplete.ModelSelect2(
                 url="prod_all_cate_autocomplete",
                 attrs={
-                    "data-theme": "bootstrap-5",
                     "data-placeholder": _("輸入一個商品分類編號或是商品名稱"),
                 },
             ),
             "prod_mfr_id": autocomplete.ListSelect2(
                 url="mfr_autocomplete",
                 attrs={
-                    "data-theme": "bootstrap-5",
                     "data-placeholder": _("輸入一個廠商編號或是廠商名稱"),
                 },
             ),
@@ -112,3 +107,12 @@ class ExcelTableUpdateForm(forms.Form):
             attrs={"class": "input-form", "placeholder": table_template}
         ),
     )
+
+
+class ProdRestrictionCreateForm(forms.ModelForm):
+    class Meta:
+        fields = "__all__"
+        model = ProdRestriction
+        widgets = {
+            "pr_prod_no": autocomplete.ModelSelect2(url="prod_autocomplete"),
+        }

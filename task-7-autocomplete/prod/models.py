@@ -3,6 +3,7 @@ from django.db import models
 from django.db.models import Case, F, Value, When
 from django.db.models.functions import Concat, Substr
 from django.urls import reverse
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from manufacturer.models import Manufacturer
 
@@ -170,3 +171,27 @@ class Prod(models.Model):
 
     class Meta:
         ordering = ["prod_no"]
+
+
+class ProdRestriction(models.Model):
+    pr_no = models.BigAutoField(primary_key=True, verbose_name=_("限制編號"))
+    pr_prod_no = models.ForeignKey(
+        verbose_name=_("商品限制編號"),
+        to=Prod,
+        on_delete=models.CASCADE,
+    )
+    pr_unit_price = models.PositiveBigIntegerField(
+        verbose_name=_("商品限制單價"),
+        default=0,
+    )
+    pr_as_case_quantity = models.PositiveIntegerField(
+        verbose_name=_("商品限制成箱數"),
+        default=0,
+    )
+    pr_effective_start_date = models.DateField(
+        verbose_name=_("商品限制生效起日"), default=timezone.now
+    )
+    pr_effective_end_date = models.DateField(
+        verbose_name=_("商品限制生效迄日"),
+        default=timezone.make_aware(timezone.datetime(9999, 1, 1)),
+    )
