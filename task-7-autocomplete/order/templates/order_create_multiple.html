@@ -17,6 +17,7 @@
                         {{ prods_formset.management_form }}
                         {% for prod_form in prods_formset %}
                             {% include "include/orderprod_grid_table.html" with form=prod_form prefix=prefix can_delete=prods_formset.can_delete %}
+                            {% include "base_inputs/non_field_errors.html" with form=prod_form %}
                         {% endfor %}
                     {% endwith %}
                 {% endwith %}

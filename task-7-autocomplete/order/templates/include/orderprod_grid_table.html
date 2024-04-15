@@ -2,6 +2,7 @@
 {% load crispy_forms_field %}
 {% load helper_tags %}
 {% load i18n %}
+{% comment %} TODO: product title will be empty when form is invalid {% endcomment %}
 <div class="gap-3 d-flex flex-row mb-3">
     <div class="input-group">
         {% for field in form %}
@@ -18,7 +19,6 @@
             {% endif %}
         {% endfor %}
     </div>
-    {% include "base_inputs/non_field_errors.html" with form=form %}
     {% translate "刪除" as delete_text %}
     {{ form.DELETE|add_class:"d-none delete-checkbox" }}
     <input type="button"

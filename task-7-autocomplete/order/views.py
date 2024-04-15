@@ -196,6 +196,7 @@ class OrderCreateMultipleView(CreateView):
         order_formset: BaseModelFormSet,
         orderprod_formset_list: List[BaseModelFormSet],
     ):
+        # TODO: orders create after all orderprods are valid
         orders = order_formset.save(commit=False)
         for order in orders:
             order.save()
