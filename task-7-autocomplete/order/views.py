@@ -200,7 +200,8 @@ class OrderCreateMultipleView(CreateView):
         for order in orders:
             order.save()
         if not all((_.is_valid() for _ in orderprod_formset_list)):
-            # TODO: remove orders when orderprod_formset_list is invalid
+            for order in orders:
+                order.delete()
             return self.render_to_response(
                 self.get_context_data(
                     named_formset={
