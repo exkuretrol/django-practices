@@ -25,3 +25,15 @@ class ManufacturerUsernameAutoComplete(autocomplete.Select2QuerySetView):
             qs = qs.filter(Q(username__icontains=self.q) | Q(id__icontains=self.q))
 
         return qs
+
+
+class ManufacturerCurrentUserAutoComplete(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        u = self.request.user
+        qs = u.manufacturer_set.all()
+        if self.q:
+            qs = qs.filter(
+                Q(mfr_name__icontains=self.q) | Q(mfr_full_id__icontains=self.q)
+            )
+
+        return qs

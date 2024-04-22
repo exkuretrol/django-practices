@@ -212,3 +212,37 @@ class OrderRulesFilter(django_filters.FilterSet):
     class Meta:
         model = OrderRule
         fields = []
+
+
+class OrderCirculatedOrderFilter(django_filters.FilterSet):
+    mfr_name = django_filters.ModelChoiceFilter(
+        label="10碼廠編 / 廠商名稱",
+        widget=autocomplete.ModelSelect2(
+            url="mfr_current_user_autocomplete",
+            attrs={
+                # "data-theme": "bootstrap-5",
+                "data-placeholder": _("輸入一個廠商編號或是廠商名稱"),
+                "data-html": True,
+            },
+        ),
+        queryset=Manufacturer.objects.all(),
+    )
+
+    mfr_user_id = django_filters.ModelChoiceFilter(
+        label="訂貨人員",
+        # widget=autocomplete.ModelSelect2(
+        #     url="username_autocomplete",
+        #     attrs={
+        #         "data-placeholder": _("輸入訂貨人員名稱"),
+        #     },
+        # ),
+        queryset=get_user_model().objects.all(),
+    )
+
+    class Meta:
+        model = Manufacturer
+        fields = ["mfr_name"]
+
+    # def __init__(self, *args, **kwargs):
+    #     super().__init__(*args, **kwargs)
+    #     self.form.initial["mfr_user"] = self.request.user

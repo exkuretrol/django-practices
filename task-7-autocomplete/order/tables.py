@@ -183,3 +183,7 @@ class OrderRulesTable(tables.Table):
             "or_effective_start_date",
             "or_effective_end_date",
         )
+
+
+class CirculatedOrderTable(tables.Table):
+    pass

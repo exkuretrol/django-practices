@@ -1,5 +1,6 @@
 from typing import Any
 
+from dal import autocomplete
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView
 from django.http import HttpRequest
@@ -8,6 +9,7 @@ from django.urls import reverse_lazy
 from django.views.generic import CreateView, TemplateView
 
 from .forms import CustomUserAuthenticationForm, CustomUserCreationForm
+from .models import CustomUser
 
 
 class SignUpView(CreateView):
@@ -27,3 +29,11 @@ class ProfileView(LoginRequiredMixin, TemplateView):
         context = self.get_context_data(**kwargs)
         context["mfrs"] = request.user.manufacturer_set.all()
         return self.render_to_response(context)
+
+
+class UsernameAutocomplete(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        qs = CustomUser.objects.all().order_by("username")
+        if self.q:
+            qs = qs.filter(username__icontains=self.q)
+        return qs

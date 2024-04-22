@@ -4,20 +4,23 @@ from typing import List
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Button, Submit
 from dal import autocomplete
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.forms import modelformset_factory
 from django.forms.models import BaseModelFormSet
+from django.http import QueryDict
 from django.http.response import HttpResponse as HttpResponse
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
+from django.utils.datastructures import MultiValueDict
 from django.utils.translation import gettext as _
-from django.views.generic import UpdateView
+from django.views.generic import ListView, UpdateView
 from django.views.generic.edit import CreateView, FormView
 from django_filters.views import FilterView
 from django_tables2 import SingleTableMixin
 from manufacturer.models import Manufacturer
 from prod.models import Prod
 
-from .filters import OrderFilter, OrderRulesFilter
+from .filters import OrderCirculatedOrderFilter, OrderFilter, OrderRulesFilter
 from .forms import (
     OrderBeforeCreateForm,
     OrderCreateForm,
@@ -29,7 +32,7 @@ from .forms import (
     get_order_no_from_day,
 )
 from .models import Order, OrderProd
-from .tables import OrderRulesTable, OrderTable
+from .tables import CirculatedOrderTable, OrderRulesTable, OrderTable
 
 
 class OrderListView(SingleTableMixin, FilterView):
@@ -278,3 +281,23 @@ class OrderNoAutocomplete(autocomplete.Select2QuerySetView):
         if self.q:
             qs = qs.filter(od_no__startswith=self.q)
         return qs.order_by("-od_no")
+
+
+class OrderCirculatedOrderView(LoginRequiredMixin, SingleTableMixin, FilterView):
+    filterset_class = OrderCirculatedOrderFilter
+    table_class = CirculatedOrderTable
+    template_name = "order_circulated_order.html"
+    paginate_by = 1
+
+    def get_queryset(self):
+        return Manufacturer.objects.all().order_by("mfr_id")
+
+    def get_filterset_kwargs(self, filterset_class):
+        kwargs = super().get_filterset_kwargs(filterset_class)
+        if kwargs["data"]:
+            pass
+        else:
+            qd = QueryDict(mutable=True)
+            qd.update({"mfr_user_id": self.request.user.pk})
+            kwargs["data"] = qd
+        return kwargs

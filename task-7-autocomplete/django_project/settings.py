@@ -58,10 +58,10 @@ INSTALLED_APPS = [
     "django_seed",
     "django_filters",
     "django_tables2",
-    # "debug_toolbar",
+    "debug_toolbar",
     "crispy_forms",
     "crispy_bootstrap5",
-    "silk",
+    # "silk",
     # local apps
     "prod",
     "accounts",
@@ -82,8 +82,8 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     # 3rd party
     # "django_browser_reload.middleware.BrowserReloadMiddleware",
-    # "debug_toolbar.middleware.DebugToolbarMiddleware",
-    "silk.middleware.SilkyMiddleware",
+    "debug_toolbar.middleware.DebugToolbarMiddleware",
+    # "silk.middleware.SilkyMiddleware",
 ]
 
 ROOT_URLCONF = "django_project.urls"

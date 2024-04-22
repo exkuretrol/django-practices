@@ -1,8 +1,9 @@
 from django.urls import path
-from django.views.generic import FormView
+from django.views.generic import TemplateView
 
 from .views import (
     OrderBeforeCreateView,
+    OrderCirculatedOrderView,
     OrderCreateMultipleView,
     OrderCreateView,
     OrderListView,
@@ -37,6 +38,11 @@ urlpatterns = [
         "order/rules/",
         OrderRulesView.as_view(),
         name="order_rules",
+    ),
+    path(
+        "order/circulated_order/",
+        OrderCirculatedOrderView.as_view(),
+        name="order_circulated_order",
     ),
     # autocomplete
     path(
