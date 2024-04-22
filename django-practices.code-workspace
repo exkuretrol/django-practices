@@ -8,10 +8,6 @@
         "[html][django-html][handlebars][hbs][mustache][jinja][jinja-html][nj][njk][nunjucks][twig]": {
             "editor.formatOnSave": true,
             "editor.defaultFormatter": "monosans.djlint",
-            "workbench.editor.languageDetection": false
-        },
-        "[css]": {
-            "workbench.editor.languageDetection": false
         },
         "[python]": {
             "editor.defaultFormatter": "ms-python.black-formatter",
@@ -23,6 +19,13 @@
         "[javascript]": {
             "editor.formatOnSave": true,
         },
-        "isort.args": ["--profile", "black"]
+        "isort.args": [
+            "--profile",
+            "black"
+        ],
+        "files.associations": {
+            "*.html": "django-html",
+        },
+        "makefile.makefilePath": "./task-7-autocomplete/MakeFile"
     }
 }
