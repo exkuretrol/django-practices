@@ -11848,4 +11848,8 @@ textarea.form-control-lg {
   --bs-btn-color: white;
 }
 
+.cursor-not-allowed {
+  cursor: not-allowed;
+}
+
 /*# sourceMappingURL=output.css.map */
