@@ -7,7 +7,10 @@ from crispy_forms.layout import Submit
 from dal import autocomplete
 from django import forms
 from django.core.exceptions import NON_FIELD_ERRORS
+from django.core.files.base import File
+from django.db.models.base import Model
 from django.forms import inlineformset_factory, modelformset_factory
+from django.forms.utils import ErrorList
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from manufacturer.models import Manufacturer
@@ -498,3 +501,17 @@ class OrderRuleCreateForm(forms.ModelForm):
                 url="prod_all_cate_autocomplete"
             ),
         }
+
+
+class CirculatedOrderManufacturerForm(forms.ModelForm):
+    mfr_id = forms.ChoiceField(choices=(), label="廠商名稱")
+
+    class Meta:
+        model = Manufacturer
+        fields = ["mfr_id"]
+
+    def __init__(self, choices, initial=None, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["mfr_id"].choices = choices
+        if initial:
+            self.fields["mfr_id"].initial = choices[initial]

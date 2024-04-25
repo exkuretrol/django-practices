@@ -26,6 +26,22 @@
         "files.associations": {
             "*.html": "django-html",
         },
-        "makefile.makefilePath": "./task-7-autocomplete/MakeFile"
+        "makefile.makefilePath": "./task-7-autocomplete/MakeFile",
+        "todohighlight.exclude": [
+            "**/node_modules/**",
+            "**/bower_components/**",
+            "**/dist/**",
+            "**/build/**",
+            "**/.vscode/**",
+            "**/.github/**",
+            "**/_output/**",
+            "**/*.min.*",
+            "**/*.map",
+            "**/.next/**",
+            "**/static/**",
+            "**/staticfiles/**",
+            "**/migrations/**",
+            "**/task-[1-6]-*/**",
+        ]
     }
 }

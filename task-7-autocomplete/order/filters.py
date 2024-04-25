@@ -215,34 +215,31 @@ class OrderRulesFilter(django_filters.FilterSet):
 
 
 class OrderCirculatedOrderFilter(django_filters.FilterSet):
-    mfr_name = django_filters.ModelChoiceFilter(
-        label="10碼廠編 / 廠商名稱",
-        widget=autocomplete.ModelSelect2(
-            url="mfr_current_user_autocomplete",
-            attrs={
-                # "data-theme": "bootstrap-5",
-                "data-placeholder": _("輸入一個廠商編號或是廠商名稱"),
-                "data-html": True,
-            },
-        ),
-        queryset=Manufacturer.objects.all(),
-    )
-
     mfr_user_id = django_filters.ModelChoiceFilter(
         label="訂貨人員",
+        empty_label=None,
         # widget=autocomplete.ModelSelect2(
         #     url="username_autocomplete",
         #     attrs={
         #         "data-placeholder": _("輸入訂貨人員名稱"),
         #     },
         # ),
-        queryset=get_user_model().objects.all(),
+        queryset=get_user_model().objects.filter(manufacturer__isnull=False).distinct(),
     )
 
     class Meta:
         model = Manufacturer
-        fields = ["mfr_name"]
+        fields = []
 
-    # def __init__(self, *args, **kwargs):
+    # def get_mfrs(self, request):
+    #     if request is None:
+    #         return Manufacturer.objects.none()
+    #     u = request.user
+    #     if "mfr_user_id" in request.GET:
+    #         u = request.GET["mfr_user_id"]
+    #     mfrs = Manufacturer.objects.filter(mfr_user_id=u)
+    #     return mfrs
+
+    # def __init__(self, request, *args, **kwargs):
     #     super().__init__(*args, **kwargs)
-    #     self.form.initial["mfr_user"] = self.request.user
+    #     self.filters["mfr_name"].queryset = self.get_mfrs(request)

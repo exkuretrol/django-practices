@@ -1,13 +1,20 @@
 {% extends "_base.html" %}
 {% load prod_extra %}
 {% block content %}
-    {% for object in object_list %}{{ object.mfr_id }} {{ object.mfr_full_id }} {{ object.mfr_name }}{% endfor %}
+    <ul>
+        {% for object in object_list %}
+            <li>{{ object.mfr_id }} / {{ object.mfr_full_id }} / {{ object.mfr_name }}</li>
+        {% empty %}
+            <li>no data</li>
+        {% endfor %}
+    </ul>
     {% if filter %}
         <form action="" method="get">
             {{ filter.form.as_p }}
             <input type="submit" value="query">
         </form>
     {% endif %}
+    {% if form %}{{ form.as_p }}{% endif %}
     <div class="pagination">
         <span class="page-item">
             {% if page_obj.has_previous %}
@@ -32,4 +39,5 @@
 {% endblock content %}
 {% block head %}
     {{ filter.form.media }}
+    {% include "include/head/order_circulated_order_head.html" %}
 {% endblock head %}

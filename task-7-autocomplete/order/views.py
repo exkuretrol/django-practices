@@ -1,6 +1,7 @@
 import re
 from typing import List
 
+from accounts.models import CustomUser
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Button, Submit
 from dal import autocomplete
@@ -22,6 +23,7 @@ from prod.models import Prod
 
 from .filters import OrderCirculatedOrderFilter, OrderFilter, OrderRulesFilter
 from .forms import (
+    CirculatedOrderManufacturerForm,
     OrderBeforeCreateForm,
     OrderCreateForm,
     OrderFormset,
@@ -32,7 +34,7 @@ from .forms import (
     get_order_no_from_day,
 )
 from .models import Order, OrderProd
-from .tables import CirculatedOrderTable, OrderRulesTable, OrderTable
+from .tables import OrderRulesTable, OrderTable
 
 
 class OrderListView(SingleTableMixin, FilterView):
@@ -283,14 +285,29 @@ class OrderNoAutocomplete(autocomplete.Select2QuerySetView):
         return qs.order_by("-od_no")
 
 
-class OrderCirculatedOrderView(LoginRequiredMixin, SingleTableMixin, FilterView):
+class OrderCirculatedOrderView(LoginRequiredMixin, FilterView, FormView):
+    form_class = CirculatedOrderManufacturerForm
     filterset_class = OrderCirculatedOrderFilter
-    table_class = CirculatedOrderTable
     template_name = "order_circulated_order.html"
     paginate_by = 1
 
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        u = self.request.user
+        if "mfr_user_id" in self.request.GET:
+            u = self.request.GET["mfr_user_id"]
+        mfrs = Manufacturer.objects.filter(mfr_user_id=u)
+        mfrs_options = [(mfr.pk, mfr.mfr_name) for mfr in mfrs]
+        kwargs["choices"] = mfrs_options
+        if "page" in self.request.GET:
+            kwargs["initial"] = int(self.request.GET["page"]) - 1
+        return kwargs
+
     def get_queryset(self):
-        return Manufacturer.objects.all().order_by("mfr_id")
+        u = self.request.user
+        if "mfr_user_id" in self.request.GET:
+            u = CustomUser.objects.get(pk=self.request.GET["mfr_user_id"])
+        return Manufacturer.objects.filter(mfr_user_id=u).order_by("mfr_id")
 
     def get_filterset_kwargs(self, filterset_class):
         kwargs = super().get_filterset_kwargs(filterset_class)
@@ -301,3 +318,7 @@ class OrderCirculatedOrderView(LoginRequiredMixin, SingleTableMixin, FilterView)
             qd.update({"mfr_user_id": self.request.user.pk})
             kwargs["data"] = qd
         return kwargs
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        return ctx
