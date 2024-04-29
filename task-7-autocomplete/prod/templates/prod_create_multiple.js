@@ -46,10 +46,12 @@ $(function () {
             let cells = row.split("\t");
             let obj = {};
             let htmlTr = $("<tr>");
-            for (let cell_num in cells) {
-                let cell = cells[cell_num];
-                let header = get_header(cell_num);
+            for (i = 0; i < cells.length; i++) {
+                let cell = cells[i];
+                let header = get_header(i);
                 if (row_num !== "0") {
+                    if (i === 0 || i === 4 || i === 6 || i === 7 || i === 8)
+                        cell = parseInt(cell);
                     obj[header] = cell;
                 }
                 let htmlTd = $("<td>");
@@ -86,22 +88,27 @@ $(function () {
             "prod_no",
             "prod_name",
             "prod_desc",
-            "prod_type",
             "prod_img",
             "prod_quantity",
-            "prod_status",
+            "prod_cate_no",
+            "prod_sales_status",
+            "prod_quality_assurance_status",
+            "prod_mfr_id",
         ];
         return headers[cell_num] || "";
     }
 
     function create_prods(json) {
         $.ajax({
-            url: "{% url 'ajax_create_prods' %}",
+            url: "{% url 'api:create_product' %}",
             method: "post",
-            headers: { "X-CSRFToken": "{{ csrf_token }}" },
-            data: { prods: JSON.stringify(json) },
+            headers: {
+                "X-CSRFToken": "{{ csrf_token }}",
+                "Content-Type": "application/json",
+            },
+            data: JSON.stringify(json),
             success: (_) => {
-                output.text(_["message"])
+                output.text(_["message"]);
             },
         });
     }

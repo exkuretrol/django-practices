@@ -13,7 +13,9 @@ $(function () {
             } else {
                 tbl_json = generate_table(table_str);
 
-                $("#id_prod_no").val(extract_product_no_to_list(tbl_json).join(","))
+                $("#id_prod_no").val(
+                    extract_product_no_to_list(tbl_json).join(",")
+                );
                 btn_update.removeAttr("disabled").removeClass("disabled");
             }
         }, 800);
@@ -56,11 +58,13 @@ $(function () {
     }
 
     /**
-     * 
-     * @param {[Object]} table_json 
+     *
+     * @param {[Object]} table_json
      */
     function extract_product_no_to_list(table_json) {
-        return table_json.map((prod) => {return prod.prod_no})
+        return table_json.map((prod) => {
+            return prod.prod_no;
+        });
     }
 
     /**
@@ -84,17 +88,20 @@ $(function () {
     }
 
     /**
-     * 
-     * @param {[Object]} obj_list 
+     *
+     * @param {[Object]} obj_list
      */
     function update_prods(obj_list) {
         $.ajax({
-            url: "{% url 'ajax_update_prods' %}",
-            method: "post",
-            headers: { "X-CSRFToken": "{{ csrf_token }}" },
-            data: { prods: JSON.stringify(obj_list) },
+            url: "{% url 'api:update_products' %}",
+            method: "put",
+            headers: {
+                "X-CSRFToken": "{{ csrf_token }}",
+                "Content-Type": "application/json",
+            },
+            data: JSON.stringify(obj_list),
             success: (_) => {
-                $("#btn_query").trigger("click")
+                $("#btn_query").trigger("click");
             },
         });
     }

@@ -4,6 +4,7 @@
     <script>{% include "prod_create_multiple.js" %}</script>
 {% endblock head %}
 {% block content %}
+    {% comment %} TODO: add server side verification {% endcomment %}
     <h2 class="page-title">新增多個商品</h2>
     <form action="" method="post">
         {{ form | crispy }}

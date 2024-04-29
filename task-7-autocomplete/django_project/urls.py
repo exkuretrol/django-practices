@@ -25,6 +25,8 @@ from django.urls import include, path
 from django.views.generic import TemplateView
 from prod.models import Prod
 
+from .api import api
+
 try:
     last_prod = Prod.objects.last()
 except OperationalError:
@@ -48,6 +50,8 @@ urlpatterns = [
     # path("__reload__/", include("django_browser_reload.urls")),
     # debug
     path("__debug__/", include("debug_toolbar.urls")),
+    # ninja api
+    path("api/", api.urls),
 ]
 
 # performance profiling
