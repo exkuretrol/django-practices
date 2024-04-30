@@ -1,0 +1,13 @@
+{% extends "_base.html" %}
+{% load crispy_forms_tags %}
+{% load django_tables2 %}
+{% block content %}
+    <form action="" method="get">
+        {{ filter.form.as_p }}
+        <input type="submit" value="送出">
+    </form>
+    {% render_table table %}
+{% endblock content %}
+{% block head %}
+    {{ filter.form.media }}
+{% endblock head %}

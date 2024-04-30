@@ -1,0 +1,81 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="description"
+              content="use django to connect to relational-database and make a todo app">
+        <meta name="keywords" content="django, postgresql">
+        <title>
+            {% block title %}
+                {% if title %}
+                    {{ title }}
+                {% else %}
+                    Django Project
+                {% endif %}
+            {% endblock title %}
+        </title>
+        <script src="{% static 'js/jquery-3.7.1.min.js' %}"></script>
+        <link rel="stylesheet" href="{% static 'css/output.css' %}">
+        <link rel="stylesheet"
+              href="{% static 'css/select2-bootstrap-5-theme.min.css' %}">
+        {% block head %}
+        {% endblock head %}
+    </head>
+    {% block body %}
+        <body>
+            <nav class="navbar navbar-expand-lg mb-2 sticky-top bg-body-tertiary">
+                <div class="container-xxl">
+                    <a href="{% url 'home' %}" class="navbar-brand">
+                        {% if title %}
+                            {{ title }}
+                        {% else %}
+                            Django Project
+                        {% endif %}
+                    </a>
+                    <button class="navbar-toggler"
+                            type="button"
+                            data-bs-toggle="collapse"
+                            data-bs-target="#navbarSupportedContent"
+                            aria-controls="navbarSupportedContent"
+                            aria-expanded="false"
+                            aria-label="Toggle navigation">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                        <ul class="ms-auto navbar-nav">
+                            <li class="nav-item">
+                                <a href="{% url 'admin:index' %}" class="ml-auto nav-link">管理</a>
+                            </li>
+                            {% if user.is_authenticated %}
+                                <li class="nav-item">
+                                    <a href="{% url 'profile' %}" class="nav-link">* 你好 {{ user.username }} ! *</a>
+                                </li>
+                                <li class="nav-item">
+                                    <form action="{% url 'logout' %}" method="post">
+                                        {% csrf_token %}
+                                        <input type="submit" value="- 登出 -" class="nav-link">
+                                    </form>
+                                </li>
+                            {% else %}
+                                <li class="nav-item">
+                                    <a href="{% url 'login' %}" class="ml-auto nav-link">+ 登入 +</a>
+                                </li>
+                            {% endif %}
+                            {% block nav %}
+                            {% endblock nav %}
+                        </ul>
+                    </div>
+                </div>
+            </nav>
+            <div class="container">
+                {% block content %}
+                {% endblock content %}
+            </div>
+            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+                    integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+                    crossorigin="anonymous"></script>
+        </body>
+    {% endblock body %}
+</html>

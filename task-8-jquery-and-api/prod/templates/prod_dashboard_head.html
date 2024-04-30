@@ -1,0 +1,4 @@
+{% load static %}
+<script src="{% static 'js/d3.v7.min.js' %}"></script>
+{{ prod_cate_data|json_script:"prod_cate_data" }}
+<script type="module" src="{% static 'js/prod_dashboard.js' %}"></script>

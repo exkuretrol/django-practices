@@ -12,7 +12,7 @@
             "**/static": true,
             "**/staticfiles": true,
             "**/migrations": true,
-            "**/task-[1-6]-*": true,
+            "**/task-[1-7]-*": true,
             "*.code-workspace": true,
         },
         "[html][django-html]": {
@@ -37,7 +37,7 @@
             "*.html": "django-html",
             "*.js": "javascript",
         },
-        "makefile.makefilePath": "./task-7-autocomplete/MakeFile",
+        "makefile.makefilePath": "./task-8-autocomplete/MakeFile",
         "todohighlight.exclude": [
             "**/node_modules/**",
             "**/bower_components/**",
@@ -54,6 +54,6 @@
             "**/migrations/**",
             "**/task-[1-6]-*/**",
         ],
-        "terminal.integrated.cwd": "${workspaceFolder}/task-7-autocomplete",
+        "terminal.integrated.cwd": "${workspaceFolder}/task-8-jquery-and-api",
     }
 }

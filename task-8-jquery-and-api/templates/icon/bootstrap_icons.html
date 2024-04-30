@@ -1,0 +1,7 @@
+{% load static %}
+<svg class="bi"
+     width="{% if width %}{{ width }}{% else %}16{% endif %}"
+     height="{% if height %}{{ height }}{% else %}16{% endif %}"
+     fill="currentColor">
+    <use xlink:href="{% static 'sprite/bootstrap-icons.svg' %}#{{ icon }}" />
+</svg>
