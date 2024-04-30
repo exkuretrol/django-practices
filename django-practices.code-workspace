@@ -5,6 +5,16 @@
         }
     ],
     "settings": {
+        "search.exclude": {
+            "**/node_modules": true,
+            "**/.vscode": true,
+            "**/.github": true,
+            "**/static": true,
+            "**/staticfiles": true,
+            "**/migrations": true,
+            "**/task-[1-6]-*": true,
+            "*.code-workspace": true,
+        },
         "[html][django-html]": {
             "editor.formatOnSave": true,
             "editor.defaultFormatter": "monosans.djlint",
