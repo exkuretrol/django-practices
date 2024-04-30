@@ -1,5 +1,6 @@
 {% extends "_base.html" %}
 {% load prod_extra %}
+{% load django_tables2 %}
 {% block content %}
     <ul>
         {% for object in object_list %}
@@ -18,7 +19,7 @@
     <div class="pagination">
         <span class="page-item">
             {% if page_obj.has_previous %}
-                <a href="?{% query_transform page=page_obj.previous_page_number %}"
+                <a href="?{% query_transform mfr_page=page_obj.previous_page_number %}"
                    class="page-link ">{% include "icon/bootstrap_icons.html" with icon="caret-left-fill" %}</a>
             {% else %}
                 <a class="page-link cursor-not-allowed">{% include "icon/bootstrap_icons.html" with icon="caret-left-fill" %}</a>
@@ -29,13 +30,15 @@
         </span>
         <span class="page-item">
             {% if page_obj.has_next %}
-                <a href="?{% query_transform page=page_obj.next_page_number %}"
+                <a href="?{% query_transform mfr_page=page_obj.next_page_number %}"
                    class="page-link">{% include "icon/bootstrap_icons.html" with icon="caret-right-fill" %}</a>
             {% else %}
                 <a class="page-link cursor-not-allowed">{% include "icon/bootstrap_icons.html" with icon="caret-right-fill" %}</a>
             {% endif %}
         </span>
     </div>
+    <input type="button" value="產生訂單" field="btn-place-order">
+    {% render_table table %}
 {% endblock content %}
 {% block head %}
     {{ filter.form.media }}

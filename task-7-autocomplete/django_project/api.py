@@ -54,6 +54,10 @@ class ProductOutput(Schema):
     prod_mfr_id_id: int
 
 
+class OrderCreate(Schema):
+    od_no: int
+
+
 class Message(Schema):
     message: str
 
@@ -180,3 +184,8 @@ def update_products(request, data: List[ProductUpdateQuantity]):
         product.save()
 
     return 200, {"message": "Products updated successfully"}
+
+
+@api.post("/order", response={200: Success, 404: Error})
+def create_order(request, data: OrderCreate):
+    return 200, {"message": "Order created successfully"}

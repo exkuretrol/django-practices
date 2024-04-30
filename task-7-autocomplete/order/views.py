@@ -6,6 +6,8 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Button, Submit
 from dal import autocomplete
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.paginator import Paginator
+from django.db.models.query import QuerySet
 from django.forms import modelformset_factory
 from django.forms.models import BaseModelFormSet
 from django.http import QueryDict
@@ -34,7 +36,7 @@ from .forms import (
     get_order_no_from_day,
 )
 from .models import Order, OrderProd
-from .tables import OrderRulesTable, OrderTable
+from .tables import CirculatedOrderTable, OrderRulesTable, OrderTable
 
 
 class OrderListView(SingleTableMixin, FilterView):
@@ -285,11 +287,15 @@ class OrderNoAutocomplete(autocomplete.Select2QuerySetView):
         return qs.order_by("-od_no")
 
 
-class OrderCirculatedOrderView(LoginRequiredMixin, FilterView, FormView):
+class OrderCirculatedOrderView(
+    LoginRequiredMixin, SingleTableMixin, FilterView, FormView
+):
     form_class = CirculatedOrderManufacturerForm
     filterset_class = OrderCirculatedOrderFilter
     template_name = "order_circulated_order.html"
+    table_class = CirculatedOrderTable
     paginate_by = 1
+    page_kwarg = "mfr_page"
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
@@ -299,9 +305,22 @@ class OrderCirculatedOrderView(LoginRequiredMixin, FilterView, FormView):
         mfrs = Manufacturer.objects.filter(mfr_user_id=u)
         mfrs_options = [(mfr.pk, mfr.mfr_name) for mfr in mfrs]
         kwargs["choices"] = mfrs_options
-        if "page" in self.request.GET:
-            kwargs["initial"] = int(self.request.GET["page"]) - 1
+        if self.page_kwarg in self.request.GET:
+            kwargs["initial"] = int(self.request.GET[self.page_kwarg]) - 1
         return kwargs
+
+    def get_table_pagination(self, table):
+        paginate = super().get_table_pagination(table)
+        paginate["per_page"] = 5
+        return paginate
+
+    def get_table_data(self):
+        if self.object_list:
+            mfr_page = self.request.GET.get(self.page_kwarg, 1)
+            current_mfr = self.object_list[int(mfr_page) - 1]
+            return current_mfr.prod_set.all()
+        else:
+            return Prod.objects.none()
 
     def get_queryset(self):
         u = self.request.user

@@ -183,3 +183,54 @@ class OrderRulesTable(tables.Table):
             "or_effective_start_date",
             "or_effective_end_date",
         )
+
+
+class CirculatedOrderTable(tables.Table):
+    co_func = tables.Column(verbose_name="功能", empty_values=(), orderable=False)
+    co_total_quantity = tables.Column(
+        verbose_name="庫存合計", empty_values=(), orderable=False
+    )
+    co_order_quantity = tables.Column(
+        verbose_name="訂貨數量", empty_values=(), orderable=False
+    )
+
+    def render_co_total_quantity(self, record, value):
+        return format_html(
+            f"""
+            <input type="number" value="{record.prod_quantity}" disabled field="total-quantity"/>
+"""
+        )
+
+    def render_co_order_quantity(self, record, value):
+        return format_html(
+            f"""
+            <input type="number" value="0" field="order-quantity"/>
+"""
+        )
+
+    def render_prod_quantity(self, record, value):
+        return format_html(
+            f"""
+            <input type="number" value="{value}" field="prod-quantity" disabled/>
+"""
+        )
+
+    def render_co_func(self, record):
+        return format_html(
+            f"""
+        <input class="form-check-input" type="checkbox" value="">
+"""
+        )
+
+    class Meta:
+        model = Prod
+        fields = [
+            "co_func",
+            "prod_no",
+            "prod_name",
+            "prod_mfr_id",
+            "prod_cate_no",
+            "prod_quantity",
+        ]
+        per_page = 10
+        row_attrs = {"data-id": lambda record: record.pk}
