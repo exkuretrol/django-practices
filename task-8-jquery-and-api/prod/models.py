@@ -106,15 +106,65 @@ class ProdCategory(models.Model):
 
 
 class SalesStatusChoices(models.IntegerChoices):
-    NORMAL = 0, _("正常")
-    ABNORMAL = 1, _("異常 (因為商品品質異常暫時停止銷售)")
+    ABNORMAL = 0, _("異常 (因為商品品質異常暫時停止銷售)")
+    NORMAL = 1, _("正常")
 
 
 class QualityAssuranceStatusChoices(models.IntegerChoices):
-    NORMAL = 0, _("正常追蹤")
-    NEW_PROD = 1, _("新產品追蹤")
-    CASE = 2, _("案例追蹤")
-    LICENSE = 3, _("證照追蹤")
+    NORMAL = 1, _("正常追蹤")
+    NEW_PROD = 2, _("新產品追蹤")
+    CASE = 3, _("案例追蹤")
+    LICENSE = 4, _("證照追蹤")
+
+
+class UnitChoices(models.IntegerChoices):
+    INDIVIDUAL = 1, _("個")
+    PIECE1 = 2, _("條")
+    UNIT = 3, _("台")
+    BOTTLE = 4, _("瓶")
+    SET = 5, _("組")
+    KIT = 6, _("套")
+    PACK = 7, _("打")
+    BAG1 = 8, _("包")
+    BOX = 9, _("盒")
+    CAN = 10, _("罐")
+    BLOCK = 11, _("塊")
+    ITEM = 12, _("件")
+    SINGLE = 13, _("只")
+    PORTION = 14, _("份")
+    PIECE2 = 15, _("片")
+    BUCKET = 16, _("桶")
+    STICK = 17, _("支")
+    CUP = 18, _("杯")
+    PAIR = 19, _("雙")
+    SHEET = 20, _("張")
+    CARD = 21, _("卡")
+    STRING = 22, _("串")
+    BOOK = 23, _("本")
+    ROLL1 = 24, _("捲")
+    ROLL2 = 25, _("卷")
+    CASE = 31, _("箱")
+    BOWL = 55, _("碗")
+    TOP = 60, _("頂")
+    BAG2 = 61, _("袋")
+
+
+class SellZoneChoices(models.TextChoices):
+    COSMED_PHYSICAL = "1", _("康是美實體")
+    COSMED_EC = "2", _("康是美EC")
+    COSMED_PHYSICAL_EC = "3", _("康是美實體+EC")
+    UNIKCY_PHYSICAL = "4", _("UNIKCY 實體")
+    UNIKCY_EC = "5", _("UNIKCY EC")
+    UNIKCY_PHYSICAL_EC = "6", _("UNIKCY 實體+EC")
+    COSMED_PHYSICAL_UNIKCY_PHYSICAL = "7", _("康是美實體 / UNIKCY 實體")
+    COSMED_PHYSICAL_UNIKCY_EC = "8", _("康是美實體 / UNIKCY EC")
+    COSMED_PHYSICAL_UNIKCY_PHYSICAL_EC = "9", _("康是美實體 / UNIKCY 實體+EC")
+    COSMED_EC_UNIKCY_PHYSICAL = "A", _("康是美EC / UNIKCY 實體")
+    COSMED_EC_UNIKCY_EC = "B", _("康是美EC / UNIKCY EC")
+    COSMED_EC_UNIKCY_PHYSICAL_EC = "C", _("康是美EC / UNIKCY 實體+EC")
+    COSMED_PHYSICAL_EC_UNIKCY_PHYSICAL = "D", _("康是美實體+EC / UNIKCY 實體")
+    COSMED_PHYSICAL_EC_UNIKCY_EC = "E", _("康是美實體+EC / UNIKCY EC")
+    COSMED_PHYSICAL_EC_UNIKCY_PHYSICAL_EC = "F", _("康是美實體+EC / UNIKCY 實體+EC")
 
 
 class Prod(models.Model):
@@ -131,6 +181,9 @@ class Prod(models.Model):
         blank=True,
     )
     prod_quantity = models.PositiveIntegerField(default=0, verbose_name=_("商品數量"))
+    prod_unit = models.PositiveSmallIntegerField(
+        default=UnitChoices.INDIVIDUAL, choices=UnitChoices, verbose_name=_("商品單位")
+    )
 
     prod_cate_no = models.ForeignKey(
         verbose_name=_("商品分類編號"),
@@ -139,9 +192,14 @@ class Prod(models.Model):
         null=True,
     )
 
-    prod_effective_date = models.DateField(
-        verbose_name=_("商品生效日期"),
+    prod_effective_start_date = models.DateField(
+        verbose_name=_("商品生效起日"),
         auto_now_add=True,
+    )
+
+    prod_effective_end_date = models.DateField(
+        verbose_name=_("商品生效迄日"),
+        default=timezone.make_aware(timezone.datetime(9999, 1, 1)),
     )
 
     prod_sales_status = models.PositiveSmallIntegerField(
@@ -155,6 +213,15 @@ class Prod(models.Model):
         choices=QualityAssuranceStatusChoices,
         default=QualityAssuranceStatusChoices.NORMAL,
     )
+
+    prod_cost_price = models.FloatField(verbose_name=_("商品成本價格"))
+
+    prod_retail_price = models.FloatField(verbose_name=_("商品零售價格"))
+
+    prod_sell_zone = models.CharField(max_length=1, verbose_name=_("商品銷售區域"))
+
+    prod_outer_quantity = models.PositiveIntegerField(verbose_name=_("商品箱入數"))
+    prod_inner_quantity = models.PositiveIntegerField(verbose_name=_("商品收縮數"))
 
     prod_mfr_id = models.ForeignKey(
         verbose_name=_("商品廠商 ID"),

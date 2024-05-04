@@ -25,7 +25,7 @@ class Manufacturer(models.Model):
         max_length=2,
         validators=[
             RegexValidator(
-                r"^\d{2}$",
+                r"^[a-zA-Z0-9]{2}$",
                 message="您必須輸入 2 位數的廠商次要編號。",
             )
         ],
