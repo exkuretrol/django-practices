@@ -18,7 +18,9 @@ class Command(BaseCommand):
     def handle(self, *args, **options) -> str | None:
         self.stdout.write("importing data...")
         empty()
-        parse_csv(options["csv"])
+        # parse_csv(options["csv"])
+        parse_csv_v2(options["csv"])
+
         self.stdout.write("done")
 
 
@@ -87,6 +89,67 @@ def parse_csv(filename: str):
                 c["Duplicated"] += 1
 
         print(c)
+
+    else:
+        print(f"File {filename} not exist!")
+        exit()
+
+
+def parse_csv_v2(filename: str):
+    curr_path = Path().cwd()
+    path_to_file = curr_path / filename
+    if path_to_file.exists():
+        df = pd.read_csv(path_to_file, header=0, dtype=str)
+        df = df.astype(
+            {
+                "product_no": int,
+                "sale_status": int,
+                "product_unit": int,
+                "outer_quantity": float,
+                "inner_quantity": float,
+                "sell_zone": str,
+                "qa_status": int,
+                "manufacturer_id": str,
+                "effective_start_date": str,
+                "effective_end_date": str,
+                "cost_price": float,
+                "retail_price": float,
+                "product_name": str,
+                "category": str,
+                "sub_category": str,
+                "sub_sub_category": str,
+            }
+        )
+        df["category"] = df["category"].str.replace(".0", "").str.zfill(6)
+        df["sub_category"] = df["sub_category"].str.replace(".0", "").str.zfill(6)
+        df["sub_sub_category"] = (
+            df["sub_sub_category"].str.replace(".0", "").str.zfill(6)
+        )
+        df["outer_quantity"] = df["outer_quantity"].astype(int)
+        df["inner_quantity"] = df["inner_quantity"].astype(int)
+        for _, row in df.iterrows():
+            try:
+                mfr_id = row["manufacturer_id"].zfill(10)
+                mfr = Manufacturer.objects.get(mfr_full_id=mfr_id)
+                cate_no = ProdCategory.objects.get(cate_no=row["sub_sub_category"])
+                Prod.objects.create(
+                    prod_no=row["product_no"],
+                    prod_name=row["product_name"],
+                    prod_unit=row["product_unit"],
+                    prod_effective_start_date=row["effective_start_date"],
+                    prod_effective_end_date=row["effective_end_date"],
+                    prod_sales_status=row["sale_status"],
+                    prod_quality_assurance_status=row["qa_status"],
+                    prod_cate_no=cate_no,
+                    prod_cost_price=row["cost_price"],
+                    prod_retail_price=row["retail_price"],
+                    prod_sell_zone=row["sell_zone"],
+                    prod_outer_quantity=row["outer_quantity"],
+                    prod_inner_quantity=row["inner_quantity"],
+                    prod_mfr_id=mfr,
+                )
+            except Exception as e:
+                print(f"{row["sub_sub_category"]}")
 
     else:
         print(f"File {filename} not exist!")
