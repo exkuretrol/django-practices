@@ -185,14 +185,64 @@ class OrderRulesTable(tables.Table):
         )
 
 
+class SummingColums(tables.Column):
+    def render_footer(self, bound_column, table):
+        return format_html(
+            f"<input type='number' value='0' disabled field='{bound_column.name}'/>"
+        )
+
+
 class CirculatedOrderTable(tables.Table):
-    co_func = tables.Column(verbose_name="功能", empty_values=(), orderable=False)
+    co_func = tables.Column(
+        verbose_name="功能", empty_values=(), orderable=False, footer="合計"
+    )
     co_total_quantity = tables.Column(
         verbose_name="庫存合計", empty_values=(), orderable=False
     )
     co_order_quantity = tables.Column(
         verbose_name="訂貨數量", empty_values=(), orderable=False
     )
+    co_box_quantity = tables.Column(
+        verbose_name="收縮 / 箱入數", empty_values=(), orderable=False
+    )
+    co_order_box_quantity = SummingColums(
+        verbose_name="訂貨箱數", empty_values=(), orderable=False
+    )
+    co_order_cost_price = SummingColums(
+        verbose_name="訂貨未稅金額", empty_values=(), orderable=False
+    )
+    co_prod_cost_price = tables.Column(
+        verbose_name="商品未稅金額", empty_values=(), orderable=False
+    )
+
+    def render_co_prod_cost_price(self, record, value):
+        return format_html(
+            f"""
+        <input type="number" value="{record.prod_cost_price}" field="prod-cost-price" disabled/>
+        """
+        )
+
+    def render_co_order_box_quantity(self, record, value):
+        return format_html(
+            """
+        <input type="number" value="0" field="order-box-quantity" disabled/>
+        """
+        )
+
+    def render_co_order_cost_price(self, record):
+        return format_html(
+            """
+        <input type="number" value="0" field="order-cost-price" disabled/>
+        """
+        )
+
+    def render_co_box_quantity(self, record, value):
+        return format_html(
+            f"""
+            <input type="number" value="{record.prod_outer_quantity}" disabled field="outer-quantity"/>
+            <input type="number" value="{record.prod_inner_quantity}" disabled field="inner-quantity"/>
+            """
+        )
 
     def render_co_total_quantity(self, record, value):
         return format_html(
@@ -228,8 +278,6 @@ class CirculatedOrderTable(tables.Table):
             "co_func",
             "prod_no",
             "prod_name",
-            "prod_mfr_id",
-            "prod_cate_no",
             "prod_quantity",
         ]
         per_page = 10
