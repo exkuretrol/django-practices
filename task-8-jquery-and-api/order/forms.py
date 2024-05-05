@@ -90,6 +90,20 @@ class OrderProdUpdateForm(forms.ModelForm):
     field_order = ["op_prod", "op_quantity", "op_status"]
 
 
+def get_rule(or_prod_no, or_type: OrderRuleTypeChoices):
+    rule = None
+    try:
+        rule = OrderRule.objects.filter(
+            or_type=or_type,
+            or_prod_no=or_prod_no,
+            or_effective_start_date__lte=timezone.now(),
+            or_effective_end_date__gte=timezone.now(),
+        )
+    except OrderRule.DoesNotExist:
+        pass
+    return rule
+
+
 class OrderProdCreateForm(forms.ModelForm):
     op_prod = forms.CharField(
         label="產品名稱", disabled=True, empty_value=(), required=False
@@ -124,21 +138,8 @@ class OrderProdCreateForm(forms.ModelForm):
             pass
         return pr
 
-    def get_rule(self, or_type: OrderRuleTypeChoices):
-        rule = None
-        try:
-            rule = OrderRule.objects.filter(
-                or_type=or_type,
-                or_prod_no=self.cleaned_data["op_prod_no"],
-                or_effective_start_date__lte=timezone.now(),
-                or_effective_end_date__gte=timezone.now(),
-            )
-        except OrderRule.DoesNotExist:
-            pass
-        return rule
-
     def check_order_rule_prod(self):
-        rule = self.get_rule(OrderRuleTypeChoices.Product)
+        rule = get_rule(self.cleaned_data["or_prod_no"], OrderRuleTypeChoices.Product)
         if rule.exists():
             if self.pr is None:
                 self.add_error(

@@ -254,7 +254,7 @@ class CirculatedOrderTable(tables.Table):
     def render_co_order_quantity(self, record, value):
         return format_html(
             f"""
-            <input type="number" value="0" field="order-quantity"/>
+            <input type="number" class="form-control" style="width: 120px" value="0" field="order-quantity"/>
 """
         )
 
