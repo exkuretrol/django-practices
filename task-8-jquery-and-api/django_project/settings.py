@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 
 from pathlib import Path
 
+from constance import config
 from environs import Env
 
 env = Env()
@@ -62,6 +63,7 @@ INSTALLED_APPS = [
     "crispy_forms",
     "crispy_bootstrap5",
     "django_extensions",
+    "constance",
     # "silk",
     # local apps
     "prod",
@@ -122,6 +124,7 @@ DATABASES = {
     }
 }
 
+CONSTANCE_BACKEND = "constance.backends.database.DatabaseBackend"
 
 from collections import OrderedDict
 
@@ -131,12 +134,21 @@ CONSTANCE_CONFIG = OrderedDict(
         ("NUM", (87, "description", int)),
         ("BOOL", (False, "description", bool)),
         ("FLOAT", (3.14, "description", float)),
+        (
+            "CIRCULATED_ORDER_PER_PAGE_ITEMS",
+            (40, "設定定期訂貨頁面的產品預設顯示數目", int),
+        ),
     ]
 )
 
 CONSTANCE_CONFIG_FIELDSETS = {
-    "General Options": ("STR", "NUM", "BOOL"),
-    "Section 2": ("FLOAT",),
+    "General Options": (
+        "STR",
+        "NUM",
+        "BOOL",
+        "FLOAT",
+    ),
+    "訂單": ("CIRCULATED_ORDER_PER_PAGE_ITEMS",),
 }
 
 

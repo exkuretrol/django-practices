@@ -1,6 +1,12 @@
 from django.urls import path
 
-from .views import CustomLoginView, ProfileView, SignUpView, UsernameAutocomplete
+from .views import (
+    ConfigView,
+    CustomLoginView,
+    ProfileView,
+    SignUpView,
+    UsernameAutocomplete,
+)
 
 urlpatterns = [
     path("signup/", SignUpView.as_view(), name="signup"),
@@ -12,4 +18,5 @@ urlpatterns = [
         UsernameAutocomplete.as_view(),
         name="username_autocomplete",
     ),
+    path("config/", ConfigView.as_view(), name="config"),
 ]

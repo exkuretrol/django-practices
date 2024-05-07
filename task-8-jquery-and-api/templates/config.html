@@ -1,0 +1,35 @@
+{% extends "_base.html" %}
+{% block content %}
+    <form id="changelist-form"
+          action=""
+          method="post"
+          enctype="multipart/form-data">
+        {% csrf_token %}
+        {% if form.non_field_errors %}
+            <ul class="errorlist">
+                {% for error in form.non_field_errors %}<li>{{ error }}</li>{% endfor %}
+            </ul>
+        {% endif %}
+        {% if form.errors %}<ul class="errorlist">{% endif %}
+            {% for field in form.hidden_fields %}
+                {% for error in field.errors %}<li>{{ error }}</li>{% endfor %}
+                {{ field }}
+            {% endfor %}
+            {% if form.errors %}</ul>{% endif %}
+        {% if fieldsets %}
+            {% for fieldset in fieldsets %}
+                <fieldset class="module{% if fieldset.collapse %} collapse{% endif %}">
+                    <h2>{{ fieldset.title }}</h2>
+                    {% with config_values=fieldset.config_values %}
+                        {% include "admin/constance/includes/results_list.html" %}
+                    {% endwith %}
+                </fieldset>
+            {% endfor %}
+        {% else %}
+            {% include "admin/constance/includes/results_list.html" %}
+        {% endif %}
+        <p class="paginator sticky-footer">
+            <input type="submit" name="_save" class="default" value="Save" />
+        </p>
+    </form>
+{% endblock content %}

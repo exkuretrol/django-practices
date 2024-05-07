@@ -2,6 +2,7 @@ import re
 from typing import List
 
 from accounts.models import CustomUser
+from constance import config
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Button, Submit
 from dal import autocomplete
@@ -311,7 +312,7 @@ class OrderCirculatedOrderView(
 
     def get_table_pagination(self, table):
         paginate = super().get_table_pagination(table)
-        paginate["per_page"] = 5
+        paginate["per_page"] = config.CIRCULATED_ORDER_PER_PAGE_ITEMS
         return paginate
 
     def get_table_data(self):
