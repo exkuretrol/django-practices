@@ -3,6 +3,7 @@ from typing import List, Optional
 from django.db.utils import IntegrityError
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
+from django.utils.translation import gettext as _
 from manufacturer.models import Manufacturer
 from ninja import NinjaAPI, Schema
 from ninja.responses import codes_4xx
@@ -13,6 +14,7 @@ from prod.models import (
     ProdCategory,
     QualityAssuranceStatusChoices,
     SalesStatusChoices,
+    UnitChoices,
 )
 
 api = NinjaAPI(urls_namespace="api")
@@ -82,7 +84,7 @@ class Errors(Schema):
 
 
 class Success(MessageSchema):
-    pass
+    obj: Optional[str | int] = None
 
 
 @api.get("/product/{prod_no}", response={200: ProductOutput, 404: Error})
@@ -219,7 +221,7 @@ def update_products(request, data: List[ProductUpdateQuantity]):
     return 200, {"message": "Products updated successfully"}
 
 
-@api.post("/order/orderproduct", response={200: Success, 400: Errors})
+@api.post("/order", response={200: Success, 400: Errors})
 def create_order(request, data: OrderSchema):
     error_list = []
     order_mfr_id = None
@@ -238,11 +240,17 @@ def create_order(request, data: OrderSchema):
             )
             continue
 
+        case_num = order_product.prod_quantity / (
+            product.prod_outer_quantity * product.prod_inner_quantity
+        )
+        order_price = product.prod_cost_price * order_product.prod_quantity
+        prod_unit = UnitChoices(product.prod_unit).label
+
         if order_product.prod_quantity <= 0:
             error_list.append(
                 {
                     "code": "quantity_too_low",
-                    "message": "Quantity should be greater than 0",
+                    "message": _("產品數量應大於 0 {unit}").format(unit=prod_unit),
                     "obj": order_product.prod_no,
                 }
             )
@@ -250,52 +258,56 @@ def create_order(request, data: OrderSchema):
 
         p_rules = get_rule(product, OrderRuleTypeChoices.Product)
         if p_rules.exists():
-            case_num = order_product.prod_quantity / (
-                product.prod_outer_quantity * product.prod_inner_quantity
-            )
-            order_price = product.prod_cost_price * order_product.prod_quantity
-            for p_rule in p_rules:
-                if p_rule.or_cannot_order:
+            for rule in p_rules:
+                if rule.or_cannot_order:
                     error_list.append(
                         {
                             "code": "cannot_order",
-                            "message": "Product cannot be ordered",
+                            "message": _("該產品目前無法下訂"),
                             "obj": order_product.prod_no,
                         }
                     )
                     continue
-                if not p_rule.or_cannot_be_shipped_as_case:
+                if not rule.or_cannot_be_shipped_as_case:
                     if not case_num.is_integer():
                         error_list.append(
                             {
                                 "code": "not_as_case",
-                                "message": f"Case number should be integer for this product, current case number: {case_num:.2f}",
+                                "message": _(
+                                    "這個產品的訂貨箱數應為整數，目前為：{case_num:.2f} 箱"
+                                ).format(case_num=case_num),
                                 "obj": order_product.prod_no,
                             }
                         )
-                if p_rule.or_order_amount is not None:
-                    if order_price < p_rule.or_order_amount:
+                if rule.or_order_amount is not None:
+                    if order_price < rule.or_order_amount:
                         error_list.append(
                             {
-                                "code": "order_amount_too_low",
-                                "message": f"Order amount too low, minimum order amount: {p_rule.or_order_amount}",
+                                "code": "order_product_price_too_low",
+                                "message": _("該產品下訂總價格應大於 {prod_no}").format(
+                                    prod_no=rule.or_order_amount
+                                ),
                                 "obj": order_product.prod_no,
                             }
                         )
-                if p_rule.or_order_quantity_cases is not None:
-                    print(p_rule.or_order_quantity_cases, case_num)
-                    if case_num < p_rule.or_order_quantity_cases:
+                if rule.or_order_quantity_cases is not None:
+                    print(rule.or_order_quantity_cases, case_num)
+                    if case_num < rule.or_order_quantity_cases:
                         error_list.append(
                             {
                                 "code": "order_quantity_too_low",
-                                "message": f"Order quantity too low, minimum order case quantity: {p_rule.or_order_quantity_cases}",
+                                "message": _(
+                                    "該產品下訂數應大於 {order_case_quantity} 箱"
+                                ).format(
+                                    order_case_quantity=rule.or_order_quantity_cases
+                                ),
                                 "obj": order_product.prod_no,
                             }
                         )
     if len(error_list) != 0:
         return 400, {"errors": error_list}
     if data.action == "validation":
-        return 200, {"message": "Order validated successfully"}
+        return 200, {"message": _("訂單驗證成功")}
     order = Order.objects.create(
         od_no=get_order_no_from_day() + 1,
         od_mfr_id=order_mfr_id,
@@ -308,4 +320,7 @@ def create_order(request, data: OrderSchema):
             op_od_no=order, op_prod_no=product, op_quantity=order_product.prod_quantity
         )
 
-    return 200, {"message": f"Order {order.od_no} created successfully"}
+    return 200, {
+        "message": _("訂單 {od_no} 建立成功").format(od_no=order.od_no),
+        "obj": order.od_no,
+    }
