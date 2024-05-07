@@ -52,7 +52,7 @@
             "**/static/**",
             "**/staticfiles/**",
             "**/migrations/**",
-            "**/task-[1-6]-*/**",
+            "**/task-[1-7]-*/**",
         ],
         "terminal.integrated.cwd": "${workspaceFolder}/task-8-jquery-and-api",
     }
