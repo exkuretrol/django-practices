@@ -743,6 +743,23 @@ files = [
 ]
 
 [[package]]
+name = "django-constance"
+version = "3.1.0"
+description = "Django live settings with pluggable backends, including Redis."
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "django-constance-3.1.0.tar.gz", hash = "sha256:2b96e51de63751ef63f8f92f74e0f6aea30fb6453f3a736c21e1f8b3f6cf0b4f"},
+    {file = "django_constance-3.1.0-py3-none-any.whl", hash = "sha256:6242486a346e396d765a9333d17f3101c8613cabc92e0b98dcb70c2a391bc53b"},
+]
+
+[package.dependencies]
+django-picklefield = "*"
+
+[package.extras]
+redis = ["redis"]
+
+[[package]]
 name = "django-crispy-forms"
 version = "2.1"
 description = "Best way to have Django DRY forms"
@@ -818,6 +835,23 @@ pydantic = ">=2.0,<3.0.0"
 dev = ["pre-commit"]
 doc = ["markdown-include", "mkdocs", "mkdocs-material", "mkdocstrings"]
 test = ["django-stubs", "mypy (==1.7.1)", "psycopg2-binary", "pytest", "pytest-asyncio", "pytest-cov", "pytest-django", "ruff (==0.1.7)"]
+
+[[package]]
+name = "django-picklefield"
+version = "3.2"
+description = "Pickled object field for Django"
+optional = false
+python-versions = ">=3"
+files = [
+    {file = "django-picklefield-3.2.tar.gz", hash = "sha256:aa463f5d79d497dbe789f14b45180f00a51d0d670067d0729f352a3941cdfa4d"},
+    {file = "django_picklefield-3.2-py3-none-any.whl", hash = "sha256:e9a73539d110f69825d9320db18bcb82e5189ff48dbed41821c026a20497764c"},
+]
+
+[package.dependencies]
+Django = ">=3.2"
+
+[package.extras]
+tests = ["tox"]
 
 [[package]]
 name = "django-seed"
@@ -2927,4 +2961,4 @@ cffi = ["cffi (>=1.11)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "eb96213d495ac7d0456513f77396e711e3f15893508c7d8adecc9d7c1a80d583"
+content-hash = "982d2ee1b3c53183e2de7f4419c518e6fc1d0a40e550da108ef57c3ec5ff2bdd"

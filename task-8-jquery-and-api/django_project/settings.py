@@ -123,6 +123,23 @@ DATABASES = {
 }
 
 
+from collections import OrderedDict
+
+CONSTANCE_CONFIG = OrderedDict(
+    [
+        ("STR", ("My Title", "Website title")),
+        ("NUM", (87, "description", int)),
+        ("BOOL", (False, "description", bool)),
+        ("FLOAT", (3.14, "description", float)),
+    ]
+)
+
+CONSTANCE_CONFIG_FIELDSETS = {
+    "General Options": ("STR", "NUM", "BOOL"),
+    "Section 2": ("FLOAT",),
+}
+
+
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
 
