@@ -1,5 +1,34 @@
 const data = document.currentScript.dataset;
 $(function () {
+    function alert_div_set(status, message = "") {
+        var alert_div = $("div[role=alert]");
+
+        alert_div.removeClass("alert-success").removeClass("alert-danger");
+        if (status == "hidden") {
+            alert_div.addClass("d-none");
+            return;
+        }
+        alert_div.removeClass("d-none");
+        if (status == "success") {
+            alert_div.addClass("alert-success");
+        }
+        if (status == "error") {
+            alert_div.addClass("alert-danger");
+        }
+        alert_div.text(message);
+    }
+
+    function product_feedbacks_set(status) {
+        if (status == "show") {
+            $("table th:first").removeClass("d-none");
+            $("table tr").find("td:first").removeClass("d-none");
+        }
+        if (status == "hidden") {
+            $("table th:first").addClass("d-none");
+            $("table tr").find("td:first").addClass("d-none");
+        }
+    }
+
     $("select[name=mfr_id]").on("change", function () {
         var selected_option_index = $(this).prop("selectedIndex") + 1;
         var url = new URL(window.location.href);
@@ -46,7 +75,7 @@ $(function () {
 
         var box_quantity =
             order_quantity / (outer_quantity_field * inner_quantity_field);
-        order_box_quantity_field.val(box_quantity);
+        order_box_quantity_field.val(box_quantity.toFixed(2));
 
         total_quantity_field.val(order_quantity + prod_quantity);
         updateTotalQuantity();
@@ -97,11 +126,17 @@ $(function () {
         sum_of_order_cost_price_field.val(sum_of_order_cost_price);
     }
 
+    function get_checked_products() {
+        return $("table input[type=checkbox]:checked").parent().parent();
+    }
+
     function constructOrder(action) {
         var order_products = [];
-        var target_tr = $("table input[type=checkbox]:checked")
-            .parent()
-            .parent();
+        var target_tr = get_checked_products();
+        if (target_tr.length == 0) {
+            alert_div_set("error", "請選擇至少一個產品！");
+            return { action: action, products: order_products };
+        }
         target_tr.each(function () {
             var order_quantity = parseInt(
                 $(this).find("input[field=order-quantity]").val()
@@ -116,28 +151,40 @@ $(function () {
     }
 
     function handle_error(err) {
-        var errors = err.responseJSON.errors;
-        for (let error of errors) {
-            var target_tr = $(`tr[data-id=${error.obj}]`);
-            var target_input = target_tr.find("input[field=order-quantity]");
-            var feedback = target_input.next();
-            if (feedback.length > 0 && feedback.children().length > 0) {
-                feedback.children().append(`<li>${error.message}</li>`);
-            } else {
-                target_input.after(
-                    `<div class='invalid-feedback'><ul><li>${error.message}</li></ul></div>`
+        if (err.status == 400) {
+            product_feedbacks_set("show");
+            var errors = err.responseJSON.errors;
+            for (let error of errors) {
+                var target_tr = $(`tr[data-id=${error.obj}]`);
+                var invalid_input = target_tr.find(
+                    "input[field=order-quantity]"
                 );
+                var feedback = target_tr.find("div[field=feedback]");
+                feedback.addClass("alert alert-danger");
+                if (feedback.children().length > 0) {
+                    feedback.children().append(`<li>${error.message}</li>`);
+                } else {
+                    feedback.append(`<ul><li>${error.message}</li></ul>`);
+                }
+                invalid_input.removeClass("is-valid").addClass("is-invalid");
             }
-            target_input.removeClass("is-valid").addClass("is-invalid");
+            if (errors.length > 0) {
+                get_checked_products()
+                    .find("input[field=order-quantity]")
+                    .first()
+                    .trigger("focus");
+            }
+        } else {
+            alert_div_set("error", "伺服器錯誤，請稍後再試！");
         }
-        if (errors.length > 0) {
-            $("input[type=checkbox]:checked")
-                .parent()
-                .parent()
-                .find("input[field=order-quantity]")
-                .first()
-                .trigger("focus");
-        }
+    }
+
+    function reset_feedbacks() {
+        $("div[field=feedback]").children().remove();
+        alert_div_set("hidden");
+        $("input[field=order-quantity]").removeClass("is-invalid");
+        $("input[field=order-quantity]").removeClass("is-valid");
+        product_feedbacks_set("hidden");
     }
 
     $("input[field=btn-validation]").on("click", () => {
@@ -150,20 +197,13 @@ $(function () {
             dataTyle: "json",
             contentType: "application/json",
             beforeSend: function () {
-                $("input[field=order-quantity]").removeClass("is-invalid");
-                $("input[field=order-quantity]").removeClass("is-valid");
-                $(".invalid-feedback").children().remove();
-                $("input[type=checkbox]:checked")
-                    .parent()
-                    .parent()
+                reset_feedbacks();
+                get_checked_products()
                     .find("input[field=order-quantity]")
                     .addClass("is-valid");
             },
             success: function (data) {
-                var alert_div = $("div[role=alert]");
-                alert_div.removeClass("alert-danger");
-                alert_div.addClass("alert-success");
-                alert_div.text(data.message);
+                alert_div_set("success", data.message);
             },
             error: function (err) {
                 handle_error(err);
@@ -173,7 +213,6 @@ $(function () {
 
     $("input[field=btn-place-order]").on("click", () => {
         var order_obj = constructOrder("place");
-        var alert_div = $("div[role=alert]");
         $.ajax({
             type: "POST",
             url: data.createOrderUrl,
@@ -181,13 +220,10 @@ $(function () {
             dataTyle: "json",
             contentType: "application/json",
             beforeSend: function () {
-                alert_div.removeClass("alert-danger");
-                alert_div.removeClass("alert-success");
-                alert_div.text("");
+                reset_feedbacks();
             },
             success: function (data) {
-                alert_div.addClass("alert-success");
-                alert_div.text(data.message);
+                alert_div_set("success", data.message);
             },
             error: function (err) {
                 handle_error(err);

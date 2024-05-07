@@ -193,6 +193,16 @@ class SummingColums(tables.Column):
 
 
 class CirculatedOrderTable(tables.Table):
+    co_feedback = tables.Column(
+        verbose_name="回饋",
+        empty_values=(),
+        orderable=False,
+        attrs={
+            "td": {"style": "min-width: 320px", "class": "d-none"},
+            "th": {"class": "d-none"},
+        },
+    )
+
     co_func = tables.Column(
         verbose_name="功能", empty_values=(), orderable=False, footer="合計"
     )
@@ -214,6 +224,9 @@ class CirculatedOrderTable(tables.Table):
     co_prod_cost_price = tables.Column(
         verbose_name="商品未稅金額", empty_values=(), orderable=False
     )
+
+    def render_co_feedback(self, record):
+        return format_html("<div field='feedback'></div>")
 
     def render_co_prod_cost_price(self, record, value):
         return format_html(
@@ -275,6 +288,7 @@ class CirculatedOrderTable(tables.Table):
     class Meta:
         model = Prod
         fields = [
+            "co_feedback",
             "co_func",
             "prod_no",
             "prod_name",
