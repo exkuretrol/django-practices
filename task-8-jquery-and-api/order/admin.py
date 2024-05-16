@@ -37,9 +37,9 @@ class OrderRulesAdmin(admin.ModelAdmin):
         "or_mfr_id",
         "or_prod_cate_no",
         "or_cannot_order",
-        "or_cannot_be_shipped_as_case",
-        "or_order_amount",
-        "or_order_quantity_cases",
+        "or_shipped_as_case",
+        "or_order_price",
+        "or_order_cases_quantity",
         "or_effective_start_date",
         "or_effective_end_date",
     ]

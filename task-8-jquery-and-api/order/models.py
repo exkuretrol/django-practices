@@ -120,13 +120,13 @@ class OrderRule(models.Model):
     or_cannot_order = models.BooleanField(
         verbose_name=_("訂單規則不可訂貨"), default=False
     )
-    or_cannot_be_shipped_as_case = models.BooleanField(
-        verbose_name=_("訂單規則可不成箱"), default=False
+    or_shipped_as_case = models.BooleanField(
+        verbose_name=_("訂單規則須成箱"), default=False
     )
-    or_order_amount = models.PositiveBigIntegerField(
+    or_order_price = models.PositiveBigIntegerField(
         verbose_name=_("訂單規則訂貨金額"), null=True, blank=True, default=None
     )
-    or_order_quantity_cases = models.PositiveBigIntegerField(
+    or_order_cases_quantity = models.PositiveBigIntegerField(
         verbose_name=_("訂單規則訂貨箱數"), null=True, blank=True, default=None
     )
     or_notes = models.TextField(
@@ -139,3 +139,26 @@ class OrderRule(models.Model):
         verbose_name=_("訂單規則生效迄日"),
         default=timezone.make_aware(timezone.datetime(9999, 1, 1)),
     )
+
+    def __str__(self):
+        attrs = []
+        attrs.append(f"type: {OrderRuleTypeChoices(self.or_type).label}")
+        if self.or_type == OrderRuleTypeChoices.Product:
+            attrs.append(f"obj: {self.or_prod_no}")
+        elif self.or_type == OrderRuleTypeChoices.Manufacturer:
+            attrs.append(f"obj: {self.or_mfr_id}")
+        else:
+            attrs.append(f"obj: {self.or_prod_cate_no}")
+
+        if self.or_cannot_order:
+            attrs.append("orderable: False")
+        if self.or_shipped_as_case:
+            attrs.append("as_case: True")
+        if self.or_order_price:
+            attrs.append(f"order_price: {self.or_order_price}")
+        if self.or_order_cases_quantity:
+            attrs.append(f"order_cases: {self.or_order_cases_quantity}")
+        if self.or_notes:
+            attrs.append(f"notes: {self.or_notes}")
+
+        return f"rule ({self.pk}) {", ".join(attrs)}"

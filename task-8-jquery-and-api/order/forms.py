@@ -1,6 +1,7 @@
 import csv
 import datetime
 from io import StringIO
+from typing import Union
 
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit
@@ -11,7 +12,7 @@ from django.forms import inlineformset_factory, modelformset_factory
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from manufacturer.models import Manufacturer
-from prod.models import Prod, ProdRestriction
+from prod.models import Prod, ProdCategory, ProdRestriction
 
 from .models import Order, OrderProd, OrderRule, OrderRuleTypeChoices
 
@@ -90,18 +91,21 @@ class OrderProdUpdateForm(forms.ModelForm):
     field_order = ["op_prod", "op_quantity", "op_status"]
 
 
-def get_rule(or_prod_no, or_type: OrderRuleTypeChoices):
-    rule = None
-    try:
-        rule = OrderRule.objects.filter(
-            or_type=or_type,
-            or_prod_no=or_prod_no,
-            or_effective_start_date__lte=timezone.now(),
-            or_effective_end_date__gte=timezone.now(),
-        )
-    except OrderRule.DoesNotExist:
-        pass
-    return rule
+def get_rule(
+    or_item: Union[Prod, ProdCategory, Manufacturer], or_type: OrderRuleTypeChoices
+):
+    rules = OrderRule.objects.filter(
+        or_type=or_type,
+        or_effective_start_date__lte=timezone.now(),
+        or_effective_end_date__gte=timezone.now(),
+    )
+    if or_type == OrderRuleTypeChoices.Product:
+        rules = rules.filter(or_prod_no=or_item.pk)
+    elif or_type == OrderRuleTypeChoices.ProductCategory:
+        rules = rules.filter(or_prod_cate_no=or_item.pk)
+    elif or_type == OrderRuleTypeChoices.Manufacturer:
+        rules = rules.filter(or_mfr_id=or_item.pk)
+    return rules
 
 
 class OrderProdCreateForm(forms.ModelForm):
@@ -167,8 +171,8 @@ class OrderProdCreateForm(forms.ModelForm):
                         ),
                     )
                     return
-                if a_rule.or_order_amount is not None and a_rule.or_order_amount > 0:
-                    if order_price < a_rule.or_order_amount:
+                if a_rule.or_order_price is not None and a_rule.or_order_price > 0:
+                    if order_price < a_rule.or_order_price:
                         self.add_error(
                             field=NON_FIELD_ERRORS,
                             error=forms.ValidationError(
@@ -184,12 +188,12 @@ class OrderProdCreateForm(forms.ModelForm):
                                     "unit_price": self.pr.pr_unit_price,
                                     "order_price": order_price,
                                     "order_rule_no": a_rule.or_id,
-                                    "order_amount": a_rule.or_order_amount,
+                                    "order_amount": a_rule.or_order_price,
                                 },
                             ),
                         )
-                if not a_rule.or_cannot_be_shipped_as_case:
-                    if a_rule.or_order_quantity_cases > 0:
+                if a_rule.shipped_as_case:
+                    if a_rule.or_order_cases_quantity > 0:
                         if not case_num.is_integer():
                             self.add_error(
                                 field=NON_FIELD_ERRORS,
@@ -206,7 +210,7 @@ class OrderProdCreateForm(forms.ModelForm):
                                     },
                                 ),
                             )
-                        if case_num < a_rule.or_order_quantity_cases:
+                        if case_num < a_rule.or_order_cases_quantity:
                             self.add_error(
                                 field=NON_FIELD_ERRORS,
                                 error=forms.ValidationError(
@@ -219,7 +223,7 @@ class OrderProdCreateForm(forms.ModelForm):
                                             "op_prod_no"
                                         ].prod_name,
                                         "case_num": case_num,
-                                        "quantity": a_rule.or_order_quantity_cases,
+                                        "quantity": a_rule.or_order_cases_quantity,
                                         "as_case_quantity": self.pr.pr_as_case_quantity,
                                     },
                                 ),
