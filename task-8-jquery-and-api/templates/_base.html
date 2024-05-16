@@ -8,13 +8,11 @@
               content="use django to connect to relational-database and make a todo app">
         <meta name="keywords" content="django, postgresql">
         <title>
-            {% block title %}
-                {% if title %}
-                    {{ title }}
-                {% else %}
-                    Django Project
-                {% endif %}
-            {% endblock title %}
+            {% if title %}
+                {{ title }}
+            {% else %}
+                Django Project
+            {% endif %}
         </title>
         <script src="{% static 'js/jquery-3.7.1.min.js' %}"></script>
         <link rel="stylesheet" href="{% static 'css/output.css' %}">

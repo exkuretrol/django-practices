@@ -221,22 +221,75 @@ INTERNAL_IPS = [
 
 # Logging
 # https://docs.djangoproject.com/en/dev/topics/logging/
-# import os
-# LOGGING = {
-#     'version': 1,
-#     'disable_existing_loggers': False,
-#     'handlers': {
-#         'console': {
-#             'class': 'logging.StreamHandler',
-#         },
-#     },
-#     'loggers': {
-#         'django.template': {
-#             'handlers': ['console'],
-#             'level': os.getenv('DJANGO_LOG_LEVEL', 'DEBUG'),
-#         },
-#     },
-# }
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "rich": {
+            "datefmt": "[%X]",
+        }
+    },
+    "handlers": {
+        "console": {
+            "class": "rich.logging.RichHandler",
+            "formatter": "rich",
+            "level": env.str("LOG_LEVEL", default="DEBUG"),
+            "rich_tracebacks": True,
+            "tracebacks_show_locals": True,
+        },
+    },
+    "loggers": {
+        "django.utils.autoreload": {
+            "handlers": ["console"],
+            "level": "ERROR",
+            "propagate": False,
+        },
+        "django": {
+            "handlers": ["console"],
+            "level": env.str("DJANGO_LOG_LEVEL", default="INFO"),
+            "propagate": False,
+        },
+        # api
+        "ninja": {
+            "handlers": ["console"],
+            "level": env.str("API_LOG_LEVEL", default="DEBUG"),
+            "propagate": False,
+        },
+        "django_project.api": {
+            "handlers": ["console"],
+            "level": env.str("API_LOG_LEVEL", default="DEBUG"),
+            "propagate": False,
+        },
+        # apps
+        "order": {
+            "handlers": ["console"],
+            "level": env.str("APP_LOG_LEVEL", default="DEBUG"),
+            "propagate": False,
+        },
+        "accounts": {
+            "handlers": ["console"],
+            "level": env.str("APP_LOG_LEVEL", default="DEBUG"),
+            "propagate": False,
+        },
+        "prod": {
+            "handlers": ["console"],
+            "level": env.str("APP_LOG_LEVEL", default="DEBUG"),
+            "propagate": False,
+        },
+        "manufacturer": {
+            "handlers": ["console"],
+            "level": env.str("APP_LOG_LEVEL", default="DEBUG"),
+            "propagate": False,
+        },
+        # 3rd party
+        "debug_toolbar": {
+            "handlers": ["console"],
+            "level": "ERROR",
+            "propagate": False,
+        },
+    },
+    "root": {"handlers": ["console"], "level": "WARNING"},
+}
 
 APP_TITLE = env.str("TITLE", default="Django Project")
 

@@ -1,3 +1,4 @@
+import logging
 from typing import List, Optional
 
 from django.db.utils import IntegrityError
@@ -6,9 +7,8 @@ from django.utils import timezone
 from django.utils.translation import gettext as _
 from manufacturer.models import Manufacturer
 from ninja import NinjaAPI, Schema
-from ninja.responses import codes_4xx
 from order.forms import get_order_no_from_day, get_rule
-from order.models import Order, OrderProd, OrderRule, OrderRuleTypeChoices
+from order.models import Order, OrderProd, OrderRuleTypeChoices
 from prod.models import (
     Prod,
     ProdCategory,
@@ -16,6 +16,9 @@ from prod.models import (
     SalesStatusChoices,
     UnitChoices,
 )
+from rich.pretty import pretty_repr
+
+logger = logging.getLogger(__name__)
 
 api = NinjaAPI(urls_namespace="api")
 
@@ -77,6 +80,7 @@ class MessageSchema(Schema):
 class Error(MessageSchema):
     code: str
     obj: Optional[str | int] = None
+    obj_type: Optional[str] = None
 
 
 class Errors(Schema):
@@ -225,11 +229,13 @@ def update_products(request, data: List[ProductUpdateQuantity]):
 def create_order(request, data: OrderSchema):
     error_list = []
     order_mfr_id = None
+    prod_dict = dict()
     for order_product in data.products:
         try:
-            product = Prod.objects.get(prod_no=order_product.prod_no)
+            prod = Prod.objects.get(prod_no=order_product.prod_no)
             if order_mfr_id is None:
-                order_mfr_id = product.prod_mfr_id
+                order_mfr_id = prod.prod_mfr_id
+            prod_dict.update({prod: order_product.prod_quantity})
         except Prod.DoesNotExist:
             error_list.append(
                 {
@@ -241,86 +247,202 @@ def create_order(request, data: OrderSchema):
             continue
 
         case_num = order_product.prod_quantity / (
-            product.prod_outer_quantity * product.prod_inner_quantity
+            prod.prod_outer_quantity * prod.prod_inner_quantity
         )
-        order_price = product.prod_cost_price * order_product.prod_quantity
-        prod_unit = UnitChoices(product.prod_unit).label
+        order_price = prod.prod_cost_price * order_product.prod_quantity
+        prod_unit = UnitChoices(prod.prod_unit).label
 
         if order_product.prod_quantity <= 0:
             error_list.append(
                 {
                     "code": "quantity_too_low",
-                    "message": _("產品數量應大於 0 {unit}").format(unit=prod_unit),
+                    "message": _("產品數量應大於 0 %(unit)s" % {"unit": prod_unit}),
                     "obj": order_product.prod_no,
                 }
             )
             continue
 
-        p_rules = get_rule(product, OrderRuleTypeChoices.Product)
-        if p_rules.exists():
-            for rule in p_rules:
-                if rule.or_cannot_order:
+        # logger.debug(
+        #     "current iteration:\n\t obj: %(obj_type)s\n\ttype: %(rule_type)s\n---\nrules: %(rules)s\n"
+        #     % {
+        #         "obj_type": obj.__str__(),
+        #         "rule_type": rule_type.name,
+        #         "rules": rules.__str__(),
+        #     }
+        # )
+        rules = get_rule(prod, OrderRuleTypeChoices.Product)
+        if rules.exists():
+            obj_type = prod.__class__.__name__
+            group_obj = prod
+            if len(rules) > 1:
+                logger.warning(
+                    "Multiple rules found for %(obj_type)s %(obj)s"
+                    % {"obj_type": obj_type, "obj": group_obj}
+                )
+                break
+            rule = rules.first()
+            obj_type_name = OrderRuleTypeChoices(rule.or_type).label
+            if rule.or_cannot_order:
+                error_list.append(
+                    {
+                        "code": "cannot_order",
+                        "message": _(
+                            "該%(obj_type_name)s目前無法下訂"
+                            % {"obj_type_name": obj_type_name}
+                        ),
+                        "obj": order_product.prod_no,
+                        "obj_type": obj_type,
+                    }
+                )
+                continue
+            if rule.or_shipped_as_case:
+                if not case_num.is_integer():
                     error_list.append(
                         {
-                            "code": "cannot_order",
-                            "message": _("該產品目前無法下訂"),
+                            "code": "not_as_case",
+                            "message": _(
+                                "該%(obj_type_name)s的訂貨箱數應為整數，目前為：%(case_num).2f 箱"
+                                % {
+                                    "obj_type_name": obj_type_name,
+                                    "case_num": case_num,
+                                }
+                            ),
                             "obj": order_product.prod_no,
+                            "obj_type": obj_type,
                         }
                     )
-                    continue
-                if not rule.or_cannot_be_shipped_as_case:
-                    if not case_num.is_integer():
-                        error_list.append(
-                            {
-                                "code": "not_as_case",
-                                "message": _(
-                                    "這個產品的訂貨箱數應為整數，目前為：{case_num:.2f} 箱"
-                                ).format(case_num=case_num),
-                                "obj": order_product.prod_no,
-                            }
-                        )
-                if rule.or_order_amount is not None:
-                    if order_price < rule.or_order_amount:
-                        error_list.append(
-                            {
-                                "code": "order_product_price_too_low",
-                                "message": _("該產品下訂總價格應大於 {prod_no}").format(
-                                    prod_no=rule.or_order_amount
-                                ),
-                                "obj": order_product.prod_no,
-                            }
-                        )
-                if rule.or_order_quantity_cases is not None:
-                    print(rule.or_order_quantity_cases, case_num)
-                    if case_num < rule.or_order_quantity_cases:
-                        error_list.append(
-                            {
-                                "code": "order_quantity_too_low",
-                                "message": _(
-                                    "該產品下訂數應大於 {order_case_quantity} 箱"
-                                ).format(
-                                    order_case_quantity=rule.or_order_quantity_cases
-                                ),
-                                "obj": order_product.prod_no,
-                            }
-                        )
+            if rule.or_order_price is not None:
+                if order_price < rule.or_order_price:
+                    error_list.append(
+                        {
+                            "code": "order_product_price_too_low",
+                            "message": _(
+                                "該%(obj_type_name)s下訂總金額應大於 %(order_amount)i。"
+                                % {
+                                    "obj_type_name": obj_type_name,
+                                    "order_amount": rule.or_order_price,
+                                }
+                            ),
+                            "obj": order_product.prod_no,
+                            "obj_type": obj_type,
+                        }
+                    )
+            if rule.or_order_cases_quantity is not None:
+                if case_num < rule.or_order_cases_quantity:
+                    error_list.append(
+                        {
+                            "code": "order_quantity_too_low",
+                            "message": _(
+                                "該%(obj_type_name)s下訂數應大於 %(order_case_quantity)s 箱"
+                                % {
+                                    "obj_type_name": obj_type_name,
+                                    "order_case_quantity": rule.or_order_cases_quantity,
+                                }
+                            ),
+                            "obj": order_product.prod_no,
+                            "obj_type": obj_type,
+                        }
+                    )
+    logger.debug(f"product dict:\n{pretty_repr(prod_dict)}")
+
+    for key in ["category", "manufacturer"]:
+        grouped_prods = dict()
+        for prod, l in prod_dict.items():
+            if key == "manufacturer":
+                group_obj = prod.prod_mfr_id
+                rule_type = OrderRuleTypeChoices.Manufacturer
+            else:
+                group_obj = prod.prod_cate_no
+                rule_type = OrderRuleTypeChoices.ProductCategory
+            grouped_prods.setdefault(group_obj, []).append(prod)
+        logger.debug(f"classify by {key}:\n{pretty_repr(grouped_prods)}")
+
+        for group_obj, group_prod_list in grouped_prods.items():
+            rules = get_rule(group_obj, rule_type)
+            obj_type = group_obj.__class__.__name__
+            logger.debug(
+                f"query rules for {obj_type}<{group_obj}>: {rules if len(rules) > 0 else None}"
+            )
+
+            if len(rules) > 1:
+                logger.warning(
+                    "Multiple rules found for %(obj_type)s %(obj)s"
+                    % {"obj_type": obj_type, "obj": group_obj}
+                )
+                error_list.append(
+                    {
+                        "code": "multiple_rules",
+                        "message": _(
+                            "找到多個%(obj_type)s %(obj)s的規則"
+                            % {"obj_type": obj_type, "obj": group_obj}
+                        ),
+                        "obj": str(group_obj),
+                        "obj_type": obj_type,
+                    }
+                )
+                continue
+            if not rules.exists():
+                # rule does not exist
+                continue
+            rule = rules.first()
+            obj_type_name = OrderRuleTypeChoices(rule.or_type).label
+
+            if rule.or_cannot_order:
+                error_list.append(
+                    {
+                        "code": "cannot_order",
+                        "message": _(
+                            "該%(obj_type_name)s目前無法下訂"
+                            % {"obj_type_name": obj_type_name}
+                        ),
+                        "obj": str(group_obj),
+                        "obj_type": obj_type,
+                    }
+                )
+                continue
+            if rule.or_order_price is not None:
+                order_price = sum(
+                    prod.prod_cost_price * order_quantity
+                    for prod, order_quantity in prod_dict.items()
+                    if prod in group_prod_list
+                )
+                logger.debug(f"order_price: {order_price}")
+                if order_price < rule.or_order_price:
+                    error_list.append(
+                        {
+                            "code": "order_price_too_low",
+                            "message": _(
+                                "該%(obj_type_name)s下訂總金額應大於 %(order_amount)i。"
+                                % {
+                                    "obj_type_name": obj_type_name,
+                                    "order_amount": rule.or_order_price,
+                                }
+                            ),
+                            "obj": str(group_obj),
+                            "obj_type": obj_type,
+                        }
+                    )
+
     if len(error_list) != 0:
+        logger.debug(f"error_list:\n{error_list}")
         return 400, {"errors": error_list}
     if data.action == "validation":
         return 200, {"message": _("訂單驗證成功")}
-    order = Order.objects.create(
-        od_no=get_order_no_from_day() + 1,
-        od_mfr_id=order_mfr_id,
-        od_except_arrival_date=timezone.localdate() + timezone.timedelta(days=7),
-    )
-
-    for order_product in data.products:
-        product = Prod.objects.get(prod_no=order_product.prod_no)
-        OrderProd.objects.create(
-            op_od_no=order, op_prod_no=product, op_quantity=order_product.prod_quantity
+    elif data.action == "create":
+        order = Order.objects.create(
+            od_no=get_order_no_from_day() + 1,
+            od_mfr_id=order_mfr_id,
+            od_except_arrival_date=timezone.localdate() + timezone.timedelta(days=7),
         )
 
-    return 200, {
-        "message": _("訂單 {od_no} 建立成功").format(od_no=order.od_no),
-        "obj": order.od_no,
-    }
+        for prod, order_quantity in prod_dict.items():
+            OrderProd.objects.create(
+                op_od_no=order, op_prod_no=prod, op_quantity=order_quantity
+            )
+
+        return 200, {
+            "message": _("訂單 {od_no} 建立成功").format(od_no=order.od_no),
+            "obj": order.od_no,
+        }
+    else:
+        return 400, {"message": _("未知操作")}
