@@ -1,5 +1,5 @@
 import logging
-from typing import List, Optional
+from typing import List, Optional, Union
 
 from django.db.utils import IntegrityError
 from django.shortcuts import get_object_or_404
@@ -71,6 +71,12 @@ class OrderProdSchema(Schema):
 class OrderSchema(Schema):
     products: List[OrderProdSchema]
     action: str
+
+
+class ChecklistSchema(Schema):
+    mfr_full_id: str
+    checklist: Optional[List[int]] = None
+    unchecklist: Optional[List[int]] = None
 
 
 class MessageSchema(Schema):
@@ -446,3 +452,34 @@ def create_order(request, data: OrderSchema):
         }
     else:
         return 400, {"message": _("未知操作")}
+
+
+@api.post("/checklist", response={200: Success, 400: Error})
+def update_checklist(request, data: ChecklistSchema):
+    logger.debug(data)
+    if data.checklist:
+        new_checklist = data.checklist
+
+    if "checklist" in request.session:
+        checklist_tuple_list = request.session.get("checklist")
+        checklist_tuple = checklist_tuple_list[0]
+        mfr_full_id, checklist = checklist_tuple
+        logger.debug(f"(session)\nmfr_full_id: {mfr_full_id}, checklist: {checklist}")
+        if mfr_full_id == data.mfr_full_id and len(checklist) > 0:
+            checkset = set(checklist)
+            if data.unchecklist:
+                checkset = checkset.difference(set(data.unchecklist))
+            if data.checklist:
+                checkset = checkset.union(set(data.checklist))
+            new_checklist = list(checkset)
+            logger.debug("mfr_full_id matched")
+            logger.debug(f"new checklist: {new_checklist}")
+        else:
+            logger.debug("mfr_full_id not matched")
+    else:
+        logger.debug("no checklist in session")
+
+    new_checklist_tuple_list = [(data.mfr_full_id, new_checklist)]
+    request.session["checklist"] = new_checklist_tuple_list
+    logger.debug(f"new checklist tuple list: {new_checklist_tuple_list}")
+    return {"message": _("成功更新"), "obj": str(new_checklist_tuple_list)}
