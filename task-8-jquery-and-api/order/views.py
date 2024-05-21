@@ -8,6 +8,7 @@ from crispy_forms.layout import Button, Submit
 from dal import autocomplete
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.paginator import Paginator
+from django.db.models import Case, QuerySet, When
 from django.db.models.query import QuerySet
 from django.forms import modelformset_factory
 from django.forms.models import BaseModelFormSet
@@ -316,12 +317,15 @@ class OrderCirculatedOrderView(
         return paginate
 
     def get_table_data(self):
-        if self.object_list:
-            mfr_page = self.request.GET.get(self.page_kwarg, 1)
-            current_mfr = self.object_list[int(mfr_page) - 1]
-            return current_mfr.prod_set.all()
-        else:
-            return Prod.objects.none()
+        mfr_page = int(self.request.GET.get(self.page_kwarg, 1))
+        try:
+            current_mfr = self.object_list.__getitem__(mfr_page - 1)
+            if isinstance(current_mfr, Manufacturer):
+                return current_mfr.prod_set.all()
+        except:
+            pass
+
+        return Prod.objects.none()
 
     def get_queryset(self):
         u = self.request.user

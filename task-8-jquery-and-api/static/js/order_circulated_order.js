@@ -1,6 +1,6 @@
 const data = document.currentScript.dataset;
 $(function () {
-    function alert_div_set(status, message = "") {
+    function alert_div_set(status, content = null) {
         var alert_div = $("div[role=alert]");
 
         alert_div.removeClass("alert-success").removeClass("alert-danger");
@@ -9,13 +9,22 @@ $(function () {
             return;
         }
         alert_div.removeClass("d-none");
+        alert_div.empty();
         if (status == "success") {
             alert_div.addClass("alert-success");
         }
         if (status == "error") {
             alert_div.addClass("alert-danger");
         }
-        alert_div.text(message);
+        var list = $("<ul>");
+        if (typeof content == "object") {
+            for (let message of content) {
+                list.append(`<li>${message}</li>`);
+            }
+            alert_div.append(list);
+        } else {
+            alert_div.text(content);
+        }
     }
 
     function product_feedbacks_set(status) {
@@ -40,7 +49,30 @@ $(function () {
 
     $("table tr input[type=checkbox]").on("change", () => {
         updateTotalQuantity();
+        var checklist_obj = construct_checklist();
+        $.ajax({
+            type: "POST",
+            url: data.updateChecklistUrl,
+            data: JSON.stringify(checklist_obj),
+            dataTyle: "json",
+            contentType: "application/json",
+        });
     });
+
+    function construct_checklist() {
+        var checklist = [];
+        var unchecklist = [];
+        $("table tr input[type=checkbox]").each(function () {
+            var prod_no = parseInt($(this).parent().parent().attr("data-id"));
+            if ($(this).prop("checked")) checklist.push(prod_no);
+            else unchecklist.push(prod_no);
+        });
+        return {
+            mfr_full_id: data.manufacturerId,
+            checklist: checklist,
+            unchecklist: unchecklist,
+        };
+    }
 
     $("table tr input[field=order-quantity]").on("change", function () {
         // TODO: when change order box quantity, update order quantity
@@ -150,11 +182,19 @@ $(function () {
         return { action: action, products: order_products };
     }
 
-    function handle_error(err) {
+    function handle_order_error(err) {
         if (err.status == 400) {
-            product_feedbacks_set("show");
             var errors = err.responseJSON.errors;
+            global_errors = [];
             for (let error of errors) {
+                if (
+                    error.obj_type == "Manufacturer" ||
+                    error.obj_type == "ProdCategory"
+                ) {
+                    global_errors.push(error.message);
+                    continue;
+                }
+                product_feedbacks_set("show");
                 var target_tr = $(`tr[data-id=${error.obj}]`);
                 var invalid_input = target_tr.find(
                     "input[field=order-quantity]"
@@ -173,6 +213,9 @@ $(function () {
                     .find("input[field=order-quantity]")
                     .first()
                     .trigger("focus");
+            }
+            if (global_errors.length > 0) {
+                alert_div_set("error", global_errors);
             }
         } else {
             alert_div_set("error", "伺服器錯誤，請稍後再試！");
@@ -206,7 +249,7 @@ $(function () {
                 alert_div_set("success", data.message);
             },
             error: function (err) {
-                handle_error(err);
+                handle_order_error(err);
             },
         });
     });
@@ -226,7 +269,7 @@ $(function () {
                 alert_div_set("success", data.message);
             },
             error: function (err) {
-                handle_error(err);
+                handle_order_error(err);
             },
         });
     });

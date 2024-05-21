@@ -446,6 +446,8 @@ def create_order(request, data: OrderSchema):
                 op_od_no=order, op_prod_no=prod, op_quantity=order_quantity
             )
 
+        if "checklist" in request.session:
+            request.session.pop("checklist")
         return 200, {
             "message": _("訂單 {od_no} 建立成功").format(od_no=order.od_no),
             "obj": order.od_no,

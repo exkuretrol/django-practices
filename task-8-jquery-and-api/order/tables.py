@@ -1,4 +1,5 @@
 import django_tables2 as tables
+from django.db.models import Case, QuerySet, When
 from django.templatetags.static import static
 from django.urls import reverse
 from django.utils import timezone
@@ -203,9 +204,7 @@ class CirculatedOrderTable(tables.Table):
         },
     )
 
-    co_func = tables.Column(
-        verbose_name="功能", empty_values=(), orderable=False, footer="合計"
-    )
+    co_func = tables.Column(verbose_name="功能", empty_values=(), footer="合計")
     co_total_quantity = tables.Column(
         verbose_name="庫存合計", empty_values=(), orderable=False
     )
@@ -231,59 +230,71 @@ class CirculatedOrderTable(tables.Table):
     def render_co_prod_cost_price(self, record, value):
         return format_html(
             f"""
-        <input type="number" value="{record.prod_cost_price}" field="prod-cost-price" disabled/>
-        """
+            <input type="number" value="{record.prod_cost_price}" field="prod-cost-price" disabled/>"""
         )
 
     def render_co_order_box_quantity(self, record, value):
         return format_html(
             """
-        <input type="number" value="0" field="order-box-quantity" disabled/>
-        """
+            <input type="number" value="0" field="order-box-quantity" disabled/>"""
         )
 
     def render_co_order_cost_price(self, record):
         return format_html(
             """
-        <input type="number" value="0" field="order-cost-price" disabled/>
-        """
+            <input type="number" value="0" field="order-cost-price" disabled/>"""
         )
 
     def render_co_box_quantity(self, record, value):
         return format_html(
             f"""
             <input type="number" value="{record.prod_outer_quantity}" disabled field="outer-quantity"/>
-            <input type="number" value="{record.prod_inner_quantity}" disabled field="inner-quantity"/>
-            """
+            <input type="number" value="{record.prod_inner_quantity}" disabled field="inner-quantity"/>"""
         )
 
     def render_co_total_quantity(self, record, value):
         return format_html(
             f"""
-            <input type="number" value="{record.prod_quantity}" disabled field="total-quantity"/>
-"""
+            <input type="number" value="{record.prod_quantity}" disabled field="total-quantity"/>"""
         )
 
     def render_co_order_quantity(self, record, value):
         return format_html(
             f"""
-            <input type="number" class="form-control" style="width: 120px" value="0" field="order-quantity"/>
-"""
+            <input type="number" class="form-control" style="width: 120px" value="0" field="order-quantity"/>"""
         )
 
     def render_prod_quantity(self, record, value):
         return format_html(
             f"""
-            <input type="number" value="{value}" field="prod-quantity" disabled/>
-"""
+            <input type="number" value="{value}" field="prod-quantity" disabled/>"""
         )
 
     def render_co_func(self, record):
+        request = self.request
+        _, checklist = list(request.session.get("checklist"))[0]
+        checked = "checked" if record.prod_no in checklist else ""
         return format_html(
             f"""
-        <input class="form-check-input" type="checkbox" value="">
-"""
+            <input class="form-check-input" type="checkbox" value="" {checked}>"""
         )
+
+    def order_co_func(self, queryset: QuerySet, is_descending):
+        request = self.request
+        if "checklist" in request.session and queryset.exists():
+            mfr_full_id, checklist = list(request.session.get("checklist"))[0]
+            if mfr_full_id == queryset.first().prod_mfr_id.mfr_full_id:
+                queryset = queryset.order_by(
+                    Case(
+                        When(prod_no__in=checklist, then=1 if is_descending else 0),
+                        default=0 if is_descending else 1,
+                    )
+                )
+
+            else:
+                pass
+
+        return (queryset, True)
 
     class Meta:
         model = Prod
