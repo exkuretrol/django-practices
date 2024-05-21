@@ -272,8 +272,10 @@ class CirculatedOrderTable(tables.Table):
 
     def render_co_func(self, record):
         request = self.request
-        _, checklist = list(request.session.get("checklist"))[0]
-        checked = "checked" if record.prod_no in checklist else ""
+        checked = ""
+        if "checklist" in request.session:
+            _, checklist = list(request.session.get("checklist"))[0]
+            checked = "checked" if record.prod_no in checklist else checked
         return format_html(
             f"""
             <input class="form-check-input" type="checkbox" value="" {checked}>"""
