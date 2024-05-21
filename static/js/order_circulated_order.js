@@ -68,7 +68,7 @@ $(function () {
             else unchecklist.push(prod_no);
         });
         return {
-            mfr_full_id: data.manufacturerId,
+            mfr_full_id: "manufacturerId" in data ? data.manufacturerId : null,
             checklist: checklist,
             unchecklist: unchecklist,
         };

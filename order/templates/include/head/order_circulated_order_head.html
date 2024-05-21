@@ -1,8 +1,14 @@
 {% load static %}
 {% load helper_tags %}
-{% with mfr=object_list|index:0 %}
+{% if object_list|length > 0 %}
+    {% with mfr=object_list|index:0 %}
         <script src="{% static 'js/order_circulated_order.js' %}"
                 data-create-order-url="{% url 'api:create_order' %}"
                 data-update-checklist-url="{% url 'api:update_checklist'%}"
                 data-manufacturer-id="{{mfr.mfr_full_id}}"></script>
-{% endwith %}
+    {% endwith %}
+{% else %}
+    <script src="{% static 'js/order_circulated_order.js' %}"
+            data-create-order-url="{% url 'api:create_order' %}"
+            data-update-checklist-url="{% url 'api:update_checklist'%}"></script>
+{% endif %}
