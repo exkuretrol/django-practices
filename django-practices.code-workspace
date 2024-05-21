@@ -37,7 +37,7 @@
             "*.html": "django-html",
             "*.js": "javascript",
         },
-        "makefile.makefilePath": "./task-8-autocomplete/MakeFile",
+        "makefile.makefilePath": "./MakeFile",
         "todohighlight.exclude": [
             "**/node_modules/**",
             "**/bower_components/**",
@@ -52,8 +52,7 @@
             "**/static/**",
             "**/staticfiles/**",
             "**/migrations/**",
-            "**/task-[1-7]-*/**",
         ],
-        "terminal.integrated.cwd": "${workspaceFolder}/task-8-jquery-and-api",
+        "terminal.integrated.cwd": "${workspaceFolder}",
     }
 }

@@ -1,8 +1,0 @@
-{% load widget_tweaks %}
-{% with help_text_attr="aria-describeby:"|add:field.id_for_label|add:"-help_text" placeholder_attr="placeholder:"|add:field.label %}
-    {{ field_with_filter|add_class:"form-check-input"|attr:placeholder_attr|add_error_class:"is-invalid"|attr:help_text_attr }}
-    {% if field.help_text %}
-        <small id="{{ field.id_for_label }}-help_text" class="form-text text-muted">{{ field.help_text }}</small>
-    {% endif %}
-    {% include "base_inputs/field_errors.html" with field=field %}
-{% endwith %}
