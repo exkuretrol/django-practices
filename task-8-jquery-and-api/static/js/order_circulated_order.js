@@ -255,7 +255,7 @@ $(function () {
     });
 
     $("input[field=btn-place-order]").on("click", () => {
-        var order_obj = constructOrder("place");
+        var order_obj = constructOrder("create");
         $.ajax({
             type: "POST",
             url: data.createOrderUrl,
