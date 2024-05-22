@@ -1,6 +1,7 @@
 {% load static %}
+{% load render_bundle from webpack_loader %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-bs-theme="light" data-scheme="teal">
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -14,66 +15,230 @@
                 Django Project
             {% endif %}
         </title>
-        <script src="{% static 'js/jquery-3.7.1.min.js' %}"></script>
-        <link rel="stylesheet" href="{% static 'css/output.css' %}">
-        <link rel="stylesheet"
-              href="{% static 'css/select2-bootstrap-5-theme.min.css' %}">
+        {% render_bundle "main" "js" %}
         {% block head %}
         {% endblock head %}
     </head>
     {% block body %}
-        <body>
-            <nav class="navbar navbar-expand-lg mb-2 sticky-top bg-body-tertiary">
-                <div class="container-xxl">
-                    <a href="{% url 'home' %}" class="navbar-brand">
-                        {% if title %}
-                            {{ title }}
-                        {% else %}
-                            Django Project
-                        {% endif %}
-                    </a>
-                    <button class="navbar-toggler"
-                            type="button"
-                            data-bs-toggle="collapse"
-                            data-bs-target="#navbarSupportedContent"
-                            aria-controls="navbarSupportedContent"
-                            aria-expanded="false"
-                            aria-label="Toggle navigation">
-                        <span class="navbar-toggler-icon"></span>
-                    </button>
-                    <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                        <ul class="ms-auto navbar-nav">
-                            <li class="nav-item">
-                                <a href="{% url 'admin:index' %}" class="ml-auto nav-link">管理</a>
-                            </li>
-                            {% if user.is_authenticated %}
-                                <li class="nav-item">
-                                    <a href="{% url 'profile' %}" class="nav-link">* 你好 {{ user.username }} ! *</a>
-                                </li>
-                                <li class="nav-item">
-                                    <form action="{% url 'logout' %}" method="post">
-                                        {% csrf_token %}
-                                        <input type="submit" value="- 登出 -" class="nav-link">
-                                    </form>
-                                </li>
-                            {% else %}
-                                <li class="nav-item">
-                                    <a href="{% url 'login' %}" class="ml-auto nav-link">+ 登入 +</a>
-                                </li>
-                            {% endif %}
-                            {% block nav %}
-                            {% endblock nav %}
-                        </ul>
+        <body class="out-quart">
+            {% comment %} Page container {% endcomment %}
+            <div id="root" class="root mn--min">
+                {% comment %} Content {% endcomment %}
+                <section id="content" class="content">
+                    <div class="content__boxed">
+                        <div class="content__wrap">
+                            {% block content %}
+                            {% endblock content %}
+                        </div>
                     </div>
-                </div>
-            </nav>
-            <div class="container">
-                {% block content %}
-                {% endblock content %}
+                    {% comment %} Footer {% endcomment %}
+                    <footer class="pt-5 mt-auto">
+                        <div class="content__boxed">
+                            <div class="content__wrap py-2 d-flex flex-column flex-md-row align-items-md-center">
+                                <div class="text-nowrap text-body-emphasis fs-5">Copyright © 2024 Jefec</div>
+                            </div>
+                        </div>
+                    </footer>
+                </section>
+                {% comment %} Header {% endcomment %}
+                <header class="header">
+                    <div class="header__inner">
+                        {% comment %} Brand {% endcomment %}
+                        <div class="header__brand">
+                            <div class="brand-wrap">
+                                {% comment %} Brand logo {% endcomment %}
+                                <a href="{% url 'home' %}" class="brand-img stretched-link">
+                                    <img src="https://loremflickr.com/16/16"
+                                         alt="Nifty Logo"
+                                         class="Nifty logo"
+                                         width="16"
+                                         height="16">
+                                </a>
+                                {% comment %} Brand title {% endcomment %}
+                                <div class="brand-title">Cosmed</div>
+                            </div>
+                        </div>
+                        <div class="header__content">
+                            {% comment %} Content Header - Left Side: {% endcomment %}
+                            <div class="header__content-start">
+                                <button type="button"
+                                        class="nav-toggler header__btn btn btn-icon btn-sm"
+                                        aria-label="Nav Toggler">
+                                    <i class="psi-list-view"></i>
+                                </button>
+                            </div>
+                            {% comment %} END : Content Header - Left Side: {% endcomment %}
+                            {% comment %} Content Header - Right Side: {% endcomment %}
+                            <div class="header__content-end">
+                                {% comment %} User dropdown {% endcomment %}
+                                {% comment %} toggler {% endcomment %}
+                                <a href="{% url 'admin:index' %}">
+                                    <button type="button" class="header__btn btn btn-icon btn-sm">
+                                        <i class="bi bi-kanban-fill"></i>
+                                    </button>
+                                </a>
+                                <div class="vr mx-1 d-none d-md-block"></div>
+                                {% if user.is_authenticated %}
+                                    <button class="header__btn btn btn-icon btn-sm"
+                                            type="button"
+                                            data-bs-toggle="dropdown"
+                                            aria-label="User dropdown"
+                                            aria-expanded="false">
+                                        <i class="psi-male"></i>
+                                    </button>
+                                    {% comment %} User dropdown menu {% endcomment %}
+                                    <div class="dropdown-menu dropdown-menu-end w-md-300px">
+                                        {% comment %} User dropdown header {% endcomment %}
+                                        <div class="d-flex align-items-center border-bottom px-3 py-2">
+                                            {% comment %} <div class="flex-shrink-0">
+                                            <img class="img-sm rounded-circle" src="https://loremflickr.com/64/64" alt="Profile Picture" loading="lazy">
+                                            </div> {% endcomment %}
+                                            <div class="flex-grow-1 ms-3">
+                                                <h5 class="mb-0">{{ user.username }}</h5>
+                                                <span class="text-body-secondary fst-italic">{{ user.email }}</span>
+                                            </div>
+                                        </div>
+                                        {% comment %} User menu link {% endcomment %}
+                                        <div class="list-group list-group-borderless h-100 py-3">
+                                            <a href="{% url 'profile' %}"
+                                               class="list-group-item list-group-item-action">
+                                                <i class="pli-male fs-5 me-2"></i> Profile
+                                            </a>
+                                            <a href="{% url 'config' %}"
+                                               class="list-group-item list-group-item-action">
+                                                <i class="pli-gear fs-5 me-2"></i> Settings
+                                            </a>
+                                            <form action="{% url 'logout' %}"
+                                                  method="post"
+                                                  class="list-group-item list-group-item-action d-flex">
+                                                {% csrf_token %}
+                                                <i class="pli-unlock fs-5 me-2"></i>
+                                                <input type="submit" value=" Logout" class="nav-link">
+                                            </form>
+                                        </div>
+                                    </div>
+                                {% else %}
+                                    <a href="{% url 'login' %}">
+                                        <button type="button" class="header__btn btn btn-icon btn-sm">
+                                            <i class="bi bi-box-arrow-in-right"></i>
+                                        </button>
+                                    </a>
+                                {% endif %}
+                                {% comment %} END : User dropdown {% endcomment %}
+                                <div class="vr mx-1 d-none d-md-block"></div>
+                                <div class="form-check form-check-alt form-switch mx-md-2">
+                                    <input id="headerThemeToggler"
+                                           class="form-check-input mode-switcher"
+                                           type="checkbox"
+                                           role="switch">
+                                    <label class="form-check-label ps-1 fw-bold d-none d-md-flex align-items-center "
+                                           for="headerThemeToggler">
+                                        <i class="mode-switcher-icon icon-light psi-sun fs-5"></i>
+                                        <i class="mode-switcher-icon icon-dark d-none psi-half-moon"></i>
+                                    </label>
+                                </div>
+                                <div class="vr mx-1 d-none d-md-block"></div>
+                                {% comment %} Sidebar toggler {% endcomment %}
+                                <button class="sidebar-toggler header__btn btn btn-icon btn-sm"
+                                        type="button"
+                                        aria-label="Sidebar button">
+                                    <i class="psi-dot-vertical"></i>
+                                </button>
+                            </div>
+                            {% comment %} END : Content Header - Right Side: {% endcomment %}
+                        </div>
+                    </div>
+                </header>
+                {% comment %} END : Header {% endcomment %}
+                {% comment %} Main navigation {% endcomment %}
+                <nav id="mainnav-container" class="mainnav">
+                    <div class="mainnav__inner">
+                        <div class="mainnav__top-content scrollable-content pb-5">
+                            <div class="mainnav__categoriy py-3">
+                                <h6 class="mainnav__caption mt-0 fw-bold">Navigation</h6>
+                                <ul class="mainnav__menu nav flex-column">
+                                    <li class="nav-item has-sub">
+                                        <a href="#" class="mininav-toggle nav-link active">
+                                            <i class="demo-pli-home fs-5 me-2"></i>
+                                            <span class="nav-label ms-1">Dashboard</span>
+                                        </a>
+                                        <ul class="mininav-content nav collapse">
+                                            <li data-popper-arrow class="arrow"></li>
+                                            <li class="nav-item">
+                                                <a href="./index.html" class="nav-link active">Dashboard 1</a>
+                                            </li>
+                                            <li class="nav-item">
+                                                <a href="./dashboard-2.html" class="nav-link">Dashboard 2</a>
+                                            </li>
+                                            <li class="nav-item">
+                                                <a href="./dashboard-3.html" class="nav-link">Dashboard 3</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    <li class="nav-item has-sub">
+                                        <a href="#" class="mininav-toggle nav-link collapsed">
+                                            <i class="demo-pli-split-vertical-2 fs-5 me-2"></i>
+                                            <span class="nav-label ms-1">Layouts</span>
+                                        </a>
+                                        <ul class="mininav-content nav collapse">
+                                            <li data-popper-arrow class="arrow"></li>
+                                            <li class="nav-item">
+                                                <a href="./layouts-mini-navigation.html" class="nav-link">Mini Navigation</a>
+                                            </li>
+                                            <li class="nav-item">
+                                                <a href="./layouts-push-navigation.html" class="nav-link">Push Navigation</a>
+                                            </li>
+                                            <li class="nav-item">
+                                                <a href="./layouts-slide-navigation.html" class="nav-link">Slide Navigation</a>
+                                            </li>
+                                            <li class="nav-item">
+                                                <a href="./layouts-reveal-navigation.html" class="nav-link">Reveal Navigation</a>
+                                            </li>
+                                            <li class="nav-item">
+                                                <a href="./layouts-stuck-sidebar.html" class="nav-link">Stuck Sidebar</a>
+                                            </li>
+                                            <li class="nav-item">
+                                                <a href="./layouts-pinned-sidebar.html" class="nav-link">Pinned Sidebar</a>
+                                            </li>
+                                            <li class="nav-item">
+                                                <a href="./layouts-unite-sidebar.html" class="nav-link">Unite Sidebar</a>
+                                            </li>
+                                            <li class="nav-item">
+                                                <a href="./layouts-sticky-header.html" class="nav-link">Sticky Header</a>
+                                            </li>
+                                            <li class="nav-item">
+                                                <a href="./layouts-sticky-navigation.html" class="nav-link">Sticky Navigation</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a href="./widgets.html" class="nav-link mininav-toggle">
+                                            <i class="demo-pli-gear fs-5 me-2"></i>
+                                            <span class="nav-label mininav-content ms-1">
+                                                <span data-popper-arrow class="arrow"></span>
+                                                Widgets
+                                            </span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </nav>
+                {% comment %} END : Main navigation {% endcomment %}
+                {% comment %} Sidebar {% endcomment %}
+                <aside class="sidebar">
+                    <div class="sidebar__inner scrollable-content">...</div>
+                </aside>
+                {% comment %} END : Sidebar {% endcomment %}
             </div>
-            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-                    integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
-                    crossorigin="anonymous"></script>
+            {% comment %} END : Page container {% endcomment %}
         </body>
+        {% comment %} Scroll to top button {% endcomment %}
+        <div class="scroll-container">
+            <a href="#root"
+               class="scroll-page ratio ratio-1x1"
+               aria-label="Scroll button"></a>
+        </div>
     {% endblock body %}
 </html>

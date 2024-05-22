@@ -26,4 +26,15 @@ media
 *.csv
 
 # purchase files
-nifty-static
+assets/js/nifty
+assets/js/nifty.js
+assets/icons
+assets/fonts
+assets/css/demo-purpose
+assets/scss/nifty-admin
+assets/scss/vendors
+assets/scss/styles.scss
+assets/webpack_bundles
+
+# webpack stats
+webpack-stats.json
