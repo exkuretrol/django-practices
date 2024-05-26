@@ -1,0 +1,78 @@
+{% load helper_tags %}
+{% with request.resolver_match.url_name as url_name %}
+    <nav id="mainnav-container" class="mainnav">
+        <div class="mainnav__inner">
+            <div class="mainnav__top-content scrollable-content pb-5">
+                <div class="mainnav__categoriy py-3">
+                    {% comment %} <h6 class="mainnav__caption mt-0 fw-bold">Navigation</h6> {% endcomment %}
+                    <ul class="mainnav__menu nav flex-column">
+                        <li class="nav-item">
+                            <a href="{% url 'home' %}"
+                               class="nav-link mininav-toggle {% if url_name == 'home' %}active{% endif %}">
+                                <i class="pli-home fs-5 me-2"></i>
+                                <span class="nav-label mininav-content ms-1">
+                                    <span data-popper-arrow="" class="arrow"></span>
+                                    儀表板
+                                </span>
+                            </a>
+                        </li>
+                        <li class="nav-item has-sub">
+                            <a href="#"
+                               class="mininav-toggle nav-link collapsed {% if url_name|is_stock_category %}active{% endif %}">
+                                <i class="pli-pencil fs-5 me-2"></i>
+                                <span class="nav-label ms-1">備貨管理</span>
+                            </a>
+                            <ul class="mininav-content nav collapse">
+                                <li data-popper-arrow class="arrow"></li>
+                                <li class="nav-item">
+                                    <a href="" class="nav-link disabled">常態備貨維護</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="{% url 'order_rules' %}"
+                                       class="nav-link {% if url_name == 'order_rules' %}active{% endif %}">備貨規則設定</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="" class="nav-link disabled">訂單拆單設定</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="" class="nav-link disabled">訂貨限量數設定</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="" class="nav-link disabled">廠商主檔維護</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="" class="nav-link disabled">暫停訂貨日設定</a>
+                                </li>
+                            </ul>
+                        </li>
+                        <li class="nav-item has-sub">
+                            <a href="#"
+                               class="mininav-toggle nav-link {% if url_name|is_order_category %}active{% else %}{% endif %}">
+                                <i class="pli-receipt-4 fs-5 me-2"></i>
+                                <span class="nav-label ms-1">訂貨管理</span>
+                            </a>
+                            <ul class="mininav-content nav">
+                                <li data-popper-arrow class="arrow"></li>
+                                <li class="nav-item">
+                                    <a href="" class="nav-link disabled">訂貨建議更新</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="{% url 'order_circulated_order' %}"
+                                       class="nav-link {% if url_name == 'order_circulated_order' %}active{% endif %}">每日訂貨作業</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="{% url 'order_create_clipboard' %}"
+                                       class="nav-link {% if url_name == 'order_create_clipboard' %}active{% endif %}">零散訂貨作業</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="{% url 'order_list' %}"
+                                       class="nav-link {% if url_name == 'order_list' %}active{% endif %}">訂單查詢維護</a>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </nav>
+{% endwith %}

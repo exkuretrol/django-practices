@@ -23,6 +23,7 @@ from django.contrib import admin
 from django.db.utils import OperationalError
 from django.urls import include, path
 from django.views.generic import TemplateView
+
 from prod.models import Prod
 
 from .api import api
@@ -36,7 +37,11 @@ urlpatterns = [
     path(
         "",
         TemplateView.as_view(template_name="home.html"),
-        kwargs={"last_prod": last_prod},
+        kwargs={
+            "last_prod": last_prod,
+            "header_title": "儀表板",
+            "header_description": "歡迎使用本系統。",
+        },
         name="home",
     ),
     path("admin/", admin.site.urls),

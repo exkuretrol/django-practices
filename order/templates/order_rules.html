@@ -1,12 +1,31 @@
 {% extends "_base.html" %}
 {% load crispy_forms_tags %}
 {% load django_tables2 %}
+{% block breadcrumb %}
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a href="{% url 'home' %}">儀表板</a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="">備貨管理</a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">備貨規則設定</li>
+        </ol>
+    </nav>
+{% endblock breadcrumb %}
 {% block content %}
-    <form action="" method="get">
-        {{ filter.form.as_p }}
-        <input type="submit" value="送出">
-    </form>
-    {% render_table table %}
+    <div class="card mb-4">
+        <div class="card-body">
+            <form action="" method="get">
+                {{ filter.form.as_p }}
+                <input type="submit" value="送出">
+            </form>
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-body">{% render_table table %}</div>
+    </div>
 {% endblock content %}
 {% block head %}
     {{ filter.form.media }}

@@ -24,3 +24,20 @@ def is_checked(field):
 @register.filter
 def get_form_prefix(form):
     return form.prefix or "default"
+
+
+@register.filter
+def is_order_category(url_name):
+    return url_name in [
+        "order_list",
+        "order_create_clipboard",
+        "order_create",
+        "order_create_multiple",
+        "order_update",
+        "order_circulated_order",
+    ]
+
+
+@register.filter
+def is_stock_category(url_name):
+    return url_name in ["order_rules"]

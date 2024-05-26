@@ -22,9 +22,25 @@
     {% block body %}
         <body class="out-quart">
             {% comment %} Page container {% endcomment %}
-            <div id="root" class="root mn--min">
+            <div id="root" class="root mn--max tm--expanded-hd">
                 {% comment %} Content {% endcomment %}
                 <section id="content" class="content">
+                    <div class="content__header content__boxed overlapping">
+                        <div class="content__wrap">
+                            {% comment %} Breadcrumb {% endcomment %}
+                            {% comment %} TODO: add order management summary page {% endcomment %}
+                            {% block breadcrumb %}
+                                <nav aria-label="breadcrumb">
+                                    <ol class="breadcrumb">
+                                        <li class="breadcrumb-item active" aria-current="page">儀表板</li>
+                                    </ol>
+                                </nav>
+                            {% endblock breadcrumb %}
+                            {% comment %} END : Breadcrumb {% endcomment %}
+                            {% if header_title %}<h1 class="page-title mb-0 mt-2">{{ header_title }}</h1>{% endif %}
+                            {% if header_description %}<p class="lead">{{ header_description }}</p>{% endif %}
+                        </div>
+                    </div>
                     <div class="content__boxed">
                         <div class="content__wrap">
                             {% block content %}
@@ -47,13 +63,9 @@
                         <div class="header__brand">
                             <div class="brand-wrap">
                                 {% comment %} Brand logo {% endcomment %}
-                                <a href="{% url 'home' %}" class="brand-img stretched-link">
-                                    <img src="https://loremflickr.com/16/16"
-                                         alt="Nifty Logo"
-                                         class="Nifty logo"
-                                         width="16"
-                                         height="16">
-                                </a>
+                                {% comment %} <a href="{% url 'home' %}" class="brand-img stretched-link">
+                                    <img src="https://loremflickr.com/16/16" alt="Nifty Logo" class="Nifty logo" width="16" height="16">
+                                </a> {% endcomment %}
                                 {% comment %} Brand title {% endcomment %}
                                 <div class="brand-title">Cosmed</div>
                             </div>
@@ -72,13 +84,15 @@
                             <div class="header__content-end">
                                 {% comment %} User dropdown {% endcomment %}
                                 {% comment %} toggler {% endcomment %}
-                                <a href="{% url 'admin:index' %}">
-                                    <button type="button" class="header__btn btn btn-icon btn-sm">
-                                        <i class="bi bi-kanban-fill"></i>
-                                    </button>
-                                </a>
-                                <div class="vr mx-1 d-none d-md-block"></div>
                                 {% if user.is_authenticated %}
+                                    {% if user.is_superuser %}
+                                        <a href="{% url 'admin:index' %}">
+                                            <button class="header__btn btn btn-icon btn-sm" type="button">
+                                                <i class="bi bi-kanban-fill"></i>
+                                            </button>
+                                        </a>
+                                        <div class="vr mx-1 d-none d-md-block"></div>
+                                    {% endif %}
                                     <button class="header__btn btn btn-icon btn-sm"
                                             type="button"
                                             data-bs-toggle="dropdown"
@@ -151,80 +165,7 @@
                 </header>
                 {% comment %} END : Header {% endcomment %}
                 {% comment %} Main navigation {% endcomment %}
-                <nav id="mainnav-container" class="mainnav">
-                    <div class="mainnav__inner">
-                        <div class="mainnav__top-content scrollable-content pb-5">
-                            <div class="mainnav__categoriy py-3">
-                                <h6 class="mainnav__caption mt-0 fw-bold">Navigation</h6>
-                                <ul class="mainnav__menu nav flex-column">
-                                    <li class="nav-item has-sub">
-                                        <a href="#" class="mininav-toggle nav-link active">
-                                            <i class="demo-pli-home fs-5 me-2"></i>
-                                            <span class="nav-label ms-1">Dashboard</span>
-                                        </a>
-                                        <ul class="mininav-content nav collapse">
-                                            <li data-popper-arrow class="arrow"></li>
-                                            <li class="nav-item">
-                                                <a href="./index.html" class="nav-link active">Dashboard 1</a>
-                                            </li>
-                                            <li class="nav-item">
-                                                <a href="./dashboard-2.html" class="nav-link">Dashboard 2</a>
-                                            </li>
-                                            <li class="nav-item">
-                                                <a href="./dashboard-3.html" class="nav-link">Dashboard 3</a>
-                                            </li>
-                                        </ul>
-                                    </li>
-                                    <li class="nav-item has-sub">
-                                        <a href="#" class="mininav-toggle nav-link collapsed">
-                                            <i class="demo-pli-split-vertical-2 fs-5 me-2"></i>
-                                            <span class="nav-label ms-1">Layouts</span>
-                                        </a>
-                                        <ul class="mininav-content nav collapse">
-                                            <li data-popper-arrow class="arrow"></li>
-                                            <li class="nav-item">
-                                                <a href="./layouts-mini-navigation.html" class="nav-link">Mini Navigation</a>
-                                            </li>
-                                            <li class="nav-item">
-                                                <a href="./layouts-push-navigation.html" class="nav-link">Push Navigation</a>
-                                            </li>
-                                            <li class="nav-item">
-                                                <a href="./layouts-slide-navigation.html" class="nav-link">Slide Navigation</a>
-                                            </li>
-                                            <li class="nav-item">
-                                                <a href="./layouts-reveal-navigation.html" class="nav-link">Reveal Navigation</a>
-                                            </li>
-                                            <li class="nav-item">
-                                                <a href="./layouts-stuck-sidebar.html" class="nav-link">Stuck Sidebar</a>
-                                            </li>
-                                            <li class="nav-item">
-                                                <a href="./layouts-pinned-sidebar.html" class="nav-link">Pinned Sidebar</a>
-                                            </li>
-                                            <li class="nav-item">
-                                                <a href="./layouts-unite-sidebar.html" class="nav-link">Unite Sidebar</a>
-                                            </li>
-                                            <li class="nav-item">
-                                                <a href="./layouts-sticky-header.html" class="nav-link">Sticky Header</a>
-                                            </li>
-                                            <li class="nav-item">
-                                                <a href="./layouts-sticky-navigation.html" class="nav-link">Sticky Navigation</a>
-                                            </li>
-                                        </ul>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a href="./widgets.html" class="nav-link mininav-toggle">
-                                            <i class="demo-pli-gear fs-5 me-2"></i>
-                                            <span class="nav-label mininav-content ms-1">
-                                                <span data-popper-arrow class="arrow"></span>
-                                                Widgets
-                                            </span>
-                                        </a>
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                </nav>
+                {% include "include/main_navigation.html" %}
                 {% comment %} END : Main navigation {% endcomment %}
                 {% comment %} Sidebar {% endcomment %}
                 <aside class="sidebar">
