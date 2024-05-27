@@ -1,7 +1,6 @@
 import re
 from typing import List
 
-from accounts.models import CustomUser
 from constance import config
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Button, Submit
@@ -22,6 +21,8 @@ from django.views.generic import ListView, UpdateView
 from django.views.generic.edit import CreateView, FormView
 from django_filters.views import FilterView
 from django_tables2 import SingleTableMixin
+
+from accounts.models import CustomUser
 from manufacturer.models import Manufacturer
 from prod.models import Prod
 
@@ -48,6 +49,8 @@ class OrderListView(SingleTableMixin, FilterView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context["header_title"] = _("訂貨查詢維護")
+        context["header_description"] = _("查詢訂貨資料，並進行維護。")
         form = context["filter"].form
         form.helper = FormHelper()
         form.helper.add_input(Submit("submit", "篩選", css_class="btn btn-primary"))
@@ -114,6 +117,8 @@ class OrderBeforeCreateView(FormView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context["header_title"] = _("零散訂貨作業")
+        context["header_description"] = _("按貼上按鈕貼上訂貨資料，然後按下一步。")
         form = context["form"]
         form.helper = FormHelper()
         form.helper.add_input(
@@ -344,5 +349,7 @@ class OrderCirculatedOrderView(
         return kwargs
 
     def get_context_data(self, **kwargs):
-        ctx = super().get_context_data(**kwargs)
-        return ctx
+        context = super().get_context_data(**kwargs)
+        context["header_title"] = _("每日訂貨作業")
+        context["header_description"] = _("查看每日訂貨資料，並進行維護。")
+        return context

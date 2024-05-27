@@ -5,6 +5,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
+
 from manufacturer.models import Manufacturer
 from prod.models import Prod
 
@@ -60,9 +61,7 @@ class OrderTable(tables.Table):
         return format_html(
             f"""
             <a href='{reverse(viewname="order_update", kwargs={"pk": record.pk})}' class='btn btn-info'>
-                <svg class="bi" width="16" height="16" role="img" aria-label="pencil-square" fill="currentColor">
-                    <use xlink:href="{static("sprite/bootstrap-icons.svg")}#pencil-square"/>
-                </svg>
+                <i class="bi bi-pencil-square"></i>
                 <span class="ms-1">
                 編輯
                 </span>
@@ -122,17 +121,13 @@ class OrderRulesTable(tables.Table):
             f"""
             <div class="d-flex flex-column">
             <a href='#' class='btn btn-info'>
-                <svg class="bi" width="16" height="16" role="img" aria-label="pencil-square" fill="currentColor">
-                    <use xlink:href="{static("sprite/bootstrap-icons.svg")}#pencil-square"/>
-                </svg>
+                <i class="bi-pencil-square"></i>
                 <span class="ms-1">
                 編輯
                 </span>
             </a>
             <a href='#' class='btn btn-info'>
-                <svg class="bi" width="16" height="16" role="img" aria-label="pencil-square" fill="currentColor">
-                    <use xlink:href="{static("sprite/bootstrap-icons.svg")}#trash"/>
-                </svg>
+                <i class="bi-trash"></i>
                 <span class="ms-1">
                 刪除
                 </span>
@@ -189,7 +184,8 @@ class OrderRulesTable(tables.Table):
 class SummingColums(tables.Column):
     def render_footer(self, bound_column, table):
         return format_html(
-            f"<input type='number' value='0' disabled field='{bound_column.name}'/>"
+            f"""
+            <input type='number' class="form-control-plaintext" value='0' field='{bound_column.name}'/>"""
         )
 
 
@@ -230,44 +226,46 @@ class CirculatedOrderTable(tables.Table):
     def render_co_prod_cost_price(self, record, value):
         return format_html(
             f"""
-            <input type="number" value="{record.prod_cost_price}" field="prod-cost-price" disabled/>"""
+            <input type="number" readonly class="form-control-plaintext" value="{record.prod_cost_price}" field="prod-cost-price"/>"""
         )
 
     def render_co_order_box_quantity(self, record, value):
         return format_html(
             """
-            <input type="number" value="0" field="order-box-quantity" disabled/>"""
+            <input type="number" readonly class="form-control-plaintext" value="0" field="order-box-quantity" />"""
         )
 
-    def render_co_order_cost_price(self, record):
+    def render_co_order_cost_price(self, record, value):
+        if value is None:
+            value = 0
         return format_html(
-            """
-            <input type="number" value="0" field="order-cost-price" disabled/>"""
+            f"""
+            <input type="number" readonly class="form-control-plaintext" value="{value}" field="order-cost-price"/>"""
         )
 
     def render_co_box_quantity(self, record, value):
         return format_html(
             f"""
-            <input type="number" value="{record.prod_outer_quantity}" disabled field="outer-quantity"/>
-            <input type="number" value="{record.prod_inner_quantity}" disabled field="inner-quantity"/>"""
+            <input type="number" readonly class="form-control-plaintext" value="{record.prod_outer_quantity}" field="outer-quantity"/>
+            <input type="number" readonly class="form-control-plaintext" value="{record.prod_inner_quantity}" field="inner-quantity"/>"""
         )
 
     def render_co_total_quantity(self, record, value):
         return format_html(
             f"""
-            <input type="number" value="{record.prod_quantity}" disabled field="total-quantity"/>"""
+            <input type="number" readonly class="form-control-plaintext" value="{record.prod_quantity}" field="total-quantity"/>"""
         )
 
     def render_co_order_quantity(self, record, value):
         return format_html(
             f"""
-            <input type="number" class="form-control" style="width: 120px" value="0" field="order-quantity"/>"""
+            <input type="number" class="form-control" value="0" field="order-quantity"/>"""
         )
 
     def render_prod_quantity(self, record, value):
         return format_html(
             f"""
-            <input type="number" value="{value}" field="prod-quantity" disabled/>"""
+            <input type="number" readonly class="form-control-plaintext" value="{value}" field="prod-quantity"/>"""
         )
 
     def render_co_func(self, record):
@@ -278,7 +276,7 @@ class CirculatedOrderTable(tables.Table):
             checked = "checked" if record.prod_no in checklist else checked
         return format_html(
             f"""
-            <input class="form-check-input" type="checkbox" value="" {checked}>"""
+            <input class="form-check-input form-control" type="checkbox" value="" {checked}>"""
         )
 
     def order_co_func(self, queryset: QuerySet, is_descending):

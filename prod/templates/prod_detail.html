@@ -20,9 +20,9 @@
             <li class="list-group-item">數量: {{ prod.prod_quantity }}</li>
         </ul>
         <div class="card-footer d-flex flex-row gap-2">
-            <a href="{% url 'prod_update' prod.pk %}">{% include "icon/bootstrap_icons.html" with icon="pencil-square" %}</a>
-            <a href="{% url 'prod_create' %}">{% include "icon/bootstrap_icons.html" with icon="plus-circle" %}</a>
-            <a href="{% url 'prod_delete' prod.pk %}">{% include "icon/bootstrap_icons.html" with icon="trash" %}</a>
+            <a href="{% url 'prod_update' prod.pk %}"><i class="bi-pencil-square fs-4"></i></a>
+            <a href="{% url 'prod_create' %}"><i class="bi-plus-circle fs-4"></i></a>
+            <a href="{% url 'prod_delete' prod.pk %}"><i class="bi-trash fs-4"></i></a>
         </div>
     </div>
 {% endblock content %}

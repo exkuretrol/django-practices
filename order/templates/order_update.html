@@ -1,18 +1,38 @@
 {% extends "_base.html" %}
 {% load crispy_forms_tags %}
 {% load i18n %}
+{% block breadcrumb %}
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a href="{% url 'home' %}">儀表板</a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="">訂單管理</a>
+            </li>
+            <li class="breadcrumb-item" aria-current="page">
+                <a href="{% url 'order_rules' %}">訂單查詢維護</a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">訂單 {{ object.pk }}</li>
+        </ol>
+    </nav>
+{% endblock breadcrumb %}
 {% block content %}
-    <form action="" method="post">
-        {% csrf_token %}
-        {% include "include/order_form.html" with form=form %}
-        {% with named_formset.orderprod as formset %}
-            {{ formset.management_form }}
-            {% for form in formset %}
-                {% include "include/orderprod_grid_table.html" with form=form %}
-            {% endfor %}
-        {% endwith %}
-        <input type="submit" value={% translate "更新" %} class="btn btn-primary">
-    </form>
+    <div class="card">
+        <div class="card-body">
+            <form action="" method="post">
+                {% csrf_token %}
+                {% include "include/order_form.html" with form=form %}
+                {% with named_formset.orderprod as formset %}
+                    {{ formset.management_form }}
+                    {% for form in formset %}
+                        {% include "include/orderprod_grid_table.html" with form=form %}
+                    {% endfor %}
+                {% endwith %}
+                <input type="submit" value={% translate "更新" %} class="btn btn-primary">
+            </form>
+        </div>
+    </div>
 {% endblock content %}
 {% block head %}
     {% include "include/head/order_update_head.html" %}
