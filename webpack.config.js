@@ -1,5 +1,6 @@
 "use strict";
 const path = require("path");
+const webpack = require("webpack");
 const autoprefixer = require("autoprefixer");
 const bundletracker = require("webpack-bundle-tracker");
 
@@ -17,6 +18,10 @@ module.exports = {
         hot: true,
     },
     plugins: [
+        new webpack.ProvidePlugin({
+            $: "jquery",
+            jQuery: "jquery",
+        }),
         new bundletracker({ path: __dirname, filename: "webpack-stats.json" }),
     ],
     module: {
