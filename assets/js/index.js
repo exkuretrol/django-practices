@@ -1,5 +1,8 @@
 import "../scss/styles.scss";
-import "../css/select2-bootstrap-5-theme.min.css";
 import "./nifty";
+
+import Tags from "bootstrap5-tags";
+
+window.Tags = Tags;
 window.$ = require("jquery");
 window.jQuery = require("jquery");

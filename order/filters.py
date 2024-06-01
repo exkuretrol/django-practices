@@ -2,6 +2,7 @@ import django_filters
 from dal import autocomplete
 from django.contrib.auth import get_user_model
 from django.utils.translation import gettext_lazy as _
+
 from manufacturer.models import Manufacturer
 from prod.models import Prod, ProdCategory
 
@@ -14,22 +15,25 @@ class OrderFilter(django_filters.FilterSet):
         filtered_queryset = queryset.filter(orderprod_set__in=ops)
         return filtered_queryset
 
-    def orderprod_order_no_filter(self, queryset, name, value):
-        od_nos = self.request.GET.getlist("od_no")
-        return queryset.filter(od_no__in=od_nos)
+    # def orderprod_order_no_filter(self, queryset, name, value):
+    # od_nos = self.request.GET.getlist("od_no")
+    # return queryset
+    # return queryset.filter(od_no__in=od_nos)
 
-    od_no = django_filters.CharFilter(
+    od_no = django_filters.ModelChoiceFilter(
         label="訂單編號",
         required=False,
-        method="orderprod_order_no_filter",
-        widget=autocomplete.Select2Multiple(
+        # method="orderprod_order_no_filter",
+        widget=autocomplete.ModelSelect2(
             url="order_no_autocomplete",
             attrs={
-                # "data-theme": "bootstrap-5",
+                "data-theme": "bootstrap-5",
                 "data-placeholder": _("輸入一個訂單編號"),
                 "data-html": True,
+                "data-allow-clear": "false",
             },
         ),
+        queryset=Order.objects.none(),
     )
 
     od_prod = django_filters.ModelChoiceFilter(
@@ -39,9 +43,10 @@ class OrderFilter(django_filters.FilterSet):
         widget=autocomplete.ModelSelect2(
             url="prod_autocomplete",
             attrs={
-                # "data-theme": "bootstrap-5",
+                "data-theme": "bootstrap-5",
                 "data-placeholder": _("輸入一個商品編號或是商品名稱"),
                 "data-html": True,
+                "data-allow-clear": "false",
             },
         ),
         queryset=Prod.objects.all(),
@@ -52,9 +57,10 @@ class OrderFilter(django_filters.FilterSet):
         widget=autocomplete.ModelSelect2(
             url="mfr_autocomplete",
             attrs={
-                # "data-theme": "bootstrap-5",
+                "data-theme": "bootstrap-5",
                 "data-placeholder": _("輸入一個廠商編號或是廠商名稱"),
                 "data-html": True,
+                "data-allow-clear": "false",
             },
         ),
         queryset=Manufacturer.objects.all(),
@@ -65,9 +71,10 @@ class OrderFilter(django_filters.FilterSet):
         widget=autocomplete.ModelSelect2(
             url="mfr_username_autocomplete",
             attrs={
-                # "data-theme": "bootstrap-5",
+                "data-theme": "bootstrap-5",
                 "data-placeholder": _("訂貨人員名稱或是訂貨人員 ID"),
                 "data-html": True,
+                "data-allow-clear": "false",
             },
         ),
         queryset=get_user_model().objects.all(),

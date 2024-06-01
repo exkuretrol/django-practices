@@ -9,15 +9,14 @@
             "**/node_modules": true,
             "**/.vscode": true,
             "**/.github": true,
-            "**/static": true,
+            "**/assets": false,
             "**/staticfiles": true,
             "**/migrations": true,
-            "**/task-[1-7]-*": true,
-            "*.code-workspace": true,
+            "*.code-workspace": true
         },
         "[html][django-html]": {
             "editor.formatOnSave": true,
-            "editor.defaultFormatter": "monosans.djlint",
+            "editor.defaultFormatter": "monosans.djlint"
         },
         "[python]": {
             "editor.defaultFormatter": "ms-python.black-formatter",
@@ -27,15 +26,12 @@
             }
         },
         "[javascript]": {
-            "editor.formatOnSave": true,
+            "editor.formatOnSave": true
         },
-        "isort.args": [
-            "--profile",
-            "black"
-        ],
+        "isort.args": ["--profile", "black"],
         "files.associations": {
             "*.html": "django-html",
-            "*.js": "javascript",
+            "*.js": "javascript"
         },
         "makefile.makefilePath": "./MakeFile",
         "todohighlight.exclude": [
@@ -51,8 +47,8 @@
             "**/.next/**",
             "**/static/**",
             "**/staticfiles/**",
-            "**/migrations/**",
+            "**/migrations/**"
         ],
-        "terminal.integrated.cwd": "${workspaceFolder}",
+        "terminal.integrated.cwd": "${workspaceFolder}"
     }
 }

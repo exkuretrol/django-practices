@@ -38,6 +38,11 @@ $(function () {
         }
     }
 
+    $("#id_mfr_user_id").attr("data-starts-with", true);
+
+    Tags.init("#id_mfr_user_id");
+    Tags.init("#id_mfr_id");
+
     $("select[name=mfr_id]").on("change", function () {
         var selected_option_index = $(this).prop("selectedIndex") + 1;
         var url = new URL(window.location.href);
