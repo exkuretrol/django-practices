@@ -18,61 +18,67 @@
 {% block content %}
     <div class="card mb-4">
         <div class="card-body">
-            {% if not object_list %}<p>no data</p>{% endif %}
+            {% if not object_list %}
+                <div class="alert alert-info">
+                    <span>目前選擇的使用者沒有關聯的廠商</span>
+                </div>
+            {% endif %}
             {% if filter %}
                 <form action="" method="get">
                     {{ filter.form|crispy }}
-                    <input type="submit" class="btn btn-info" value="篩選">
                 </form>
             {% endif %}
         </div>
     </div>
-    <div class="card">
-        <div class="card-header">
-            {% if form %}{{ form|crispy }}{% endif %}
-            <div class="pagination">
-                <span class="page-item">
-                    {% if page_obj.has_previous %}
-                        <a href="?{% query_transform mfr_page=page_obj.previous_page_number %}"
-                           class="page-link ">
-                            <i class="psi-arrow-left-in-circle"></i>
-                        </a>
-                    {% else %}
-                        <a class="page-link cursor-not-allowed disabled">
-                            <i class="psi-arrow-left-in-circle"></i>
-                        </a>
-                    {% endif %}
-                </span>
-                <span class="page-item">
-                    <span class="page-link">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
-                </span>
-                <span class="page-item">
-                    {% if page_obj.has_next %}
-                        <a href="?{% query_transform mfr_page=page_obj.next_page_number %}"
-                           class="page-link">
-                            <i class="psi-arrow-right-in-circle"></i>
-                        </a>
-                    {% else %}
-                        <a class="page-link cursor-not-allowed disabled">
-                            <i class="psi-arrow-right-in-circle"></i>
-                        </a>
-                    {% endif %}
-                </span>
+    {% if object_list %}
+        <div class="card">
+            <div class="card-header">
+                {% if form %}{{ form|crispy }}{% endif %}
+                <div class="pagination">
+                    <span class="page-item">
+                        {% if page_obj.has_previous %}
+                            <a href="?{% query_transform mfr_page=page_obj.previous_page_number %}"
+                               class="page-link ">
+                                <i class="psi-arrow-left-in-circle"></i>
+                            </a>
+                        {% else %}
+                            <a class="page-link cursor-not-allowed disabled">
+                                <i class="psi-arrow-left-in-circle"></i>
+                            </a>
+                        {% endif %}
+                    </span>
+                    <span class="page-item">
+                        <span class="page-link">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+                    </span>
+                    <span class="page-item">
+                        {% if page_obj.has_next %}
+                            <a href="?{% query_transform mfr_page=page_obj.next_page_number %}"
+                               class="page-link">
+                                <i class="psi-arrow-right-in-circle"></i>
+                            </a>
+                        {% else %}
+                            <a class="page-link cursor-not-allowed disabled">
+                                <i class="psi-arrow-right-in-circle"></i>
+                            </a>
+                        {% endif %}
+                    </span>
+                </div>
+            </div>
+            {% comment %} TODO: hide table when no records {% endcomment %}
+            <div class="card-body">
+                <input type="button"
+                       class="btn btn-primary"
+                       value="產生訂單"
+                       field="btn-place-order">
+                <input type="button"
+                       class="btn btn-warning"
+                       value="檢核"
+                       field="btn-validation">
+                <div class="alert" role="alert"></div>
+                {% render_table table %}
             </div>
         </div>
-        <div class="card-body">
-            <input type="button"
-                   class="btn btn-primary"
-                   value="產生訂單"
-                   field="btn-place-order">
-            <input type="button"
-                   class="btn btn-warning"
-                   value="檢核"
-                   field="btn-validation">
-            <div class="alert" role="alert"></div>
-            {% render_table table %}
-        </div>
-    </div>
+    {% endif %}
 {% endblock content %}
 {% block head %}
     {{ filter.form.media }}

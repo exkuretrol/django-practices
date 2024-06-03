@@ -3,7 +3,7 @@ from typing import List
 
 from constance import config
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Button, Submit
+from crispy_forms.layout import Button, Div, Field, Layout, Submit
 from dal import autocomplete
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.paginator import Paginator
@@ -53,14 +53,33 @@ class OrderListView(SingleTableMixin, FilterView):
         context["header_description"] = _("查詢訂貨資料，並進行維護。")
         form = context["filter"].form
         form.helper = FormHelper()
-        form.helper.add_input(Submit("submit", "篩選", css_class="btn btn-primary"))
-        form.helper.add_input(
-            Button(
-                "clear", "清除", css_class="btn btn-secondary", onclick="clearFilter()"
-            )
-        )
-        form.helper.form_class = "row row-cols-4"
         form.helper.form_method = "get"
+        form.helper.add_input(Submit("submit", "篩選", css_class="btn btn-primary"))
+        # form.helper.add_input(
+        #     Button(
+        #         "clear", "清除", css_class="btn btn-secondary", onclick="clearFilter()"
+        #     )
+        # )
+        form.helper.layout = Layout(
+            Div(
+                Field("od_no", css_class="form-control dropdown form-select"),
+                Field("od_date"),
+                css_class="col-xl-3",
+            ),
+            Div(
+                Field("od_prod"),
+                Field("od_except_arrival_date"),
+                css_class="col-xl-3",
+            ),
+            Div(
+                Field(
+                    "od_mfr_id",
+                ),
+                css_class="col-xl-3",
+            ),
+            Div(Field("od_mfr_id__mfr_user_id"), css_class="col-xl-3"),
+        )
+        form.helper.form_class = "row"
         form.helper.form_id = "order-filter-form"
 
         return context

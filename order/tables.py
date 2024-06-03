@@ -329,7 +329,6 @@ class CirculatedOrderTable(tables.Table):
                     default=0,
                 )
             )
-            print(queryset)
 
         return (queryset, True)
 
