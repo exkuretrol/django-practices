@@ -5,8 +5,10 @@ from django.db.utils import IntegrityError
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.utils.translation import gettext as _
-from manufacturer.models import Manufacturer
 from ninja import NinjaAPI, Schema
+from rich.pretty import pretty_repr
+
+from manufacturer.models import Manufacturer
 from order.forms import get_order_no_from_day, get_rule
 from order.models import Order, OrderProd, OrderRuleTypeChoices
 from prod.models import (
@@ -16,7 +18,6 @@ from prod.models import (
     SalesStatusChoices,
     UnitChoices,
 )
-from rich.pretty import pretty_repr
 
 logger = logging.getLogger(__name__)
 
@@ -73,10 +74,15 @@ class OrderSchema(Schema):
     action: str
 
 
+class ChecklistProductSchema(Schema):
+    prod_no: int
+    order_quantity: int
+
+
 class ChecklistSchema(Schema):
     mfr_full_id: str
-    checklist: Optional[List[int]] = None
-    unchecklist: Optional[List[int]] = None
+    checklist: Optional[List[ChecklistProductSchema]] = None
+    unchecklist: Optional[List[ChecklistProductSchema]] = None
 
 
 class MessageSchema(Schema):
@@ -464,24 +470,43 @@ def update_checklist(request, data: ChecklistSchema):
 
     if "checklist" in request.session:
         checklist_tuple_list = request.session.get("checklist")
-        checklist_tuple = checklist_tuple_list[0]
+        # promise that there is only one checklist tuple in the list
+        [checklist_tuple] = checklist_tuple_list
         mfr_full_id, checklist = checklist_tuple
         logger.debug(f"(session)\nmfr_full_id: {mfr_full_id}, checklist: {checklist}")
         if mfr_full_id == data.mfr_full_id and len(checklist) > 0:
-            checkset = set(checklist)
+            new_checklist_dict = {c["prod_no"]: c["order_quantity"] for c in checklist}
+            new_checklist_dict_keys = new_checklist_dict.keys()
+
             if data.unchecklist:
-                checkset = checkset.difference(set(data.unchecklist))
+                unchecklist_prod_no_list = [c.prod_no for c in data.unchecklist]
+                for prod_no in unchecklist_prod_no_list:
+                    if prod_no in new_checklist_dict_keys:
+                        new_checklist_dict.pop(prod_no)
+
             if data.checklist:
-                checkset = checkset.union(set(data.checklist))
-            new_checklist = list(checkset)
+                for prod_order_quantity in data.checklist:
+                    new_checklist_dict.update(
+                        {
+                            prod_order_quantity.prod_no: prod_order_quantity.order_quantity
+                        }
+                    )
+
+            new_checklist_dict_list = [
+                {"prod_no": k, "order_quantity": v}
+                for k, v in new_checklist_dict.items()
+            ]
+
             logger.debug("mfr_full_id matched")
-            logger.debug(f"new checklist: {new_checklist}")
+            logger.debug(f"new checklist: {new_checklist_dict_list}")
         else:
             logger.debug("mfr_full_id not matched")
+            new_checklist_dict_list = [c.dict() for c in new_checklist]
     else:
         logger.debug("no checklist in session")
+        new_checklist_dict_list = [c.dict() for c in new_checklist]
 
-    new_checklist_tuple_list = [(data.mfr_full_id, new_checklist)]
+    new_checklist_tuple_list = [(data.mfr_full_id, new_checklist_dict_list)]
     request.session["checklist"] = new_checklist_tuple_list
     logger.debug(f"new checklist tuple list: {new_checklist_tuple_list}")
     return {"message": _("成功更新"), "obj": str(new_checklist_tuple_list)}

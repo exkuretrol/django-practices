@@ -65,12 +65,24 @@ $(function () {
     });
 
     function construct_checklist() {
+        // TODO: add event listener to order_quantity input, when change, update checklist
         var checklist = [];
         var unchecklist = [];
         $("table tr input[type=checkbox]").each(function () {
             var prod_no = parseInt($(this).parent().parent().attr("data-id"));
-            if ($(this).prop("checked")) checklist.push(prod_no);
-            else unchecklist.push(prod_no);
+            var order_quantity = parseInt(
+                $(this)
+                    .parent()
+                    .parent()
+                    .find("input[field=order-quantity]")
+                    .val()
+            );
+            var prod = {
+                prod_no: prod_no,
+                order_quantity: order_quantity,
+            };
+            if ($(this).prop("checked")) checklist.push(prod);
+            else unchecklist.push(prod);
         });
         return {
             mfr_full_id: "manufacturerId" in data ? data.manufacturerId : null,

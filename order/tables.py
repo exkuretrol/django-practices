@@ -1,5 +1,5 @@
 import django_tables2 as tables
-from django.db.models import Case, QuerySet, When
+from django.db.models import Case, F, QuerySet, Value, When
 from django.templatetags.static import static
 from django.urls import reverse
 from django.utils import timezone
@@ -205,7 +205,7 @@ class CirculatedOrderTable(tables.Table):
         verbose_name="庫存合計", empty_values=(), orderable=False
     )
     co_order_quantity = tables.Column(
-        verbose_name="訂貨數量", empty_values=(), orderable=False
+        verbose_name="訂貨數量", empty_values=(), orderable=True
     )
     co_box_quantity = tables.Column(
         verbose_name="收縮 / 箱入數", empty_values=(), orderable=False
@@ -257,9 +257,14 @@ class CirculatedOrderTable(tables.Table):
         )
 
     def render_co_order_quantity(self, record, value):
+        request = self.request
+        [[_, checklist]] = request.session.get("checklist")
+        checklist_dict = {c["prod_no"]: c["order_quantity"] for c in checklist}
+        order_quantity = checklist_dict.get(record.prod_no, 0)
+
         return format_html(
             f"""
-            <input type="number" class="form-control" value="0" field="order-quantity"/>"""
+            <input type="number" class="form-control" value="{order_quantity}" field="order-quantity"/>"""
         )
 
     def render_prod_quantity(self, record, value):
@@ -272,8 +277,10 @@ class CirculatedOrderTable(tables.Table):
         request = self.request
         checked = ""
         if "checklist" in request.session:
-            _, checklist = list(request.session.get("checklist"))[0]
-            checked = "checked" if record.prod_no in checklist else checked
+            # TODO: why is it nested?
+            [[_, checklist]] = request.session.get("checklist")
+            checklist_prod_no_list = [c["prod_no"] for c in checklist]
+            checked = "checked" if record.prod_no in checklist_prod_no_list else checked
         return format_html(
             f"""
             <input class="form-check-input form-control" type="checkbox" value="" {checked}>"""
@@ -282,17 +289,47 @@ class CirculatedOrderTable(tables.Table):
     def order_co_func(self, queryset: QuerySet, is_descending):
         request = self.request
         if "checklist" in request.session and queryset.exists():
-            mfr_full_id, checklist = list(request.session.get("checklist"))[0]
+            [checklist_tuple] = request.session.get("checklist")
+            mfr_full_id, checklist = checklist_tuple
+            checklist_prod_no_list = [c["prod_no"] for c in checklist]
             if mfr_full_id == queryset.first().prod_mfr_id.mfr_full_id:
                 queryset = queryset.order_by(
                     Case(
-                        When(prod_no__in=checklist, then=1 if is_descending else 0),
+                        When(
+                            prod_no__in=checklist_prod_no_list,
+                            then=1 if is_descending else 0,
+                        ),
                         default=0 if is_descending else 1,
                     )
                 )
 
             else:
                 pass
+
+        return (queryset, True)
+
+    def order_co_order_quantity(self, queryset: QuerySet, is_descending):
+        request = self.request
+        if "checklist" in request.session and queryset.exists():
+            [checklist_tuple] = request.session.get("checklist")
+            _, checklist = checklist_tuple
+            queryset = queryset.order_by(
+                Case(
+                    *[
+                        When(
+                            prod_no=c["prod_no"],
+                            then=(
+                                -Value(c["order_quantity"])
+                                if is_descending
+                                else Value(c["order_quantity"])
+                            ),
+                        )
+                        for c in checklist
+                    ],
+                    default=0,
+                )
+            )
+            print(queryset)
 
         return (queryset, True)
 
