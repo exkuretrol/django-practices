@@ -65,7 +65,6 @@ $(function () {
     });
 
     function construct_checklist() {
-        // TODO: add event listener to order_quantity input, when change, update checklist
         var checklist = [];
         var unchecklist = [];
         $("table tr input[type=checkbox]").each(function () {
@@ -94,7 +93,10 @@ $(function () {
     $("table tr input[field=order-quantity]").on("change", function () {
         // TODO: when change order box quantity, update order quantity
         var tr = $(this).parent().parent();
-        tr.find("input[type=checkbox]").first().prop("checked", true);
+        tr.find("input[type=checkbox]")
+            .first()
+            .prop("checked", true)
+            .trigger("change");
 
         var total_quantity_field = tr
             .find("input[field=total-quantity]")
