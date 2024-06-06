@@ -258,9 +258,11 @@ class CirculatedOrderTable(tables.Table):
 
     def render_co_order_quantity(self, record, value):
         request = self.request
-        [[_, checklist]] = request.session.get("checklist")
-        checklist_dict = {c["prod_no"]: c["order_quantity"] for c in checklist}
-        order_quantity = checklist_dict.get(record.prod_no, 0)
+        order_quantity = 0
+        if "checklist" in request.session:
+            [[_, checklist]] = request.session.get("checklist")
+            checklist_dict = {c["prod_no"]: c["order_quantity"] for c in checklist}
+            order_quantity = checklist_dict.get(record.prod_no, 0)
 
         return format_html(
             f"""
