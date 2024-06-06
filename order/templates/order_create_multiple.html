@@ -1,32 +1,95 @@
 {% extends "_base.html" %}
 {% load crispy_forms_tags %}
 {% load helper_tags %}
+{% block breadcrumb %}
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a href="{% url 'home' %}">儀表板</a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="">訂單管理</a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">零散訂貨作業</li>
+        </ol>
+    </nav>
+{% endblock breadcrumb %}
+{% block content %}
+    <div class="card mb-4">
+        <div class="card-body">
+            {% crispy b_form b_form.helper %}
+            <button id="generate" class="btn btn-primary">貼上</button>
+            <button class="btn btn-secondary"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#collapseExample"
+                    aria-expanded="false"
+                    aria-controls="collapseExample">顯示說明</button>
+        </div>
+    </div>
+    <div class="card collapse mb-4" id="collapseExample">
+        <div class="card-body">
+            <div class="card-title">貼上說明</div>
+            <p>從 Excel 上複製的表格應該看起來像這樣：</p>
+            <div class="row">
+                <div class="col-12 col-md-6 col-lg-3">
+                    <table class="table table-responsive table-borderless">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>產品編號</th>
+                                <th>訂貨數量</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <th>1</th>
+                                <td class="table-success">76</td>
+                                <td class="table-success">120</td>
+                            </tr>
+                            <tr>
+                                <th>2</th>
+                                <td class="table-success">78</td>
+                                <td class="table-success">60</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="alert alert-info">複製時不應該包含標題列。</div>
+        </div>
+    </div>
+    {% if named_formset %}
+        {% with order_formset=named_formset.order_formset %}
+            <form action="" method="post">
+                {% csrf_token %}
+                {% for form in order_formset %}
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            {{ order_formset.management_form }}
+                            {% include "base_inputs/non_field_errors.html" with form=form %}
+                            {% include "include/order_form.html" with form=form %}
+                            {% with prods_formset=named_formset.prods_formset_list|index:forloop.counter0 loop_index=forloop.counter0|stringformat:"i" %}
+                                {% with prefix="id_orderprod_"|add:loop_index %}
+                                    {{ prods_formset.management_form }}
+                                    {% for prod_form in prods_formset %}
+                                        {% include "include/orderprod_grid_table.html" with form=prod_form prefix=prefix can_delete=prods_formset.can_delete %}
+                                        {% include "base_inputs/non_field_errors.html" with form=prod_form %}
+                                    {% endfor %}
+                                {% endwith %}
+                            {% endwith %}
+                        </div>
+                    </div>
+                {% endfor %}
+                <div class="card">
+                    <div class="card-body">
+                        <input type="submit" value="產生訂單" class="btn btn-primary">
+                    </div>
+                </div>
+            </form>
+        {% endwith %}
+    {% endif %}
+{% endblock content %}
 {% block head %}
     {% include "include/head/order_create_multiple_head.html" %}
 {% endblock head %}
-{% block content %}
-    <div class="card">
-        <div class="card-body">
-            <form action="" method="post">
-                {% csrf_token %}
-                {% with order_formset=named_formset.order_formset %}
-                    {{ order_formset.management_form }}
-                    {% for form in order_formset %}
-                        {% include "base_inputs/non_field_errors.html" with form=form %}
-                        {% include "include/order_form.html" with form=form %}
-                        {% with prods_formset=named_formset.prods_formset_list|index:forloop.counter0 loop_index=forloop.counter0|stringformat:"i" %}
-                            {% with prefix="id_orderprod_"|add:loop_index %}
-                                {{ prods_formset.management_form }}
-                                {% for prod_form in prods_formset %}
-                                    {% include "include/orderprod_grid_table.html" with form=prod_form prefix=prefix can_delete=prods_formset.can_delete %}
-                                    {% include "base_inputs/non_field_errors.html" with form=prod_form %}
-                                {% endfor %}
-                            {% endwith %}
-                        {% endwith %}
-                    {% endfor %}
-                {% endwith %}
-                <input type="submit" value="建立" class="btn btn-primary">
-            </form>
-        </div>
-    </div>
-{% endblock content %}

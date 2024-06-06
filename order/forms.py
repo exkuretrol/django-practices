@@ -9,8 +9,11 @@ from dal import autocomplete
 from django import forms
 from django.core.exceptions import NON_FIELD_ERRORS
 from django.forms import inlineformset_factory, modelformset_factory
+from django.forms.renderers import BaseRenderer
+from django.forms.utils import ErrorList
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
+
 from manufacturer.models import Manufacturer
 from prod.models import Prod, ProdCategory, ProdRestriction
 
@@ -124,10 +127,10 @@ class OrderProdCreateForm(forms.ModelForm):
         return op_od_no_object
 
     def clean(self):
-        self.pr = self.get_prod_restriction()
-        self.check_order_rule_prod()
-        self.check_order_rule_mfr()
-        self.check_order_rule_prod_cate()
+        # self.pr = self.get_prod_restriction()
+        # self.check_order_rule_prod()
+        # self.check_order_rule_mfr()
+        # self.check_order_rule_prod_cate()
         return super().clean()
 
     def get_prod_restriction(self):
@@ -302,78 +305,105 @@ note: it should not contain the header row.
     )
     clipboard = forms.CharField(
         strip=False,
-        widget=forms.Textarea(attrs={"placeholder": clipblard_placeholder}),
-        validators=[validate_tsv],
+        widget=forms.HiddenInput,
+        # validators=[validate_tsv],
     )
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.helper = FormHelper()
-        self.helper.form_method = "post"
-        self.helper.add_input(Submit("submit", _("Submit")))
+        self.helper.form_method = "get"
 
     def clean_clipboard(self):
         input_text = self.cleaned_data["clipboard"]
         orders_to_be_updated = dict()
         f = StringIO(input_text)
+        f2 = StringIO(input_text)
         csv_reader = csv.reader(f, delimiter="\t")
+        csv_reader_ = csv.reader(f2, delimiter="\t")
+        headers = next(csv_reader_)
+        column_num = len(headers)
+        if column_num == 1:
+            self.add_error(
+                NON_FIELD_ERRORS,
+                forms.ValidationError(
+                    _("請使用 Tab 作為分隔符號。"), code="invalid_tsv"
+                ),
+            )
+            return
+        elif column_num > 2:
+            self.add_error(
+                NON_FIELD_ERRORS,
+                forms.ValidationError(
+                    _("每列應該有 2 欄組成。"), code="invalid_format"
+                ),
+            )
+            return
+        for row in csv_reader_:
+            if len(row) != column_num:
+                self.add_error(
+                    NON_FIELD_ERRORS,
+                    forms.ValidationError(
+                        _(
+                            "每列應該有相同數量的欄位數。",
+                            code="invalid_row",
+                        )
+                    ),
+                )
+                return
         for row in csv_reader:
             prod_no, prod_quantity = row
             try:
                 prod_no = int(prod_no)
             except:
                 self.add_error(
-                    self.fields["clipboard"].label,
+                    NON_FIELD_ERRORS,
                     forms.ValidationError(
-                        _("Product number should be an integer."),
+                        _("產品編號應該是整數。"),
                         code="invalid_prod_no",
                     ),
                 )
                 continue
-
             prod = Prod.objects.filter(prod_no=prod_no)
             if not prod.exists():
                 self.add_error(
-                    self.fields["clipboard"].label,
+                    NON_FIELD_ERRORS,
                     forms.ValidationError(
                         _(
-                            "Product number %(prod_no)s does not exist. Please check again."
+                            "產品編號 %(prod_no)s 不存在。請重新檢查。",
                         ),
                         code="prod_no_not_exist",
                         params={"prod_no": prod_no},
                     ),
                 )
                 continue
-
             try:
                 prod_quantity = int(prod_quantity)
             except:
                 self.add_error(
-                    self.fields["clipboard"].label,
+                    NON_FIELD_ERRORS,
                     forms.ValidationError(
-                        _("Product quantity should be an integer."),
+                        _("產品數量應該是整數。"),
                         code="invalid_prod_quantity",
                     ),
                 )
-
             if prod_quantity <= 0:
                 self.add_error(
-                    self.fields["clipboard"].label,
+                    NON_FIELD_ERRORS,
                     forms.ValidationError(
                         _(
-                            "Product quantity should be greater than 0. Please check the prod %(prod_no)s again."
+                            "產品數量應該大於0。請重新檢查產品 %(prod_no)s。",
                         ),
                         code="invalid_prod_quantity",
                         params={"prod_no": prod_no},
                     ),
                 )
-
             if prod_no in orders_to_be_updated:
                 self.add_error(
-                    self.fields["clipboard"].label,
+                    NON_FIELD_ERRORS,
                     forms.ValidationError(
                         _(
-                            "Product %(prod_no)s has been duplicated. Please check again."
+                            "產品 %(prod_no)s 已重複。請重新檢查。",
                         ),
                         code="duplicated_prod_no",
                         params={"prod_no": prod_no},
@@ -387,7 +417,6 @@ note: it should not contain the header row.
                     }
                 }
             )
-
         grouped_orders = {}
         # TODO: if same manufacturer has more than five products, it should be split into multiple orders
         for prod_no, order_info in orders_to_be_updated.items():

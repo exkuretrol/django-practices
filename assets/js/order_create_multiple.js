@@ -19,4 +19,19 @@ $(function () {
                 "border-top-right-radius: var(--bs-border-radius); border-bottom-right-radius: var(--bs-border-radius);"
             );
     });
+
+    let clipboard_text = null;
+    document.getElementById("generate").addEventListener("click", function () {
+        // TODO: add some validation
+        navigator.clipboard
+            .readText()
+            .then((text) => {
+                let input_clipboard = $("#id_b_form-clipboard");
+                input_clipboard.val(text);
+                input_clipboard.parent().trigger("submit");
+            })
+            .catch((err) => {
+                console.error("Failed to read clipboard contents: ", err);
+            });
+    });
 });

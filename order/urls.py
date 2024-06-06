@@ -2,7 +2,6 @@ from django.urls import path
 from django.views.generic import TemplateView
 
 from .views import (
-    OrderBeforeCreateView,
     OrderCirculatedOrderView,
     OrderCreateMultipleView,
     OrderCreateView,
@@ -17,11 +16,6 @@ urlpatterns = [
         "order/",
         OrderListView.as_view(),
         name="order_list",
-    ),
-    path(
-        "order/create_clipboard/",
-        OrderBeforeCreateView.as_view(),
-        name="order_create_clipboard",
     ),
     path(
         "order/create/",

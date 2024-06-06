@@ -1,23 +1,20 @@
+import logging
 import re
 from typing import List
 
 from constance import config
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Button, Div, Field, Layout, Submit
+from crispy_forms.layout import Div, Field, Layout, Submit
 from dal import autocomplete
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.core.paginator import Paginator
-from django.db.models import Case, QuerySet, When
-from django.db.models.query import QuerySet
 from django.forms import modelformset_factory
 from django.forms.models import BaseModelFormSet
 from django.http import QueryDict
 from django.http.response import HttpResponse as HttpResponse
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
-from django.utils.datastructures import MultiValueDict
 from django.utils.translation import gettext as _
-from django.views.generic import ListView, UpdateView
+from django.views.generic import UpdateView
 from django.views.generic.edit import CreateView, FormView
 from django_filters.views import FilterView
 from django_tables2 import SingleTableMixin
@@ -41,6 +38,8 @@ from .forms import (
 from .models import Order, OrderProd
 from .tables import CirculatedOrderTable, OrderRulesTable, OrderTable
 
+logger = logging.getLogger(__name__)
+
 
 class OrderListView(SingleTableMixin, FilterView):
     table_class = OrderTable
@@ -55,11 +54,6 @@ class OrderListView(SingleTableMixin, FilterView):
         form.helper = FormHelper()
         form.helper.form_method = "get"
         form.helper.add_input(Submit("submit", "篩選", css_class="btn btn-primary"))
-        # form.helper.add_input(
-        #     Button(
-        #         "clear", "清除", css_class="btn btn-secondary", onclick="clearFilter()"
-        #     )
-        # )
         form.helper.layout = Layout(
             Div(
                 Field("od_no", css_class="form-control dropdown form-select"),
@@ -130,30 +124,6 @@ class OrderUpdateView(OrderProdInline, UpdateView):
         }
 
 
-class OrderBeforeCreateView(FormView):
-    form_class = OrderBeforeCreateForm
-    template_name = "order_create_clipboard_before_create.html"
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["header_title"] = _("零散訂貨作業")
-        context["header_description"] = _("按貼上按鈕貼上訂貨資料，然後按下一步。")
-        form = context["form"]
-        form.helper = FormHelper()
-        form.helper.add_input(
-            Submit("submit", _("下一步"), css_class="btn btn-primary")
-        )
-        return context
-
-    def get_success_url(self) -> str:
-        return reverse_lazy("order_create_multiple")
-
-    def form_valid(self, form):
-        clipboard = form.cleaned_data["clipboard"]
-        self.request.session["clipboard"] = clipboard
-        return super().form_valid(form)
-
-
 class OrderCreateView(FormView):
     template_name = "order_create.html"
     form_class = OrderCreateForm
@@ -165,7 +135,7 @@ class OrderCreateMultipleView(CreateView):
     model = Order
 
     def get_success_url(self) -> str:
-        return reverse_lazy("order_create_clipboard")
+        return reverse_lazy("order_create_multiple")
 
     def get_named_formset(self):
         clipboard = self.request.session.pop("clipboard", None)
@@ -219,9 +189,19 @@ class OrderCreateMultipleView(CreateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        # remove default form_class form
         context.pop("form")
+        # add before create form
+
         if self.request.method == "GET":
+            b_form = OrderBeforeCreateForm(prefix="b_form")
+            context["b_form"] = b_form
+
+        if self.request.session.get("clipboard", None) is not None:
             context["named_formset"] = self.get_named_formset()
+
+        logger.debug(context)
+
         return context
 
     def form_valid(
@@ -248,12 +228,11 @@ class OrderCreateMultipleView(CreateView):
         for orderprod in orderprod_formset_list:
             self.formset_orderprod_valid(orderprod)
 
-        return redirect("order_create_clipboard")
+        return redirect("order_create_multiple")
 
     def form_invalid(self, order_formset, orderprod_formset_list):
-        print(order_formset.errors)
-        for orderprod_formset in orderprod_formset_list:
-            print(orderprod_formset.errors)
+        logger.critical(order_formset.errors)
+
         return self.render_to_response(
             self.get_context_data(
                 named_formset={
@@ -269,16 +248,27 @@ class OrderCreateMultipleView(CreateView):
             prod.save()
 
     def get(self, request, *args, **kwargs):
-        if request.session.get("clipboard", None) is None:
-            return redirect("order_create_clipboard")
+        self.object = None
+
+        b_form = OrderBeforeCreateForm(data=request.GET, prefix="b_form")
+
+        if b_form.is_valid() and "clipboard" in b_form.cleaned_data:
+            logger.debug(b_form.cleaned_data)
+            clipboard = b_form.cleaned_data["clipboard"]
+            request.session["clipboard"] = clipboard
+        else:
+            context = self.get_context_data()
+            context["b_form"] = b_form
+            logger.debug(b_form.errors)
+            return self.render_to_response(context)
 
         return super().get(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
         self.object = None
-        order_formset = OrderFormset(data=self.request.POST, prefix="order")
 
-        orderprod_formset_list = []
+        order_formset = OrderFormset(data=request.POST, prefix="order")
+
         orderprod_prefix = set(
             [
                 "orderprod_" + re.search(r"\d+", k).group()
@@ -286,10 +276,10 @@ class OrderCreateMultipleView(CreateView):
                 if k.startswith("orderprod")
             ]
         )
-        for prefix in orderprod_prefix:
-            orderprod_formset_list.append(
-                OrderProdCreateFormset(data=self.request.POST, prefix=prefix)
-            )
+        orderprod_formset_list = [
+            OrderProdCreateFormset(data=request.POST, prefix=prefix)
+            for prefix in orderprod_prefix
+        ]
 
         if order_formset.is_valid():
             return self.form_valid(order_formset, orderprod_formset_list)
