@@ -6,10 +6,8 @@ from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.utils.translation import gettext as _
 from ninja import NinjaAPI, Schema
-from rich.pretty import pretty_repr
 
 from manufacturer.models import Manufacturer
-from order.forms import get_order_no_from_day
 from order.models import Order, OrderProd
 from prod.models import (
     Prod,
@@ -17,6 +15,7 @@ from prod.models import (
     QualityAssuranceStatusChoices,
     SalesStatusChoices,
 )
+from utils.order import get_order_no_from_day
 
 logger = logging.getLogger(__name__)
 

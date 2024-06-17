@@ -248,6 +248,12 @@ LOGGING = {
             "rich_tracebacks": True,
             "tracebacks_show_locals": True,
         },
+        "file": {
+            "class": "logging.FileHandler",
+            "filename": BASE_DIR / "logs/django.log",
+            "formatter": "rich",
+            "level": "DEBUG",
+        },
     },
     "loggers": {
         "django.utils.autoreload": {
@@ -262,33 +268,33 @@ LOGGING = {
         },
         # api
         "ninja": {
-            "handlers": ["console"],
+            "handlers": ["console", "file"],
             "level": env.str("API_LOG_LEVEL", default="DEBUG"),
             "propagate": False,
         },
         "django_project.api": {
-            "handlers": ["console"],
+            "handlers": ["console", "file"],
             "level": env.str("API_LOG_LEVEL", default="DEBUG"),
             "propagate": False,
         },
         # apps
         "order": {
-            "handlers": ["console"],
+            "handlers": ["console", "file"],
             "level": env.str("APP_LOG_LEVEL", default="DEBUG"),
             "propagate": False,
         },
         "accounts": {
-            "handlers": ["console"],
+            "handlers": ["console", "file"],
             "level": env.str("APP_LOG_LEVEL", default="DEBUG"),
             "propagate": False,
         },
         "prod": {
-            "handlers": ["console"],
+            "handlers": ["console", "file"],
             "level": env.str("APP_LOG_LEVEL", default="DEBUG"),
             "propagate": False,
         },
         "manufacturer": {
-            "handlers": ["console"],
+            "handlers": ["console", "file"],
             "level": env.str("APP_LOG_LEVEL", default="DEBUG"),
             "propagate": False,
         },

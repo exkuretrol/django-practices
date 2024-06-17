@@ -5,14 +5,15 @@ import numpy as np
 from django.core.management.base import BaseCommand, CommandParser
 from django.utils import timezone
 from faker import Faker
+
 from manufacturer.models import Manufacturer
-from order.forms import get_order_no_from_day
 from order.models import (
     Order,
     OrderProd,
     StatusChoices,
     WarehouseStorageFeeRecipientChoices,
 )
+from utils.order import get_order_no_from_day
 
 faker = Faker()
 MODE_REFRESH = "refresh"

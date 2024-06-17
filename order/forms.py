@@ -1,23 +1,23 @@
 import csv
 import datetime
+import logging
 from io import StringIO
-from typing import Union
 
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Submit
 from dal import autocomplete
 from django import forms
 from django.core.exceptions import NON_FIELD_ERRORS
 from django.forms import inlineformset_factory, modelformset_factory
-from django.forms.renderers import BaseRenderer
-from django.forms.utils import ErrorList
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from manufacturer.models import Manufacturer
-from prod.models import Prod, ProdCategory, ProdRestriction
+from prod.models import Prod
+from utils.order import OrderProdSchema, check_product_rule
 
-from .models import Order, OrderProd, OrderRule, OrderRuleTypeChoices
+from .models import Order, OrderProd, OrderRule
+
+logger = logging.getLogger(__name__)
 
 
 class OrderUpdateForm(forms.ModelForm):
@@ -94,23 +94,6 @@ class OrderProdUpdateForm(forms.ModelForm):
     field_order = ["op_prod", "op_quantity", "op_status"]
 
 
-def get_rule(
-    or_item: Union[Prod, ProdCategory, Manufacturer], or_type: OrderRuleTypeChoices
-):
-    rules = OrderRule.objects.filter(
-        or_type=or_type,
-        or_effective_start_date__lte=timezone.now(),
-        or_effective_end_date__gte=timezone.now(),
-    )
-    if or_type == OrderRuleTypeChoices.Product:
-        rules = rules.filter(or_prod_no=or_item.pk)
-    elif or_type == OrderRuleTypeChoices.ProductCategory:
-        rules = rules.filter(or_prod_cate_no=or_item.pk)
-    elif or_type == OrderRuleTypeChoices.Manufacturer:
-        rules = rules.filter(or_mfr_id=or_item.pk)
-    return rules
-
-
 class OrderProdCreateForm(forms.ModelForm):
     op_prod = forms.CharField(
         label="產品名稱", disabled=True, empty_value=(), required=False
@@ -127,122 +110,23 @@ class OrderProdCreateForm(forms.ModelForm):
         return op_od_no_object
 
     def clean(self):
-        # self.pr = self.get_prod_restriction()
-        # self.check_order_rule_prod()
-        # self.check_order_rule_mfr()
-        # self.check_order_rule_prod_cate()
-        return super().clean()
+        prod_dict = {
+            "prod_no": self.cleaned_data["op_prod_no"],
+            "prod_quantity": self.cleaned_data["op_quantity"],
+        }
+        prod = OrderProdSchema(**prod_dict)
+        logger.debug(prod)
 
-    def get_prod_restriction(self):
-        pr = None
-        try:
-            pr = ProdRestriction.objects.get(
-                pr_prod_no=self.cleaned_data["op_prod_no"],
-                pr_effective_start_date__lte=timezone.now().date(),
-                pr_effective_end_date__gte=timezone.now().date(),
+        error_list = check_product_rule(prod)
+        logger.debug(f"product rule check: {error_list}")
+
+        for error in error_list:
+            self.add_error(
+                "op_quantity",
+                forms.ValidationError(error["message"], code=error["code"]),
             )
-        except ProdRestriction.DoesNotExist:
-            pass
-        return pr
 
-    def check_order_rule_prod(self):
-        rule = get_rule(self.cleaned_data["or_prod_no"], OrderRuleTypeChoices.Product)
-        if rule.exists():
-            if self.pr is None:
-                self.add_error(
-                    field=NON_FIELD_ERRORS,
-                    error=forms.ValidationError(
-                        _("商品限制未定義，但是訂單規則已經定義。")
-                    ),
-                )
-            else:
-                # TODO: how about multiple order rules?
-                a_rule = rule.first()
-                order_price = self.pr.pr_unit_price * self.cleaned_data["op_quantity"]
-                case_num = (
-                    self.cleaned_data["op_quantity"] / self.pr.pr_as_case_quantity
-                )
-                if a_rule.or_cannot_order:
-                    self.add_error(
-                        field=NON_FIELD_ERRORS,
-                        error=forms.ValidationError(
-                            _("商品 %(prod_name)s 不能訂貨。"),
-                            code="prod_cannot_order",
-                            params={
-                                "prod_name": self.cleaned_data["op_prod_no"].prod_name
-                            },
-                        ),
-                    )
-                    return
-                if a_rule.or_order_price is not None and a_rule.or_order_price > 0:
-                    if order_price < a_rule.or_order_price:
-                        self.add_error(
-                            field=NON_FIELD_ERRORS,
-                            error=forms.ValidationError(
-                                _(
-                                    "商品 %(prod_name)s 訂貨金額不足。單價 %(unit_price)d 元，數量 %(quantity)d 個，共 %(order_price)d 元。根據訂貨規則 %(order_rule_no)d，至少需要 %(order_amount)d 元。"
-                                ),
-                                code="prod_order_amount_not_enough",
-                                params={
-                                    "prod_name": self.cleaned_data[
-                                        "op_prod_no"
-                                    ].prod_name,
-                                    "quantity": self.cleaned_data["op_quantity"],
-                                    "unit_price": self.pr.pr_unit_price,
-                                    "order_price": order_price,
-                                    "order_rule_no": a_rule.or_id,
-                                    "order_amount": a_rule.or_order_price,
-                                },
-                            ),
-                        )
-                if a_rule.shipped_as_case:
-                    if a_rule.or_order_cases_quantity > 0:
-                        if not case_num.is_integer():
-                            self.add_error(
-                                field=NON_FIELD_ERRORS,
-                                error=forms.ValidationError(
-                                    _(
-                                        "商品 %(prod_name)s 訂貨箱數不是整數。目前只有 %(case_num).2f 箱。每箱至少需要 %(as_case_quantity)d 個商品才成箱。"
-                                    ),
-                                    params={
-                                        "prod_name": self.cleaned_data[
-                                            "op_prod_no"
-                                        ].prod_name,
-                                        "case_num": case_num,
-                                        "as_case_quantity": self.pr.pr_as_case_quantity,
-                                    },
-                                ),
-                            )
-                        if case_num < a_rule.or_order_cases_quantity:
-                            self.add_error(
-                                field=NON_FIELD_ERRORS,
-                                error=forms.ValidationError(
-                                    _(
-                                        "商品 %(prod_name)s 訂貨箱數不足。至少需要 %(quantity)d 箱，目前只有 %(case_num).2f 箱。每箱至少需要 %(as_case_quantity)d 個商品才成箱。"
-                                    ),
-                                    code="prod_order_quantity_cases_not_enough",
-                                    params={
-                                        "prod_name": self.cleaned_data[
-                                            "op_prod_no"
-                                        ].prod_name,
-                                        "case_num": case_num,
-                                        "quantity": a_rule.or_order_cases_quantity,
-                                        "as_case_quantity": self.pr.pr_as_case_quantity,
-                                    },
-                                ),
-                            )
-
-    def check_order_rule_mfr(self):
-        rule = self.get_rule(OrderRuleTypeChoices.Manufacturer)
-        pass
-        # if rule is not None:
-        #     pass
-
-    def check_order_rule_prod_cate(self):
-        rule = self.get_rule(OrderRuleTypeChoices.ProductCategory)
-        pass
-        # if rule is not None:
-        #     pass
+        return super().clean()
 
     class Meta:
         model = OrderProd
@@ -316,7 +200,7 @@ note: it should not contain the header row.
 
     def clean_clipboard(self):
         input_text = self.cleaned_data["clipboard"]
-        orders_to_be_updated = dict()
+        prods_dict = dict()
         f = StringIO(input_text)
         f2 = StringIO(input_text)
         csv_reader = csv.reader(f, delimiter="\t")
@@ -377,6 +261,7 @@ note: it should not contain the header row.
                     ),
                 )
                 continue
+            prod = prod.first()
             try:
                 prod_quantity = int(prod_quantity)
             except:
@@ -398,7 +283,7 @@ note: it should not contain the header row.
                         params={"prod_no": prod_no},
                     ),
                 )
-            if prod_no in orders_to_be_updated:
+            if prod_no in prods_dict:
                 self.add_error(
                     NON_FIELD_ERRORS,
                     forms.ValidationError(
@@ -409,20 +294,31 @@ note: it should not contain the header row.
                         params={"prod_no": prod_no},
                     ),
                 )
-            orders_to_be_updated.update(
+            prods_dict.update(
                 {
                     prod_no: {
                         "quantity": prod_quantity,
-                        "mfr_id": prod.first().prod_mfr_id.mfr_id,
+                        "mfr_id": prod.prod_mfr_id.mfr_id,
                     }
                 }
             )
         grouped_orders = {}
-        # TODO: if same manufacturer has more than five products, it should be split into multiple orders
-        for prod_no, order_info in orders_to_be_updated.items():
-            mfr_id = order_info["mfr_id"]
+        mfr_count = {}
+
+        for prod_no, order_info in prods_dict.items():
+            mfr_id = str(order_info["mfr_id"])
+            if mfr_id not in mfr_count:
+                mfr_count.update({mfr_id: 0})
+            else:
+                mfr_id = mfr_id + "_" * mfr_count[mfr_id]
+
+            if mfr_id in grouped_orders and len(grouped_orders[mfr_id]) >= 5:
+                mfr_count[mfr_id] += 1
+                mfr_id += "_"
+
             if mfr_id not in grouped_orders:
-                grouped_orders[mfr_id] = list()
+                grouped_orders.update({mfr_id: []})
+
             grouped_orders[mfr_id].append(
                 {"prod_no": prod_no, "quantity": order_info["quantity"]}
             )
@@ -430,36 +326,6 @@ note: it should not contain the header row.
 
     def clean(self):
         return super().clean()
-
-
-def get_order_no_from_day(day=timezone.localdate(), mode: str = "startswith"):
-    # TODO: order and timezone.now().date() didn't not sync,
-    #       if user enter the order create page at 23:59:59,
-    #       and then create an order at 00:00:00 (the form failed, and the user re-enter the form),
-    #       the od_date will update, but the od_no didn't.
-    day_str = day.strftime("%Y%m%d")
-
-    # Month + 30
-    # YYYYmmdd
-    # 0123^
-    day_str_list = list(day_str)
-    day_str_list[4] = str(int(day_str[4]) + 3)
-    day_str = "".join(day_str_list)
-
-    if mode == "day":
-        orders = Order.objects.filter(od_date__date__exact=day)
-    elif mode == "range":
-        orders = Order.objects.filter(
-            od_date__range=(day, day + datetime.timedelta(days=1))
-        )
-    elif mode == "startswith":
-        orders = Order.objects.filter(od_no__startswith=day_str)
-
-    if orders.exists():
-        order_no = orders.last().od_no
-    else:
-        order_no = int(day_str + "00000")
-    return order_no
 
 
 class OrderCreateForm(forms.ModelForm):

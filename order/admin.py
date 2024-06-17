@@ -1,7 +1,8 @@
 from django.contrib import admin
+
 from order.models import Order, OrderProd, OrderRule
 
-from .forms import OrderRuleCreateForm
+from .forms import OrderProdCreateForm, OrderRuleCreateForm
 
 
 @admin.register(Order)
@@ -18,6 +19,7 @@ class OrderAdmin(admin.ModelAdmin):
 
 @admin.register(OrderProd)
 class OrderProdAdmin(admin.ModelAdmin):
+    form = OrderProdCreateForm
     list_display = [
         "op_id",
         "op_od_no",
